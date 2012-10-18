@@ -3,7 +3,6 @@ package data
 import org.joda.time.DateTime
 import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
-import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import java.util.UUID
 import collection.mutable
 
@@ -23,12 +22,6 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]){
 
   def toMongo: MongoDBObject  = {
-    RegisterJodaTimeConversionHelpers()
-//    val builder = MongoDBObject.newBuilder
-//    id.foreach(builder += "_id" -> _)
-//    val update = builder.result()
-//    update ++
-
     val unsets = mutable.MutableList.empty[String]
 
     val sets = mutable.Map[String, Any](
@@ -72,6 +65,7 @@ object Match{
     val level = m.as[String]("level")
     val desc = m.getAs[String]("desc")
     val kickoff = m.as[DateTime]("kickoff")
+    val refereeType = m.as[String]("refereeType")
     val refFee = m.getAs[Int]("refFee")
     val assFee = m.getAs[Int]("assFee")
     val intRefs = m.getAsOrElse[List[DBObject]]("intRefs", Nil).map(Referee.fromMongo)
@@ -80,13 +74,21 @@ object Match{
     val assRef1 = m.getAs[DBObject]("assRef1").map(Referee.fromMongo)
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)
 
-    Match(Some(id), created, home, away, venue, level, desc, kickoff, "refereeType", refFee, assFee, intRefs, intAss, referee, assRef1, assRef2)
+    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2)
   }
+
+  def newInstance(homeTeam:String, awayTeam:String, venue:String, level:String,
+                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
+                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
+                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]) =
+    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2)
+
 }
 
 case class Referee(id:ObjectId, name:String, level:String){
   def toMongo = MongoDBObject("_id"->id, "name"->name, "level" -> level)
-  def display = "%s (%s)".format(name, level)
+  def display = "%s (%s)".format(name, Level.asMap(level))
+  def toSelectOption = SelectOption(id.toString,display)
 }
 
 object Referee{
@@ -108,6 +110,7 @@ case class User(id:Option[ObjectId], name:String, email:String, telephone:String
     builder += "password" -> password
     builder.result()
   }
+  def updateClause : MongoDBObject = if(id.isDefined) MongoDBObject("_id" -> id.get) else toMongo
 }
 
 object User{
@@ -127,44 +130,48 @@ object User{
     User(None, name, email, telephone, level, false, new DateTime, password)
 }
 
-case class Session(userId:ObjectId, username:String, sessionId:String){
+case class Session(userId:ObjectId, username:String, name:String, admin:Boolean, sessionId:String){
   def toMongo : MongoDBObject = {
-    MongoDBObject("userid" -> userId, "username" -> username, "sessionid" -> sessionId)
+    MongoDBObject("userId" -> userId, "username" -> username, "name" -> name, "admin"->admin, "sessionId" -> sessionId)
   }
 }
 
 object Session{
-  def newInstance(userId:ObjectId, username:String) = Session(userId, username, UUID.randomUUID.toString)
-  def fromMongo(m:DBObject):Session = Session(m.as[ObjectId]("userId"), m.as[String]("username"), m.as[String]("sessionId"))
+  def fromUser(u:User, sessionId:String) = Session(u.id.get, u.name, u.email, u.admin, sessionId)
+  def newInstance(u:User) = fromUser(u, UUID.randomUUID.toString)
+  def fromMongo(m:DBObject):Session = Session(m.as[ObjectId]("userId"), m.as[String]("name"), m.as[String]("username"), m.getAsOrElse[Boolean]("admin",false), m.as[String]("sessionId"))
 }
 
-object Levels{
+object Level{
+
+  case object MenPrem extends SelectOption("menPrem", "Tippeligaen")
+  case object Men1Div extends SelectOption("men1div", "1. div menn")
+  case object Men2Div extends SelectOption("men2div", "2. div menn")
+  case object Men3Div extends SelectOption("men3div", "3. div menn")
+  case object Men4Div extends SelectOption("men4div", "4. div menn")
+  case object Men5Div extends SelectOption("men5div", "5. div menn")
+  case object Men6Div extends SelectOption("men6div", "6. div menn")
+  case object Men7Div extends SelectOption("men3div", "7. div menn")
+  case object Men8Div extends SelectOption("men8div", "8. div menn")
+  case object WomenPrem extends SelectOption("womPrem", "Toppserien")
+  case object Women1Div extends SelectOption("wom1div", "1. div kvinner")
+  case object Women2Div extends SelectOption("wom2div", "2. div kvinner")
+  case object Women3Div extends SelectOption("wom3div", "3. div kvinner")
+  case object Women4Div extends SelectOption("wom4div", "4. div kvinner")
+  case object Boys19 extends SelectOption("g19", "Gutter 19")
+  case object Boys16 extends SelectOption("g16", "Gutter 16")
+  case object Boys15 extends SelectOption("g15", "Gutter 15")
+  case object Boys14 extends SelectOption("g14", "Gutter 14")
+  case object Boys13 extends SelectOption("g13", "Gutter 13")
+  case object Girls19 extends SelectOption("j19", "Jenter 19")
+  case object Girls16 extends SelectOption("j16", "Jenter 16")
+  case object Girls15 extends SelectOption("j15", "Jenter 15")
+  case object Girls14 extends SelectOption("j14", "Jenter 14")
+  case object Girls13 extends SelectOption("j13", "Jenter 13")
+
   val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men8Div, Boys19, Boys16, Boys15, Boys14, Boys13,
     WomenPrem, Women1Div, Women2Div, Women3Div, Women4Div, Girls19, Girls16, Girls15, Girls14, Girls13)
+  val asMap = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
 }
 
 case class SelectOption(key:String, display:String)
-case object MenPrem extends SelectOption("menPrem", "Tippeligaen")
-case object Men1Div extends SelectOption("men1div", "1. div menn")
-case object Men2Div extends SelectOption("men2div", "2. div menn")
-case object Men3Div extends SelectOption("men3div", "3. div menn")
-case object Men4Div extends SelectOption("men4div", "4. div menn")
-case object Men5Div extends SelectOption("men5div", "5. div menn")
-case object Men6Div extends SelectOption("men6div", "6. div menn")
-case object Men7Div extends SelectOption("men3div", "7. div menn")
-case object Men8Div extends SelectOption("men8div", "8. div menn")
-case object WomenPrem extends SelectOption("womPrem", "Toppserien")
-case object Women1Div extends SelectOption("wom1div", "1. div kvinner")
-case object Women2Div extends SelectOption("wom2div", "2. div kvinner")
-case object Women3Div extends SelectOption("wom3div", "3. div kvinner")
-case object Women4Div extends SelectOption("wom4div", "4. div kvinner")
-case object Boys19 extends SelectOption("g19", "Gutter 19")
-case object Boys16 extends SelectOption("g16", "Gutter 16")
-case object Boys15 extends SelectOption("g15", "Gutter 15")
-case object Boys14 extends SelectOption("g14", "Gutter 14")
-case object Boys13 extends SelectOption("g13", "Gutter 13")
-case object Girls19 extends SelectOption("j19", "Jenter 19")
-case object Girls16 extends SelectOption("j16", "Jenter 16")
-case object Girls15 extends SelectOption("j15", "Jenter 15")
-case object Girls14 extends SelectOption("j14", "Jenter 14")
-case object Girls13 extends SelectOption("j13", "Jenter 13")

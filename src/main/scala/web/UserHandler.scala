@@ -1,24 +1,92 @@
 package web
 
-import unfiltered.request.{GET, Path, HttpRequest}
-import unfiltered.response.{ResponseString, NotFound}
+import unfiltered.request._
+import unfiltered.response._
+import web.HerokuRedirect.XForwardProto
+import data.{Session, User}
+import data.MatchValidation.UserValidation
+import scala.Left
+import unfiltered.Cookie
+import scala.Right
+import scala.Some
+import unfiltered.response.ResponseString
 import service.MongoRepository
-import javax.servlet.http.HttpServletRequest
+import org.bson.types.ObjectId
 
 class UserHandler {
 
-  def handleUser(req: HttpRequest[HttpServletRequest])  = {
+  def handleUser(req: HttpRequest[_])  = {
     req match {
-      case Path("/users/me") => {
-        "sdf"
-//        req match{
-//          case GET =>{
-//            //            new MongoRepository().
-//            NotFound ~> ResponseString("fuckface!")
-//          }
-//        }
+      case Path("/users/signup") => {
+        req match{
+          case GET(_) => Html5(Pages(req).userForm(None))
+          case POST(_) => {
+            val Params(p) = req
+            handleSignup(p) match{
+              case Right(sessionId) => {
+                SetCookies(userCookie(req,sessionId)) ~> HerokuRedirect(req,"/matches")
+              }
+              case Left(errors) => BadRequest ~> ResponseString(errors.mkString("\n"))
+            }
+          }
+        }
+      }
+      case Path(Seg("users" :: userId :: Nil)) => {
+        req match{
+          case GET(_) =>{
+            LoggedOnUser.unapply(req) match{
+              case Some(user) if(user.id.get == userId) => Html5(Pages(req).userForm(Some(user)))
+              case Some(user) => Forbidden ~> Html5(Pages(req).forbidden)
+              case None => NotFound ~> Html5(Pages(req).notFound(Some("Bruker ikke funnet")))
+            }
+          }
+          case POST(_) =>{
+            val Params(p) = req
+            LoggedOnUser.unapply(req) match{
+              case Some(user) if(user.id.get == userId) => handleEditUser(p, userId, SessionId.unapply(req).get) match{
+                case Right(_) => HerokuRedirect(req, "/matches")
+                case Left(errors) => BadRequest ~> Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
+              }
+              case Some(user) => Forbidden ~> ResponseString("Fuck")
+              case None => Forbidden ~> Html5(Pages(req).forbidden)
+            }
+          }
+          case _ => MethodNotAllowed
+        }
       }
     }
+  }
+
+  def handleSignup(params: Map[String, Seq[String]]) : Either[List[String], String] = {
+    userFromParams(params).right.map{ u:User =>
+        val user = MongoRepository.saveUser(u)
+        val session = Session.newInstance(user.get)
+        MongoRepository.newSession(session)
+        session.sessionId
+      }
+    }
+
+  def handleEditUser(params: Map[String, Seq[String]], userId:String, sessionId:String) : Either[List[String], String] = {
+    userFromParams(params).right.map{u:User=>
+      val updatedUser = u.copy(id=Some(new ObjectId(userId)))
+      MongoRepository.saveUser(updatedUser)
+      MongoRepository.updateSession(Session.fromUser(updatedUser, sessionId))
+      sessionId
+    }
+  }
+
+
+  def userFromParams(params: Map[String, Seq[String]]): Either[List[String], User] = {
+    def valueOrBlank(key:String) :String = params.getOrElse(key,List("")).head
+    val validation = UserValidation.validate(None,  valueOrBlank("name"), valueOrBlank("email"), valueOrBlank("telephone"), valueOrBlank("level"), valueOrBlank("password"), valueOrBlank("password2"))
+    validation
+  }
+
+
+
+  def userCookie(req:HttpRequest[_], value:String) = {
+    val secure = req match { case XForwardProto("https") => Some(true) case _ => Some(false)}
+    Cookie(name="user.sessionId",value=value, secure=secure, path=Some("/"))
   }
 
 }

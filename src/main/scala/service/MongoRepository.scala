@@ -5,13 +5,19 @@ import util.Properties
 import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
 import data.{Session, Referee, User, Match}
+import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 
 object MongoRepository {
 
+  RegisterJodaTimeConversionHelpers()
+
   val MongoSetting(db) = Properties.envOrNone("MONGOLAB_URI")
-  //
 
   private val where, has = MongoDBObject
+
+  def listMatches = {
+    Nil
+  }
 
   def fullMatch(objId: ObjectId) = {
     db("matches").findOne(where("_id" -> objId)).map(Match.fromMongo(_))
@@ -50,14 +56,30 @@ object MongoRepository {
   }
 
   def userForSession(sessionId:String) : Option[User]= {
-    sessionById(new ObjectId(sessionId)).flatMap(s => db("users").findOne(where("_id" -> s.userId)).map(User.fromMongo))
+    sessionById(sessionId).flatMap(s => db("users").findOne(where("_id" -> s.userId)).map(User.fromMongo))
   }
 
-  def sessionById(sessionId:ObjectId) : Option[Session] = {
-    db("sessions").findOne(where("sessionId"->sessionId)).map(Session.fromMongo)
-   }
+  def sessionById(sessionId:String) : Option[Session] = {
+    val session = db("sessions").findOne(where("sessionId"->sessionId)).map(Session.fromMongo)
+    session
+  }
 
-  private def byId(id:Option[ObjectId]) = if(id.isDefined) where("_id"->id.get) else MongoDBObject.empty
+  def newSession(session:Session){
+    db("sessions").save(session.toMongo)
+  }
+
+  def updateSession(session:Session){
+    db("sessions").update(q=where("sessionId" -> session.sessionId), o=session.toMongo, upsert=false, multi=false)
+  }
+
+  def saveUser(user:User) = {
+    db("users").update(q = user.updateClause, o = user.toMongo, upsert = true, multi = false)
+    userByEmail(user.email)
+  }
+
+  def userByEmail(email:String)= {
+    db("users").findOne(where("email" -> email)).map(User.fromMongo)
+  }
 
 
 }

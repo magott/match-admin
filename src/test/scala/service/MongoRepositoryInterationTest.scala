@@ -8,6 +8,7 @@ import java.util.Date
 import com.mongodb.casbah.query.Imports._
 import common.MongoSetting
 import scala.Some
+import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 
 class MongoRepositoryInterationTest extends FunSuite{
   val MongoSetting(db) = None
@@ -21,13 +22,14 @@ class MongoRepositoryInterationTest extends FunSuite{
   }
 
   test("Insert new match"){
-    val m1 = m.copy(homeTeam = "BLAH", id = Some(new ObjectId("50799855040279cbe43df565")), description=None)
-    db("testMatches").update(m1.updateClause, m1.toMongo, true, false)
+    RegisterJodaTimeConversionHelpers()
+    val m1 = m.copy(homeTeam = "BLAH", description=None)
+    db("a").update(m1.updateClause, m.toMongo, true, false)
   }
 
   test("Multiple inserts"){
     val m1 = m
-    val id = MongoRepository.saveMatch(m)
+//    val id = MongoRepository.saveMatch(m)
     val int = m1.interestedAssistants ::: List(new ObjectId(new Date,3,3))
 //    val m2 = m1.copy(id = Some(id), interestedAssistants = int, description = None)
   }

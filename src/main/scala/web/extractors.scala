@@ -1,21 +1,39 @@
 package web
 
-import javax.servlet.http.HttpServletRequest
 import unfiltered.request.{Cookies, HttpRequest}
-import service.MongoRepository
+import service.MongoRepository._
 
-object LoggedOnUser {
-
-  def unapply[T <: HttpServletRequest](req: HttpRequest[T]) = {
-    UserId.unapply(req) match{
-      case Some(sessionId) => MongoRepository.userForSession(sessionId)
-      case None => None
-
+object AdminSession {
+  def unapply(req: HttpRequest[_]) = {
+    SessionId.unapply(req) match{
+      case Some(sessionId)  => sessionById(sessionId) match {
+        case Some(session) if(session.admin) => Some(session)
+        case _ => None
+      }
+      case _ => None
     }
   }
 }
 
-object UserId{
+object UserSession {
+  def unapply(req: HttpRequest[_]) = {
+    SessionId.unapply(req) match{
+      case Some(sessionId) => sessionById(sessionId)
+      case None => None
+    }
+  }
+}
+
+object LoggedOnUser {
+  def unapply(req: HttpRequest[_]) = {
+    SessionId.unapply(req) match{
+      case Some(sessionId) => userForSession(sessionId)
+      case None => None
+    }
+  }
+}
+
+object SessionId{
   def unapply[T](req: HttpRequest[T]) = {
     val cookies = Cookies.unapply(req).get
     cookies("user.sessionId") match {
