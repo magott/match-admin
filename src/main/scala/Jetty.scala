@@ -6,7 +6,7 @@ import web.Resources
 object Jetty extends App{
 
   Locale.setDefault(new Locale("no_NO"))
-  val port = Properties.envOrElse("PORT", "8080").toInt
+  val port = Properties.envOrElse("PORT", "1234").toInt
   println("Starting on port:" + port)
   val http = jetty.Http(port)
   http.resources(getClass().getResource("/static")).plan(new Resources)

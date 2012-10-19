@@ -96,7 +96,7 @@ object Referee{
   def fromMongo(m: DBObject) = Referee(m.as[ObjectId]("_id"), m.as[String]("name"), m.as[String]("level"))
 }
 
-case class User(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, admin:Boolean, created:DateTime, password:String){
+case class User(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, admin:Boolean, refereeNumber:Int, created:DateTime, password:String){
   def toMongo  = {
     val builder = MongoDBObject.newBuilder
     if(id.isDefined)
@@ -106,6 +106,7 @@ case class User(id:Option[ObjectId], name:String, email:String, telephone:String
     builder += "tel" -> telephone
     builder += "level" -> level
     builder += "admin" -> admin
+    builder += "refNo" -> refereeNumber
     builder += "created" -> created
     builder += "password" -> password
     builder.result()
@@ -121,13 +122,14 @@ object User{
     val email = m.as[String]("email")
     val tel = m.as[String]("tel")
     val level = m.as[String]("level")
+    val refNo = m.as[Int]("refNo")
     val created = m.as[DateTime]("created")
     val password = m.as[String]("password")
-    User(id,name,email,tel,level,admin,created,password)
+    User(id,name,email,tel,level,admin,refNo,created,password)
   }
 
-  def newInstance(name:String, email:String, telephone:String, level:String, password:String) =
-    User(None, name, email, telephone, level, false, new DateTime, password)
+  def newInstance(name:String, email:String, telephone:String, level:String, refereeNumber:Int, password:String) =
+    User(None, name, email, telephone, level, false, refereeNumber, new DateTime, password)
 }
 
 case class Session(userId:ObjectId, username:String, name:String, admin:Boolean, sessionId:String){

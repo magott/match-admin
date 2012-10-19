@@ -1,6 +1,6 @@
 package data
 
-import org.joda.time.{LocalTime, DateMidnight, Instant, DateTime}
+import org.joda.time.{LocalTime, DateMidnight, DateTime}
 import org.bson.types.ObjectId
 
 object MatchValidation {
@@ -56,7 +56,7 @@ object MatchValidation {
 
   object UserValidation{
     val emailRegex = """\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b"""
-    def validate(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, password:String, confirmPassword:String) = {
+    def validate(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, refereeNumber:String,password:String, confirmPassword:String) = {
       import org.mindrot.jbcrypt.BCrypt._
       import scalaz._
       import Scalaz.{id => _, _}
@@ -71,14 +71,17 @@ object MatchValidation {
         else if(!email.matches(emailRegex)) "Ugydlig e-post adresse".failNel
         else email.successNel
       def vTelephone = if(telephone.isEmpty) "Telefon må fylles ut".failNel
-        else if(telephone.length != 8 || telephone.exists(!_.isDigit)) "Telefonnummer skal være på 8 siffer og kun bestå av tall".failNel
+        else if(telephone.length < 8 || telephone.exists(!_.isDigit)) "Telefonnummer skal være på 8 siffer og kun bestå av tall".failNel
         else telephone.successNel
+      def vRefNumber = if(refereeNumber.isEmpty) "Dommernummer må fylles ut".failNel
+        else if(refereeNumber.exists(!_.isDigit)) "Dommernummer skal kun bestå av tall".failNel
+        else refereeNumber.toInt.successNel
       def vLevel = if(level.isEmpty) "Nivå må fylles ut".failNel
         else if(Level.asMap.get(level).isEmpty) "Dommernivå er ugyldig".failNel
         else level.successNel
 
-      (vName |@| vEmail |@| vTelephone |@| vLevel |@|vPassword){
-        (name, mail, tel, level, cryptPwd) => User(id, name, mail, tel, level, false, DateTime.now, cryptPwd)
+      (vName |@| vEmail |@| vTelephone |@| vLevel |@| vRefNumber |@|vPassword){
+        (name, mail, tel, level, refNo, cryptPwd) => User(id, name, mail, tel, level, false, refNo, DateTime.now, cryptPwd)
       }.either.left.map(_.list)
     }
   }

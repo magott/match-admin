@@ -3,9 +3,10 @@ package service
 import common.MongoSetting
 import util.Properties
 import org.bson.types.ObjectId
-import com.mongodb.casbah.query.Imports._
+import com.mongodb.casbah.Imports._
 import data.{Session, Referee, User, Match}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
+import org.joda.time.DateTime
 
 object MongoRepository {
 
@@ -25,6 +26,11 @@ object MongoRepository {
 
   def saveMatch(m: Match) = {
     db("matches").update(o = m.updateClause, q= m.toMongo, upsert=true, multi=false)
+  }
+
+  def listMatchesNewerThan(date:DateTime) = {
+    println(date)
+    db("matches").find(where().empty).map(Match.fromMongo(_))
   }
 
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId, refereeType:String){

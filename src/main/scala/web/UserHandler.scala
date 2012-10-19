@@ -37,7 +37,7 @@ class UserHandler {
             LoggedOnUser.unapply(req) match{
               case Some(user) if(user.id.get == userId) => Html5(Pages(req).userForm(Some(user)))
               case Some(user) => Forbidden ~> Html5(Pages(req).forbidden)
-              case None => NotFound ~> Html5(Pages(req).notFound(Some("Bruker ikke funnet")))
+              case None => Forbidden ~> Html5(Pages(req).forbidden) //Hva er rett kode??
             }
           }
           case POST(_) =>{
@@ -54,6 +54,7 @@ class UserHandler {
           case _ => MethodNotAllowed
         }
       }
+      case r@_ => NotFound ~> Html5(Pages(r).notFound())
     }
   }
 
@@ -78,7 +79,7 @@ class UserHandler {
 
   def userFromParams(params: Map[String, Seq[String]]): Either[List[String], User] = {
     def valueOrBlank(key:String) :String = params.getOrElse(key,List("")).head
-    val validation = UserValidation.validate(None,  valueOrBlank("name"), valueOrBlank("email"), valueOrBlank("telephone"), valueOrBlank("level"), valueOrBlank("password"), valueOrBlank("password2"))
+    val validation = UserValidation.validate(None,  valueOrBlank("name"), valueOrBlank("email"), valueOrBlank("telephone"), valueOrBlank("level"), valueOrBlank("refNumber"),valueOrBlank("password"), valueOrBlank("password2"))
     validation
   }
 

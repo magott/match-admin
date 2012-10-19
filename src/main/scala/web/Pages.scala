@@ -13,7 +13,11 @@ case class Pages(req:HttpRequest[_]) {
     editMatch(m)
   }
 
-  def notFound(text:Option[String]) = {
+  def alreadyLoggedIn = {
+    bootstrap("Logg inn", <div class="well">Du er alt logget inn. Vil du logge ut, så <a href="/logout">trykk her</a></div>)
+  }
+
+  def notFound(text:Option[String] = None) = {
     bootstrap("Siden finnes ikke", <div class="alert alert-error"> <h4 class="alert-heading">Siden finnes ikke!</h4> {text.getOrElse("")} </div> , None)
   }
 
@@ -25,5 +29,7 @@ case class Pages(req:HttpRequest[_]) {
   }
 
   def userForm(user:Option[User]) = snippets.editUserForm(user)
+
+  def login = snippets.loginForm
 
 }

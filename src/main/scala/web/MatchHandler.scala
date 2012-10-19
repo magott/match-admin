@@ -1,16 +1,20 @@
 package web
 
 import unfiltered.request.{GET, Path, HttpRequest}
-import unfiltered.response.{ResponseString, Ok}
+import service.MongoRepository
+import org.joda.time.DateTime
+import unfiltered.response.{Html5, ResponseString, Ok}
 
 class MatchHandler {
 
-  def handleAdmin(req: HttpRequest[_]) = {
+  def handleMatches(req: HttpRequest[_]) = {
     req match {
       case Path("/matches") => req match{
-        case GET(_) => Ok ~> ResponseString("Her kommer liste over kamper")
+        case GET(_) => {
+          val matches = MongoRepository.listMatchesNewerThan(DateTime.now.withDayOfYear(1))
+          Ok ~> Html5(Snippets(req).bootstrap("Kamper", <div>Her kommer det kamper</div>))
+        }
       }
-
     }
   }
 

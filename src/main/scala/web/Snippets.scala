@@ -137,30 +137,45 @@ case class Snippets(req: HttpRequest[_]) {
           {if (user.isEmpty) "Ny" else "Endre"}
           bruker</legend>
         <div class="control-group">
-          <label class="control-label" for="inputName">Name</label>
+          <label class="control-label" for="inputName">Navn</label>
           <div class="controls">
-            <input type="text" id="inputName" placeholder="Navn" name="name" value={user.map(_.name).getOrElse("")}/>
+            <input type="text" id="name" placeholder="Fullt navn" name="name" value={user.map(_.name).getOrElse("")}/>
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="refNumber"> Dommernummer</label>
+          <div class="controls">
+            <div class="input-prepend">
+              <span class="add-on"><strong>03-</strong></span>
+              <input type="text" class="input-mini" id="refNumber" placeholder="Dnr" name="refNumber" value={user.map(_.refereeNumber.toString).getOrElse("")} maxlength="6"/>
+              <span class="help-inline"></span>
+            </div>
           </div>
         </div>
         <div class="control-group">
           <label class="control-label" for="inputTelephone">Telefon</label>
           <div class="controls">
-            <input type="tel" id="inputTelephone" name="telephone" placeholder="Telefon" value={user.map(_.telephone).getOrElse("")}/>
+            <input type="tel" id="telephone" name="telephone" placeholder="Telefon" value={user.map(_.telephone).getOrElse("")}/>
+            <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
           <label class="control-label" for="inputEmail">Email</label>
           <div class="controls">
-            <input type="email" id="inputName" placeholder="Email" name="email" value={user.map(_.email).getOrElse("")}/>
+            <input type="email" id="email" placeholder="Email" name="email" value={user.map(_.email).getOrElse("")}/>
+            <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
           <label class="control-label" for="inputPassword">Passord</label>
           <div class="controls">
-            <input type="password" id="inputPassword" name="password" placeholder="Passord"/>
+            <input type="password" id="password" name="password" placeholder="Passord"/>
+            <span class="help-inline"></span>
           </div>
           <div class="controls">
-            <input type="password" id="inputPassword2" name="password2" placeholder="Gjenta passord"/>
+            <input type="password" id="password2" name="password2" placeholder="Gjenta passord"/>
+            <span class="help-inline"></span>
           </div>
         </div>
 
@@ -169,9 +184,9 @@ case class Snippets(req: HttpRequest[_]) {
           <div class="controls">
             <select id="level" name="level">
               {if (user.isEmpty || user.get.level.isEmpty)
-              <option selected="selected">Velg</option>}{Level.all.map(
-              (l: SelectOption) => user.map(
-                u => if (u.level == l.key) <option selected="selected" value={l.key}>
+                <option selected="selected" value="">Velg</option>}{Level.all.map(
+                (l: SelectOption) => user.map(
+                  u => if (u.level == l.key) <option selected="selected" value={l.key}>
                   {l.display}
                 </option>
                 else <option>
@@ -182,42 +197,47 @@ case class Snippets(req: HttpRequest[_]) {
               </option>))}
             </select>
           </div>
+          <span class="help-inline"></span>
         </div>
 
         <div class="control-group">
           <div class="controls">
-            <button type="submit" class="btn">Registrer</button>
+            <button type="submit" class="btn">Lagre</button>
           </div>
         </div>
-      </form>
+      </form>, Some(userFormJS)
 
     )
   }
 
   def loginForm = {
-    <form class="form-horizontal">
+    bootstrap("Logg inn",
+    <form class="form-horizontal" id="login-form" name="login-form" method="post">
       <div class="control-group">
         <label class="control-label" for="inputEmail">Email</label>
         <div class="controls">
-          <input type="text" id="inputEmail" placeholder="Email"/>
+          <input type="text" id="email" name="email" placeholder="Email"/>
+          <span class="help-inline"></span>
         </div>
       </div>
       <div class="control-group">
         <label class="control-label" for="inputPassword">Password</label>
         <div class="controls">
-          <input type="password" id="inputPassword" placeholder="Password"/>
+          <input type="password" id="password" name="password" placeholder="Password"/>
+          <span class="help-inline"></span>
         </div>
       </div>
       <div class="control-group">
         <div class="controls">
           <label class="checkbox">
-            <input type="checkbox"/>
-            Remember me
+            <input type="checkbox" name="remember"/>
+            Husk meg
           </label>
           <button type="submit" class="btn">Sign in</button>
         </div>
       </div>
     </form>
+    ,Some(loginJs))
   }
 
   def bootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None) = {
@@ -348,6 +368,31 @@ case class Snippets(req: HttpRequest[_]) {
 
   }
 
+  def matchList(matches:Iterator[Match]) = {
+    <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>Tid</th>
+          <th>Kamp</th>
+          <th>Nivå</th>
+          <th>Sted</th>
+          <th>Dommer</th>
+          <th>AD</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          matches.map( m =>
+            <tr>
+            <td>{m.kickoff.toString("dd.MM.yyyy mm:HH")}</td>
+            </tr>
+          )
+
+        }
+      </tbody>
+    </table>
+  }
+
   val editMatchJS = {
     <script src="/js/jquery.validate.min.js" />
     <script type="text/javascript">
@@ -356,6 +401,25 @@ case class Snippets(req: HttpRequest[_]) {
 
         """}
     </script>
+  }
+
+  val loginJs = {
+      <script src="/js/jquery.validate.min.js" />
+      <script type="text/javascript">
+        { """
+            $(document).ready(validateLogin());
+
+          """}
+      </script>
+  }
+  val userFormJS = {
+      <script src="/js/jquery.validate.min.js" />
+      <script type="text/javascript">
+        { """
+            $(document).ready(validateUserForm());
+
+          """}
+      </script>
   }
 
 }
