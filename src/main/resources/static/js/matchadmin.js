@@ -211,7 +211,6 @@ function interestButtonFunctions(){
 
 function refBtn(button){
     var url = window.location.href
-    url = "http://localhost:1234/matches/5082d45a040279cbe43df56e"
     if(button.attr("data-state") == "not-interested"){
         button.attr("disabled", "disabled");
         ajaxinterest("POST", url, button,function(){})
