@@ -26,7 +26,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
       "awayTeam" -> awayTeam,
       "venue" -> venue,
       "level" -> level,
-      "kikcoff" -> kickoff,
+      "kickoff" -> kickoff,
       "refereeType" -> refereeType
     )
     description.foreach(x => sets += "desc" -> x)

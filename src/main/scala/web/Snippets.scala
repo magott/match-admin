@@ -14,7 +14,7 @@ case class Snippets(req: HttpRequest[_]) {
       <legend>
         {if (m.isEmpty) "Ny" else "Endre"}
         kamp</legend>
-        <form class="form-horizontal" action={"/admin/matches"+m.map(_.id).getOrElse("")} method="POST" id="match-form">
+        <form class="form-horizontal" action={"/admin/matches/"+m.flatMap(_.id.map(_.toString)).getOrElse("")} method="POST" id="match-form">
           <div class="control-group">
             <label class="control-label">Kamp</label>
             <div class="controls">
@@ -427,7 +427,7 @@ case class Snippets(req: HttpRequest[_]) {
         {
           matches.map( m =>
             <tr>
-            <td>{m.kickoff.toString("dd.MM.yyyy mm:HH")}</td>
+            <td>{m.kickoff.toString("dd.MM.yyyy HH:mm")}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
               <td>{m.venue}</td>
