@@ -25,7 +25,7 @@ object MongoRepository {
   }
 
   def saveMatch(m: Match) = {
-    db("matches").update(o = m.updateClause, q= m.toMongo, upsert=true, multi=false)
+    db("matches").update(q = m.updateClause, o= m.toMongo, upsert=true, multi=false)
   }
 
   def listMatchesNewerThan(date:DateTime) = {

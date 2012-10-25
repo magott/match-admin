@@ -42,7 +42,7 @@ class AdminHandler {
           }
         }
         case POST(_) & Params(p)=>{
-          matchFromParams(None, p) match{
+          matchFromParams(Some(matchId), p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             case Right(m) => {
               MongoRepository.saveMatch(m)

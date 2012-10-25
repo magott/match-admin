@@ -43,9 +43,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedAssistant1.isEmpty) unsets += "assRef1"
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
 
-
     $set(sets.toSeq:_*) ++ $unset(unsets:_*)
-
   }
 
   def interestedAssistantButton(userId:Option[String]) =
