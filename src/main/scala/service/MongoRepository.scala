@@ -29,18 +29,18 @@ object MongoRepository {
   }
 
   def listMatchesNewerThan(date:DateTime) = {
-    println(date)
-    db("matches").find(where().empty).map(Match.fromMongo(_))
+    db("matches").find( ("kickoff" $gt date)).map(Match.fromMongo(_))
+//    db("matches").find(where()).map(Match.fromMongo(_))
   }
 
-  def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId, refereeType:String){
+  def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId){
     val user = User.fromMongo(db("users").findOneByID(userId).get)
-    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user)))
+    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo))
   }
 
-  def refInterestedInMatch(matchId: ObjectId, userId:ObjectId, refereeType:String){
+  def refInterestedInMatch(matchId: ObjectId, userId:ObjectId):Boolean = {
     val user = User.fromMongo(db("users").findOneByID(userId).get)
-    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intRef" -> Referee.fromUser(user)))
+    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intRef" -> Referee.fromUser(user).toMongo)).getN == 1
   }
 
   def hasDeclaredInterestAsAssistant(matchId:ObjectId, refId: ObjectId):Boolean = {
@@ -51,14 +51,14 @@ object MongoRepository {
     db("matches").findOne(where("_id" -> matchId, "refAss._id" -> refId)).isDefined
   }
 
-  def cancelInterestAsReferee(matchId:ObjectId, refId:ObjectId) = {
+  def cancelInterestAsReferee(matchId:ObjectId, refId:ObjectId):Boolean = {
 //    db("foo").update(q= where("_id" -> id), o= $pull(where("number" -> MongoDBObject("num" -> 2))))
-    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intRef" -> has("_id" -> refId))), upsert=true, multi=true)
+    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intRef" -> has("_id" -> refId))), upsert=true, multi=true).getN > 0
   }
 
-  def cancelInterestAsAssistant(matchId:ObjectId, refId:ObjectId) = {
+  def cancelInterestAsAssistant(matchId:ObjectId, refId:ObjectId):Boolean = {
 //    db("foo").update(q= where("_id" -> id), o= $pull(where("number" -> MongoDBObject("num" -> 2))))
-    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intAss" -> has("_id" -> refId))), upsert=true, multi=true)
+    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intAss" -> has("_id" -> refId))), upsert=true, multi=true).getN > 0
   }
 
   def userForSession(sessionId:String) : Option[User]= {

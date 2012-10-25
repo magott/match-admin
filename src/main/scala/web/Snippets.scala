@@ -14,7 +14,7 @@ case class Snippets(req: HttpRequest[_]) {
       <legend>
         {if (m.isEmpty) "Ny" else "Endre"}
         kamp</legend>
-        <form class="form-horizontal" action="/admin/matches/match" method="POST" id="match-form">
+        <form class="form-horizontal" action={"/admin/matches"+m.map(_.id).getOrElse("")} method="POST" id="match-form">
           <div class="control-group">
             <label class="control-label">Kamp</label>
             <div class="controls">
@@ -84,8 +84,8 @@ case class Snippets(req: HttpRequest[_]) {
           <div class="control-group">
             <label class="control-label" for="refFee">Honorar</label>
             <div class="controls controls-row">
-              <input type="number" id="refFee" name="refFee" class="input-small" placeholder="Dommer" required="required"/>
-              <input type="number" id="assFee" name="assFee" class="input-small" placeholder="AD" required="required"/>
+              <input type="number" id="refFee" name="refFee" class="input-small" placeholder="Dommer" required="required" value={m.flatMap(_.refFee.map(_.toString)).getOrElse("")}/>
+              <input type="number" id="assFee" name="assFee" class="input-small" placeholder="AD" required="required" value={m.flatMap(_.assistantFee.map(_.toString)).getOrElse("")}/>
               <span class="help-inline"></span>
             </div>
           </div>
@@ -127,6 +127,48 @@ case class Snippets(req: HttpRequest[_]) {
       o => selected.map(
         s=> if(s == o.key) <option value={o.key} selected="selected">{o.display}</option> else <option value={o.key}>{o.display}</option>)
     .getOrElse(<option value={o.key}>{o.display}</option>))
+  }
+
+  def viewMatch(m:Match, userId:Option[String]) = {
+    bootstrap("Kamp",
+       <table class="table table-condensed table-bordered table-nonfluid">
+        <tr>
+          <th>Kamp</th>
+          <td>{m.homeTeam} - {m.awayTeam}</td>
+        </tr>
+        <tr>
+          <th>Bane</th>
+          <td>{m.venue}</td>
+        </tr>
+        <tr>
+          <th>Avspark</th>
+          <td>{m.kickoff.toString("dd.MM.yyyy mm:HH")}</td>
+        </tr>
+        <tr>
+          <th>Honorar dommer</th>
+          <td>{m.refFee.getOrElse("-")}</td>
+        </tr>
+        <tr>
+          <th>Honorar Assistentdommer</th>
+          <td>{m.assistantFee.getOrElse("-")}</td>
+        </tr>
+        <tr>
+          <th>Dommer</th>
+          <td>{m.interestedRefButton(userId)}</td>
+        </tr>
+         {if(m.refereeType=="trio")
+         <tr>
+           <th>Assistentdommer</th>
+           <td>{m.interestedAssistantButton(userId)}</td>
+         </tr>
+         }
+
+        <tr>
+          <th></th>
+          <td></td>
+        </tr>
+      </table>
+      , Some(viewMatchJS))
   }
 
   def editUserForm(user: Option[User]) = {
@@ -368,7 +410,7 @@ case class Snippets(req: HttpRequest[_]) {
 
   }
 
-  def matchList(matches:Iterator[Match]) = {
+  def matchList(matches:Iterator[Match], matchLinkPath:String) = {
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -377,7 +419,8 @@ case class Snippets(req: HttpRequest[_]) {
           <th>Nivå</th>
           <th>Sted</th>
           <th>Dommer</th>
-          <th>AD</th>
+          <th>AD 1</th>
+          <th>AD 2</th>
         </tr>
       </thead>
       <tbody>
@@ -385,6 +428,13 @@ case class Snippets(req: HttpRequest[_]) {
           matches.map( m =>
             <tr>
             <td>{m.kickoff.toString("dd.MM.yyyy mm:HH")}</td>
+              <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
+              <td>{Level.asMap(m.level)}</td>
+              <td>{m.venue}</td>
+              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}</td>
+              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
+              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
+
             </tr>
           )
 
@@ -417,6 +467,15 @@ case class Snippets(req: HttpRequest[_]) {
       <script type="text/javascript">
         { """
             $(document).ready(validateUserForm());
+
+          """}
+      </script>
+  }
+
+  val viewMatchJS = {
+      <script type="text/javascript">
+        { """
+            $(document).ready(interestButtonFunctions());
 
           """}
       </script>

@@ -13,6 +13,8 @@ case class Pages(req:HttpRequest[_]) {
     editMatch(m)
   }
 
+  def listMatches(m: Iterator[Match], matchLinkPrefix:String) = bootstrap("Kamper", matchList(m, matchLinkPrefix))
+
   def alreadyLoggedIn = {
     bootstrap("Logg inn", <div class="well">Du er alt logget inn. Vil du logge ut, så <a href="/logout">trykk her</a></div>)
   }

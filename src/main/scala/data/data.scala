@@ -5,21 +5,17 @@ import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
 import java.util.UUID
 import collection.mutable
+import collection.mutable.ArrayBuffer
 
-//Referees interested
-//Match - id, assistant, ref,
-
-//Match list view
-//Match without interested parties
-
-//Referee detailed match view
-//Match with ids to check if interested.
-
-//Full admin view
 case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTeam:String, venue:String, level:String,
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]){
+
+  def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
+  def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
+
+  def updateClause : MongoDBObject = if(id.isDefined) MongoDBObject("_id" -> id.get) else toMongo
 
   def toMongo: MongoDBObject  = {
     val unsets = mutable.MutableList.empty[String]
@@ -52,7 +48,32 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   }
 
-  def updateClause : MongoDBObject = if(id.isDefined) MongoDBObject("_id" -> id.get) else toMongo
+  def interestedAssistantButton(userId:Option[String]) =
+    interestedButton(userId, "assRef", isInterestedAssistant)
+
+  def interestedRefButton(userId:Option[String]) =
+    interestedButton(userId, "ref", isInterestedRef)
+
+  def buttonTexts = (
+    <span class="int interested-txt">Interesse meldt</span>
+      <span class="int not-interested-txt">Meld interesse</span>
+      <span class="int hover-interested-txt">Meld av</span>
+      <span class="int assigned-txt">Kampen er tildelt</span>
+      <span class="int login-txt">Logg inn for å melde interesse</span>
+    )
+
+  def interestedButton(userId:Option[String], buttonId:String, isInterested: String => Boolean) = {
+    if(appointedRef.isEmpty)
+      if(userId.isEmpty)
+        <a href="/login" class="btn">Logg inn for å melde interesse</a>
+      else if(isInterested(userId.get))
+        <button id={buttonId} class="btn" data-state="interested">{buttonTexts}</button>
+      else
+        <button id={buttonId} class="btn int" data-state="not-interested">{buttonTexts}</button>
+    else
+      <button id={buttonId} type="button" data-state="assigned" class="btn disabled" disabled="disabled">{buttonTexts}</button>
+  }
+
 }
 
 object Match{
@@ -68,8 +89,8 @@ object Match{
     val refereeType = m.as[String]("refereeType")
     val refFee = m.getAs[Int]("refFee")
     val assFee = m.getAs[Int]("assFee")
-    val intRefs = m.getAsOrElse[List[DBObject]]("intRefs", Nil).map(Referee.fromMongo)
-    val intAss = m.getAsOrElse[List[DBObject]]("intAss", Nil).map(Referee.fromMongo)
+    val intRefs = m.getAsOrElse[ArrayBuffer[DBObject]]("intRef", ArrayBuffer.empty).map(Referee.fromMongo).toList
+    val intAss = m.getAsOrElse[ArrayBuffer[DBObject]]("intAss", ArrayBuffer.empty).map(Referee.fromMongo).toList
     val referee = m.getAs[DBObject]("referee").map(Referee.fromMongo)
     val assRef1 = m.getAs[DBObject]("assRef1").map(Referee.fromMongo)
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)

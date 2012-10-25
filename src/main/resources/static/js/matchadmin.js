@@ -28,6 +28,7 @@ function validateMatchForm() {
 
     $('#match-form').validate(
         {
+            onkeyup: false,
             errorPlacement:function (error, element) {
                 error.appendTo(element.nextAll("span"));
             },
@@ -90,6 +91,7 @@ function validateLogin() {
 
     $('#login-form').validate(
         {
+            onkeyup: false,
             errorPlacement:function (error, element) {
                 error.appendTo(element.next("span"));
             },
@@ -195,4 +197,62 @@ function validateUserForm() {
                     .closest('.control-group').removeClass('error');
             }
         });
+
 }
+
+function interestButtonFunctions(){
+    $("#ref").click(function() {
+        refBtn($(this))
+    });
+    $("#assRef").click(function() {
+        refBtn($(this))
+    });
+}
+
+function refBtn(button){
+    var url = window.location.href
+    url = "http://localhost:1234/matches/5082d45a040279cbe43df56e"
+    if(button.attr("data-state") == "not-interested"){
+        button.attr("disabled", "disabled");
+        ajaxinterest("POST", url, button,function(){})
+    }else if(button.attr("data-state") == "interested"){
+        button.attr("disabled", "disabled");
+        ajaxinterest("DELETE", url, button,function(){})
+    }
+}
+
+function ajaxinterest(method, url, button, onError){
+    $.ajax({
+        type: method,
+        url: url + "?reftype="+button.attr("id"),
+        error: function() {onError();},
+        success: function(data){button.attr("data-state", data.newState);},
+        complete: function(){button.removeAttr("disabled");}
+    });
+}
+
+function refButton(button){
+    if(button.hasClass("not-interested")){
+        toggleInterested(button);
+    }else if(button.hasClass("interested")){
+        toggleNotInterested(button)
+    }
+}
+
+function toggleInterested(button, callback){
+    button.attr("disabled", "disabled");
+    button.removeClass("not-interested");
+    button.addClass("btn-info");
+    button.addClass("interested");
+    button.html("Interesse meldt");
+    button.removeAttr("disabled");
+
+}
+
+function toggleNotInterested(button){
+    button.removeClass("interested");
+    button.removeClass("btn-info");
+    button.addClass("not-interested");
+    button.html("Meld interesse");
+}
+

@@ -7,7 +7,7 @@ object MatchValidation {
 
   def validate(id: Option[String], homeTeam: String, awayTeam: String, venue: String, level: String,
                description: String, kickoffDate: String, kickoffTime: String, refereeType: String, refFee: String,
-               assistantFee: String, appointedRef: Option[Referee], appointedAssistant1: Option[Referee], appointedAssistant2: Option[Referee]): Either[List[String], Match] = {
+               assistantFee: String, appointedRef: String, appointedAssistant1: String, appointedAssistant2: String): Either[List[String], Match] = {
 
     import scalaz._
     import Scalaz.{id => _, _}
@@ -23,7 +23,9 @@ object MatchValidation {
       else if(refereeType!="trio") None.successNel
       else Some(assistantFee.toInt).successNel
 
-    def vAppointedRef = None //TODO Fetch from mongo
+    def vAppointedRef = None
+    def vAppointedAssistant1 = None.successNel
+    def vAppointedAssistant2 = None.successNel//TODO Fetch from mongo
 
 
     def vRefereeType =
@@ -48,9 +50,10 @@ object MatchValidation {
 
     def nonEmpty(s:String) = if(s.trim.isEmpty) None else Some(s)
 
-    (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@| vAssFee) {
+    (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@|
+      vAssFee) {
       (kickoff, home, away, venue, refType, refFee, assFee) => Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, level, nonEmpty(description), kickoff, refereeType, refFee, assFee,
-        Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2)
+        Nil, Nil, None, None, None)
     }.either.left.map(_.list)
   }
 
