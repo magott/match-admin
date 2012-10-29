@@ -56,7 +56,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   def interestedAssistant1Button(userId:Option[String]) = {
     if(appointedAssistant1.isEmpty){
-      interestedButton(userId, "assRef1", isInterestedAssistant)
+      interestedButton(userId, "assRef", isInterestedAssistant)
     }else{
       <div>{appointedAssistant1.get.name}</div>
     }
@@ -64,7 +64,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   def interestedAssistant2Button(userId:Option[String]):NodeSeq = {
     if(appointedAssistant1.isDefined && appointedAssistant2.isEmpty){
-      interestedButton(userId, "assRef2", isInterestedAssistant)
+      interestedButton(userId, "assRef", isInterestedAssistant)
     }else{
       <div>{appointedAssistant1.map(_.name).getOrElse("")}</div>
     }
