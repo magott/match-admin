@@ -30,6 +30,8 @@ case class Pages(req:HttpRequest[_]) {
     bootstrap("Ingen tilgang", <div class="alert alert-error"> <h4 class="alert-heading">Ingen tilgang!</h4> Du har ikke tilgang til denne siden eller mangler rettigheter til å gjøre dette</div> , None)
   }
 
+  def user(user:User) = bootstrap(user.name, userView(user), None)
+
   def userForm(user:Option[User]) = snippets.editUserForm(user)
 
   def login = snippets.loginForm

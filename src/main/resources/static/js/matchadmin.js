@@ -1,5 +1,6 @@
 function trioOn() {
     $('#assFee').show('fast').removeAttr("disabled");
+    $('.ass-controls').show('fast');
     $('#appointedAssistant1').show('fast').removeAttr("disabled");
     $('#appointedAssistant2').show('fast').removeAttr("disabled");
 }
@@ -7,6 +8,7 @@ function trioOn() {
 function trioOff() {
     $('#assFee').hide().attr("disabled", "disabled");
     $('#appointedAssistant1').hide().attr("disabled", "disabled");
+    $('.ass-controls').hide();
     $('#appointedAssistant2').hide().attr("disabled", "disabled");
 }
 
@@ -18,6 +20,12 @@ function isTrio() {
 function editMatchFunctions() {
     $('#refTypeDommer').click(trioOff);
     $('#refTypeTrio').click(trioOn);
+    $('#appointedRef').change(setUserLink)
+    $('#appointedAssistant1').change(setUserLink)
+    $('#appointedAssistant2').change(setUserLink)
+    $('#appointedRef').trigger('change');
+    $('#appointedAssistant1').trigger('change');
+    $('#appointedAssistant2').trigger('change');
     validateMatchForm();
     if (!isTrio()) {
         trioOff();
@@ -46,7 +54,8 @@ function validateMatchForm() {
                     required:true
                 },
                 time:{
-                    required:true
+                    required:true,
+                    time: true
                 },
                 level:{
                     required:true
@@ -68,7 +77,10 @@ function validateMatchForm() {
                 away:"Bortelag må fylles ut",
                 venue:"Bane må fylles ut",
                 name:"Navn må fylles ut",
-                time:"Tidspunkt for kampen må fylles ut",
+                time:{
+                    required: "Tidspunkt for kampen må fylles ut",
+                    time: "Ugyldig tidsformat (gyldig format f.eks 23:59)"
+                },
                 date:"Dato for kampen må fylles ut",
                 level:"Nivå for kampen må fylles ut",
                 refFee:"Dommerhonorar må fylles ut",
@@ -230,12 +242,13 @@ function ajaxinterest(method, url, button, onError){
     });
 }
 
-function refButton(button){
-    if(button.hasClass("not-interested")){
-        toggleInterested(button);
-    }else if(button.hasClass("interested")){
-        toggleNotInterested(button)
-    }
+function setUserLink(){
+    var userId = $(this).attr('value')
+    if(userId)
+        $(this).next('a').attr('href','/admin/users/'+userId);
+    else
+        $(this).next('a').removeAttr("href")
+
 }
 
 function toggleInterested(button, callback){

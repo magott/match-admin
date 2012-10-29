@@ -65,6 +65,10 @@ object MongoRepository {
     sessionById(sessionId).flatMap(s => db("users").findOne(where("_id" -> s.userId)).map(User.fromMongo))
   }
 
+  def refereeByUserId(userId:ObjectId) : Option[Referee] = userById(userId).map(Referee.fromUser)
+
+  def userById(userId:ObjectId) : Option[User] = db("users").findOne(where("_id" -> userId)).map(User.fromMongo)
+
   def sessionById(sessionId:String) : Option[Session] = {
     val session = db("sessions").findOne(where("sessionId"->sessionId)).map(Session.fromMongo)
     session

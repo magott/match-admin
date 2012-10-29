@@ -6,6 +6,7 @@ import com.mongodb.casbah.query.Imports._
 import java.util.UUID
 import collection.mutable
 import collection.mutable.ArrayBuffer
+import xml.NodeSeq
 
 case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTeam:String, venue:String, level:String,
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
@@ -14,6 +15,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
   def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
+  def areAssistantsAppointed = appointedAssistant1.isDefined && appointedAssistant2.isDefined
 
   def updateClause : MongoDBObject = if(id.isDefined) MongoDBObject("_id" -> id.get) else toMongo
 
@@ -45,12 +47,28 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
     $set(sets.toSeq:_*) ++ $unset(unsets:_*)
   }
-
-  def interestedAssistantButton(userId:Option[String]) =
-    interestedButton(userId, "assRef", isInterestedAssistant)
-
   def interestedRefButton(userId:Option[String]) =
-    interestedButton(userId, "ref", isInterestedRef)
+    if(appointedRef.isEmpty)
+      interestedButton(userId, "ref", isInterestedRef)
+    else
+      <div>{appointedRef.get.name}</div>
+
+
+  def interestedAssistant1Button(userId:Option[String]) = {
+    if(appointedAssistant1.isEmpty){
+      interestedButton(userId, "assRef1", isInterestedAssistant)
+    }else{
+      <div>{appointedAssistant1.get.name}</div>
+    }
+  }
+
+  def interestedAssistant2Button(userId:Option[String]):NodeSeq = {
+    if(appointedAssistant1.isDefined && appointedAssistant2.isEmpty){
+      interestedButton(userId, "assRef2", isInterestedAssistant)
+    }else{
+      <div>{appointedAssistant1.map(_.name).getOrElse("")}</div>
+    }
+  }
 
   def buttonTexts = (
     <span class="int interested-txt">Interesse meldt</span>
@@ -61,15 +79,12 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     )
 
   def interestedButton(userId:Option[String], buttonId:String, isInterested: String => Boolean) = {
-    if(appointedRef.isEmpty)
       if(userId.isEmpty)
         <a href="/login" class="btn">Logg inn for å melde interesse</a>
       else if(isInterested(userId.get))
         <button id={buttonId} class="btn" data-state="interested">{buttonTexts}</button>
       else
         <button id={buttonId} class="btn int" data-state="not-interested">{buttonTexts}</button>
-    else
-      <button id={buttonId} type="button" data-state="assigned" class="btn disabled" disabled="disabled">{buttonTexts}</button>
   }
 
 }
@@ -107,7 +122,7 @@ object Match{
 case class Referee(id:ObjectId, name:String, level:String){
   def toMongo = MongoDBObject("_id"->id, "name"->name, "level" -> level)
   def display = "%s (%s)".format(name, Level.asMap(level))
-  def toSelectOption = SelectOption(id.toString,display)
+  def toSelectOption = KeyAndValue(id.toString,display)
 }
 
 object Referee{
@@ -165,34 +180,41 @@ object Session{
 
 object Level{
 
-  case object MenPrem extends SelectOption("menPrem", "Tippeligaen")
-  case object Men1Div extends SelectOption("men1div", "1. div menn")
-  case object Men2Div extends SelectOption("men2div", "2. div menn")
-  case object Men3Div extends SelectOption("men3div", "3. div menn")
-  case object Men4Div extends SelectOption("men4div", "4. div menn")
-  case object Men5Div extends SelectOption("men5div", "5. div menn")
-  case object Men6Div extends SelectOption("men6div", "6. div menn")
-  case object Men7Div extends SelectOption("men3div", "7. div menn")
-  case object Men8Div extends SelectOption("men8div", "8. div menn")
-  case object WomenPrem extends SelectOption("womPrem", "Toppserien")
-  case object Women1Div extends SelectOption("wom1div", "1. div kvinner")
-  case object Women2Div extends SelectOption("wom2div", "2. div kvinner")
-  case object Women3Div extends SelectOption("wom3div", "3. div kvinner")
-  case object Women4Div extends SelectOption("wom4div", "4. div kvinner")
-  case object Boys19 extends SelectOption("g19", "Gutter 19")
-  case object Boys16 extends SelectOption("g16", "Gutter 16")
-  case object Boys15 extends SelectOption("g15", "Gutter 15")
-  case object Boys14 extends SelectOption("g14", "Gutter 14")
-  case object Boys13 extends SelectOption("g13", "Gutter 13")
-  case object Girls19 extends SelectOption("j19", "Jenter 19")
-  case object Girls16 extends SelectOption("j16", "Jenter 16")
-  case object Girls15 extends SelectOption("j15", "Jenter 15")
-  case object Girls14 extends SelectOption("j14", "Jenter 14")
-  case object Girls13 extends SelectOption("j13", "Jenter 13")
+  case object MenPrem extends KeyAndValue("menPrem", "Tippeligaen")
+  case object Men1Div extends KeyAndValue("men1div", "1. div menn")
+  case object Men2Div extends KeyAndValue("men2div", "2. div menn")
+  case object Men3Div extends KeyAndValue("men3div", "3. div menn")
+  case object Men4Div extends KeyAndValue("men4div", "4. div menn")
+  case object Men5Div extends KeyAndValue("men5div", "5. div menn")
+  case object Men6Div extends KeyAndValue("men6div", "6. div menn")
+  case object Men7Div extends KeyAndValue("men3div", "7. div menn")
+  case object Men8Div extends KeyAndValue("men8div", "8. div menn")
+  case object WomenPrem extends KeyAndValue("womPrem", "Toppserien")
+  case object Women1Div extends KeyAndValue("wom1div", "1. div kvinner")
+  case object Women2Div extends KeyAndValue("wom2div", "2. div kvinner")
+  case object Women3Div extends KeyAndValue("wom3div", "3. div kvinner")
+  case object Women4Div extends KeyAndValue("wom4div", "4. div kvinner")
+  case object Boys19 extends KeyAndValue("g19", "Gutter 19")
+  case object Boys16 extends KeyAndValue("g16", "Gutter 16")
+  case object Boys15 extends KeyAndValue("g15", "Gutter 15")
+  case object Boys14 extends KeyAndValue("g14", "Gutter 14")
+  case object Boys13 extends KeyAndValue("g13", "Gutter 13")
+  case object Girls19 extends KeyAndValue("j19", "Jenter 19")
+  case object Girls16 extends KeyAndValue("j16", "Jenter 16")
+  case object Girls15 extends KeyAndValue("j15", "Jenter 15")
+  case object Girls14 extends KeyAndValue("j14", "Jenter 14")
+  case object Girls13 extends KeyAndValue("j13", "Jenter 13")
 
   val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men8Div, Boys19, Boys16, Boys15, Boys14, Boys13,
     WomenPrem, Women1Div, Women2Div, Women3Div, Women4Div, Girls19, Girls16, Girls15, Girls14, Girls13)
   val asMap = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
 }
 
-case class SelectOption(key:String, display:String)
+object RefereeType{
+  case object Dommer extends KeyAndValue("dommer", "Dommer")
+  case object Trio extends KeyAndValue("trio", "Trio")
+  val all = List(Dommer, Trio)
+  val asMap = Map(Dommer.key -> Dommer.display, Trio.key -> Trio.display)
+}
+
+case class KeyAndValue(key:String, display:String)

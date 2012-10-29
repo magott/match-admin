@@ -3,13 +3,14 @@ package web
 import xml.NodeSeq
 import unfiltered.request.HttpRequest
 import data._
-import data.SelectOption
+import data.KeyAndValue
 import scala.Some
+import data.RefereeType.{Dommer, Trio}
 
 case class Snippets(req: HttpRequest[_]) {
 
   def editMatch(m: Option[Match]) = {
-    val isTrio = m.isDefined && m.get.refereeType=="trio"
+    val isTrio = m.isDefined && m.get.refereeType==Trio.key
     bootstrap("Kamp",
       <legend>
         {if (m.isEmpty) "Ny" else "Endre"}
@@ -37,7 +38,7 @@ case class Snippets(req: HttpRequest[_]) {
           <label class="control-label">Kampstart</label>
             <div class="controls controls-row">
               <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required" value={m.map(_.kickoff.toString("yyyy-MM-dd")).getOrElse("")}/>
-              <input type="time" id="time" name="time" placeholder="TT:MM" class="input-small" required="required"/>
+              <input type="time" id="time" name="time" placeholder="TT:MM" class="input-small" required="required" value={m.map(_.kickoff.toString("HH:mm")).getOrElse("")}/>
               <span class="help-inline"></span>
               </div>
             </div>
@@ -49,7 +50,7 @@ case class Snippets(req: HttpRequest[_]) {
                 <option disabled="disabled" selected="selected" value="">Velg</option>
                 }
                 {Level.all.map(
-                (l: SelectOption) => m.map(
+                (l: KeyAndValue) => m.map(
                   `match` =>
                   if (`match`.level == l.key) <option selected="selected" value={l.key}> {l.display} </option>
                   else <option value={l.key}> {l.display}</option>
@@ -63,20 +64,20 @@ case class Snippets(req: HttpRequest[_]) {
             <div class="controls">
               <label class="radio">
                 {if (isTrio)
-                  <input type="radio" name="refType" id="refTypeDommer" value="dommer" required="required"/>
+                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
                 else
-                  <input type="radio" name="refType" id="refTypeDommer" value="dommer" checked="checked" required="required"/>
+                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
                 }
-                Dommer
+                <div>{Dommer.display}</div>
               </label>
               <span class="help-inline"></span>
             <label class="radio">
               {if (!isTrio)
-              <input type="radio" name="refType" id="refTypeTrio" value="trio"/>
+              <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
               else
-              <input type="radio" name="refType" id="refTypeTrio" value="trio" checked="checked"/>
+              <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
               }
-                Trio
+                <div>{Trio.display}</div>
               </label>
             </div>
             <span class="help-inline"></span>
@@ -94,16 +95,25 @@ case class Snippets(req: HttpRequest[_]) {
           <div class="control-group">
             <label class="control-label" for="refFee">Tildeling</label>
             <div class="controls">
-              {select("appointedRef", "Dommer", m.flatMap(_.appointedRef.map(_.id.toString)), m.map(_.interestedRefs.map(_.toSelectOption)).getOrElse(Nil))}
+              <div class="ref-controls">
+               {select("appointedRef", "Dommer", m.flatMap(_.appointedRef.map(_.id.toString)), m.map(_.interestedRefs.map(_.toSelectOption)).getOrElse(Nil))}
+                <a clas="user-profile" href=""><i class="icon-user"></i></a>
+              </div>
+              <div class="ass-controls">
               {select("appointedAssistant1", "AD1", m.flatMap(_.appointedAssistant1.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
-              {select("appointedAssistant2", "AD2", m.flatMap(_.appointedAssistant2.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
+                <a clas="user-profile" href=""><i class="icon-user"></i></a>
+              </div>
+              <div class="ass-controls">
+                {select("appointedAssistant2", "AD2", m.flatMap(_.appointedAssistant2.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
+                <a clas="user-profile" href=""><i class="icon-user"></i></a>
+              </div>
             </div>
           </div>
 
           <div class="control-group">
             <div class="controls">
               <button type="submit" class="btn btn-primary">Lagre</button>
-              <button type="submit" class="btn btn-danger">Slett</button>
+              <button type="submit" class="btn btn-danger" disabled="disabled">Slett</button>
               <button type="submit" class="btn btn-inverse" disabled="disabled">Send mail</button>
             </div>
           </div>
@@ -111,18 +121,18 @@ case class Snippets(req: HttpRequest[_]) {
     , Some(editMatchJS))
   }
 
-  def select(selectId:String, defaultDisplay:String, selected:Option[String], options:List[SelectOption]) = {
+  def select(selectId:String, defaultDisplay:String, selected:Option[String], options:List[KeyAndValue]) = {
     <select id={selectId} name={selectId}>
       {if(selected.isEmpty)
-        <option disabled="disabled" selected="selected" value="">{defaultDisplay}</option>
+        <option selected="selected" value="">{defaultDisplay}</option>
        else
-        <option disabled="disabled" value="">{defaultDisplay}</option>
+        <option value="">{defaultDisplay}</option>
       }
       {selectOption(selectId, selected, options)}
     </select>
   }
 
-  def selectOption(selectId:String, selected:Option[String], options:List[SelectOption]):NodeSeq = {
+  def selectOption(selectId:String, selected:Option[String], options:List[KeyAndValue]):NodeSeq = {
     options.map(
       o => selected.map(
         s=> if(s == o.key) <option value={o.key} selected="selected">{o.display}</option> else <option value={o.key}>{o.display}</option>)
@@ -156,17 +166,16 @@ case class Snippets(req: HttpRequest[_]) {
           <th>Dommer</th>
           <td>{m.interestedRefButton(userId)}</td>
         </tr>
-         {if(m.refereeType=="trio")
+         {if(m.refereeType==Trio.key)
          <tr>
            <th>Assistentdommer</th>
-           <td>{m.interestedAssistantButton(userId)}</td>
+           <td>{m.interestedAssistant1Button(userId)}</td>
+         </tr>
+           <tr>
+           <th>&nbsp;</th>
+           <td>{m.interestedAssistant2Button(userId)}</td>
          </tr>
          }
-
-        <tr>
-          <th></th>
-          <td></td>
-        </tr>
       </table>
       , Some(viewMatchJS))
   }
@@ -227,7 +236,7 @@ case class Snippets(req: HttpRequest[_]) {
             <select id="level" name="level">
               {if (user.isEmpty || user.get.level.isEmpty)
                 <option selected="selected" value="">Velg</option>}{Level.all.map(
-                (l: SelectOption) => user.map(
+                (l: KeyAndValue) => user.map(
                   u => if (u.level == l.key) <option selected="selected" value={l.key}>
                   {l.display}
                 </option>
@@ -280,6 +289,37 @@ case class Snippets(req: HttpRequest[_]) {
       </div>
     </form>
     ,Some(loginJs))
+  }
+
+  def userView(user:User) = {
+      <table class="table table-condensed table-bordered table-nonfluid">
+        <tr>
+          <th>Dommernummer</th>
+          <td>03-{user.refereeNumber}</td>
+        </tr>
+        <tr>
+          <th>Navn</th>
+          <td>{user.name}</td>
+      </tr>
+      <tr>
+        <th>E-mail</th>
+        <td>{user.email}</td>
+      </tr>
+      <tr>
+        <th>Telefon</th>
+        <td>{user.telephone}</td>
+      </tr>
+      <tr>
+        <th>Nivå</th>
+        <td>{Level.asMap(user.level)}</td>
+      </tr>
+        {if(user.admin)
+        <tr>
+        <th></th>
+          <td>Admin</td>
+        </tr>
+        }
+    </table>
   }
 
   def bootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None) = {
@@ -445,6 +485,7 @@ case class Snippets(req: HttpRequest[_]) {
 
   val editMatchJS = {
     <script src="/js/jquery.validate.min.js" />
+    <script src="/js/additional-methods.min.js" />
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);

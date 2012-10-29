@@ -2,6 +2,7 @@ package data
 
 import org.joda.time.{LocalTime, DateMidnight, DateTime}
 import org.bson.types.ObjectId
+import service.MongoRepository
 
 object MatchValidation {
 
@@ -18,19 +19,30 @@ object MatchValidation {
     def vRefFee = if (refFee.isEmpty) "Dommerhonorar må være satt".failNel
       else if(refFee.exists(!_.isDigit)) "Dommerhonorar må være heltall (%s)".format(refFee).failNel
       else Some(refFee.toInt).successNel
-    def vAssFee = if (assistantFee.isEmpty && refereeType=="trio") "AD-honorar må være satt når det er trio".failNel
+    def vAssFee = if (assistantFee.isEmpty && refereeType==RefereeType.Trio.key) "AD-honorar må være satt når det er trio".failNel
       else if(!assistantFee.forall(_.isDigit)) "AD-honorar må være heltall (%s)".format(assistantFee).failNel
       else if(refereeType!="trio") None.successNel
       else Some(assistantFee.toInt).successNel
 
-    def vAppointedRef = None
-    def vAppointedAssistant1 = None.successNel
-    def vAppointedAssistant2 = None.successNel//TODO Fetch from mongo
+    def vAppointedRef = if(appointedRef.isEmpty) None.successNel else MongoRepository.refereeByUserId(new ObjectId(appointedRef)) match{
+        case None => "Finnes ingen dommer registrert med id %s".format(appointedRef).failNel
+        case Some(s) => Some(s).successNel
+    }
+
+    def vAppointedAssistant1 = if(appointedAssistant1.isEmpty) None.successNel else MongoRepository.refereeByUserId(new ObjectId(appointedAssistant1)) match{
+      case None => "Finnes ingen dommer registrert med id %s".format(appointedAssistant1).failNel
+      case Some(s) => Some(s).successNel
+    }
+
+    def vAppointedAssistant2 = if(appointedAssistant2.isEmpty) None.successNel else MongoRepository.refereeByUserId(new ObjectId(appointedAssistant2)) match{
+      case None => "Finnes ingen dommer registrert med id %s".format(appointedAssistant2).failNel
+      case Some(s) => Some(s).successNel
+    }
 
 
     def vRefereeType =
       if (refereeType.isEmpty) "Dommertype må være valgt".failNel
-      else if(!List("trio","dommer").contains(refereeType)) "%s er en ugyldig dommertype".format(refereeType).failNel
+      else if(!RefereeType.asMap.contains(refereeType)) "%s er en ugyldig dommertype".format(refereeType).failNel
       else refereeType.successNel
 
     def vKickoffDate = {
@@ -51,9 +63,10 @@ object MatchValidation {
     def nonEmpty(s:String) = if(s.trim.isEmpty) None else Some(s)
 
     (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@|
-      vAssFee) {
-      (kickoff, home, away, venue, refType, refFee, assFee) => Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, level, nonEmpty(description), kickoff, refereeType, refFee, assFee,
-        Nil, Nil, None, None, None)
+      vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2) {
+      (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2) =>
+        Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, level, nonEmpty(description), kickoff, refereeType, refFee, assFee,
+        Nil, Nil, appointedRef, appointedAss1, appointedAss2)
     }.either.left.map(_.list)
   }
 

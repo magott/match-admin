@@ -51,6 +51,14 @@ class AdminHandler {
           }
         }
       }
+      case Path(Seg(List("admin", "users", userId))) => req match{
+        case GET(_) =>
+          MongoRepository.userById(new ObjectId(userId)) match{
+            case Some(user) => Ok ~> Html5(Pages(req).user(user))
+            case None => NotFound ~> Html5(Pages(req).notFound(Some("Fant ingen dommer med id %s".format(userId))))
+          }
+        case _ => MethodNotAllowed
+      }
       case _ => NotFound ~> Html5(Pages(req).notFound(Some("Ukjent adminside")))
     }
   }

@@ -13,6 +13,7 @@ class Resources extends Plan{
     case r@Path("/login") => new LoginHandler().handleLogin(r)
     case r@Path("/logout") => new LoginHandler().handleLogout(r)
     case r@Path("/lostPassword") => new LoginHandler().handlePasswordReset(r)
+    case r@Path("/") => HerokuRedirect(r, "/matches")
 
     case Path("/foo") => {
       Ok ~> Html5(
