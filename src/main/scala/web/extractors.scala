@@ -3,6 +3,16 @@ package web
 import unfiltered.request.{Cookies, HttpRequest}
 import service.MongoRepository._
 
+object NotAdmin{
+  def unapply(req:HttpRequest[_]) = {
+    LoggedOnUser.unapply(req) match{
+      case None => Some("authentication needed")
+      case Some(u) if(!u.admin) => Some("access denied")
+      case Some(u) => None
+    }
+  }
+}
+
 object AdminSession {
   def unapply(req: HttpRequest[_]) = {
     SessionId.unapply(req) match{

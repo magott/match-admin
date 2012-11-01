@@ -30,6 +30,10 @@ function editMatchFunctions() {
     if (!isTrio()) {
         trioOff();
     }
+    $('#match-form').change(function(evt) {
+        $('#send-mail').attr("disabled","disabled")
+    });
+    $('#delete-match').click(deleteResource)
 }
 
 function validateMatchForm() {
@@ -232,6 +236,14 @@ function refBtn(button){
     }
 }
 
+function deleteResource(){
+    $.ajax({
+        type: "DELETE",
+        url: window.location.href,
+        success: function(data){window.location.href=data.href;}
+    })
+}
+
 function ajaxinterest(method, url, button, onError){
     $.ajax({
         type: method,
@@ -251,20 +263,4 @@ function setUserLink(){
 
 }
 
-function toggleInterested(button, callback){
-    button.attr("disabled", "disabled");
-    button.removeClass("not-interested");
-    button.addClass("btn-info");
-    button.addClass("interested");
-    button.html("Interesse meldt");
-    button.removeAttr("disabled");
-
-}
-
-function toggleNotInterested(button){
-    button.removeClass("interested");
-    button.removeClass("btn-info");
-    button.addClass("not-interested");
-    button.html("Meld interesse");
-}
 

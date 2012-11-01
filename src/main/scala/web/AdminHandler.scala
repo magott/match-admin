@@ -2,11 +2,11 @@ package web
 
 import unfiltered.request._
 import unfiltered.response._
-import service.MongoRepository
+import service.MongoRepository._
 import org.bson.types.ObjectId
 import unfiltered.response.Html5
 import unfiltered.response.ResponseString
-import data.{MatchValidation, Match, Level, Referee}
+import data.{MatchValidation, Level, Referee}
 import java.util.Date
 import org.joda.time.DateTime
 
@@ -19,24 +19,27 @@ class AdminHandler {
   def handleAdmin(req: HttpRequest[_]) = {
     req match {
       case Path("/admin/matches/new") => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) => Html5(Pages(req).editMatchForm(None))
         case _ => MethodNotAllowed
       }
-      case Path("/admin/matches") => req match{
-        case GET(_) => Html5(Pages(req).listMatches(MongoRepository.listMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/"))
+      case Path(Seg(List("admin", "matches"))) => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
+        case GET(_) => Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/"))
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             case Right(m) => {
-              MongoRepository.saveMatch(m)
+              saveMatch(m)
               HerokuRedirect(req, "/admin/matches")
             }
           }
         }
       }
       case Path(Seg(List("admin","matches", matchId))) => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>{
-          MongoRepository.fullMatch(new ObjectId(matchId)) match {
+          fullMatch(new ObjectId(matchId)) match {
             case None => BadRequest ~> Html5(Pages(req).notFound(Some("Ingen kamp med id " + matchId)))
             case Some(m) => Html5(Pages(req).editMatchForm(Some(m)))
           }
@@ -45,15 +48,20 @@ class AdminHandler {
           matchFromParams(Some(matchId), p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             case Right(m) => {
-              MongoRepository.saveMatch(m)
+              saveMatch(m)
               HerokuRedirect(req, "/admin/matches")
             }
           }
         }
+        case DELETE(_) => {
+          deleteMatch(new ObjectId(matchId))
+          Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
+        }
       }
       case Path(Seg(List("admin", "users", userId))) => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>
-          MongoRepository.userById(new ObjectId(userId)) match{
+          userById(new ObjectId(userId)) match{
             case Some(user) => Ok ~> Html5(Pages(req).user(user))
             case None => NotFound ~> Html5(Pages(req).notFound(Some("Fant ingen dommer med id %s".format(userId))))
           }

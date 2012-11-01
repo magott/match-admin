@@ -14,11 +14,7 @@ object MongoRepository {
 
   val MongoSetting(db) = Properties.envOrNone("MONGOLAB_URI")
 
-  private val where, has = MongoDBObject
-
-  def listMatches = {
-    Nil
-  }
+  private val where, has, by = MongoDBObject
 
   def fullMatch(objId: ObjectId) = {
     db("matches").findOne(where("_id" -> objId)).map(Match.fromMongo(_))
@@ -28,14 +24,20 @@ object MongoRepository {
     db("matches").update(q = m.updateClause, o= m.toMongo, upsert=true, multi=false)
   }
 
+  def deleteMatch(matchId: ObjectId) = {
+    val foo = db("matches").findAndRemove(where("_id" -> matchId))
+    println(foo)
+    foo
+  }
+
   def listMatchesNewerThan(date:DateTime) = {
-    db("matches").find( ("kickoff" $gt date)).map(Match.fromMongo(_))
+    db("matches").find( ("kickoff" $gt date)).sort(by("kickoff" -> 1)).map(Match.fromMongo(_))
 //    db("matches").find(where()).map(Match.fromMongo(_))
   }
 
-  def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId){
+  def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {
     val user = User.fromMongo(db("users").findOneByID(userId).get)
-    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo))
+    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo)).getN == 1
   }
 
   def refInterestedInMatch(matchId: ObjectId, userId:ObjectId):Boolean = {

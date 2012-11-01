@@ -31,7 +31,9 @@ class MatchHandler {
               else InternalServerError
             }
             case Params(RefTypeParam("assRef")) =>{
-              Ok ~> JsonContent ~> ResponseString("""{"newState": "interested"}""")
+              if(assistantInterestedInMatch(new ObjectId(matchId), user.id.get))
+                Ok ~> JsonContent ~> ResponseString("""{"newState": "interested"}""")
+              else InternalServerError
             }
             case _ => BadRequest~> JsonContent ~> ResponseString("""{"error":"Invalid or no reftype specified" }""")
           }
@@ -45,7 +47,9 @@ class MatchHandler {
               else InternalServerError
             }
             case Params(RefTypeParam("assRef")) =>{
-              Ok ~> JsonContent ~> ResponseString("""{"newState": "not-interested"}""")
+              if(cancelInterestAsAssistant(new ObjectId(matchId), user.id.get))
+                Ok ~> JsonContent ~> ResponseString("""{"newState": "not-interested"}""")
+              else InternalServerError  
             }
             case _ => BadRequest~> JsonContent ~> ResponseString("""{"error":"Invalid or no reftype specified" }""")
           }

@@ -59,28 +59,25 @@ case class Snippets(req: HttpRequest[_]) {
               <span class="help-inline"></span>
             </div>
           </div>
-          <div class="control-group">
-            <label class="control-label">Behov</label>
-            <div class="controls">
+          <label class="control-label">Behov</label>
+          <div class="controls">
+            <label class="radio">
+              {if (isTrio)
+                <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
+            else
+                <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
+              }
+              <div>{Dommer.display}</div>
+              </label>
               <label class="radio">
-                {if (isTrio)
-                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
-                else
-                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
-                }
-                <div>{Dommer.display}</div>
+              {if (!isTrio)
+                <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
+            else
+                <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
+              }
+              <div>{Trio.display}</div>
               </label>
               <span class="help-inline"></span>
-            <label class="radio">
-              {if (!isTrio)
-              <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
-              else
-              <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
-              }
-                <div>{Trio.display}</div>
-              </label>
-            </div>
-            <span class="help-inline"></span>
           </div>
           <div class="control-group">
             <label class="control-label" for="refFee">Honorar</label>
@@ -97,15 +94,15 @@ case class Snippets(req: HttpRequest[_]) {
             <div class="controls">
               <div class="ref-controls">
                {select("appointedRef", "Dommer", m.flatMap(_.appointedRef.map(_.id.toString)), m.map(_.interestedRefs.map(_.toSelectOption)).getOrElse(Nil))}
-                <a clas="user-profile" href=""><i class="icon-user"></i></a>
+                <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
               </div>
               <div class="ass-controls">
               {select("appointedAssistant1", "AD1", m.flatMap(_.appointedAssistant1.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
-                <a clas="user-profile" href=""><i class="icon-user"></i></a>
+                <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
               </div>
               <div class="ass-controls">
                 {select("appointedAssistant2", "AD2", m.flatMap(_.appointedAssistant2.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
-                <a clas="user-profile" href=""><i class="icon-user"></i></a>
+                <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
               </div>
             </div>
           </div>
@@ -113,12 +110,29 @@ case class Snippets(req: HttpRequest[_]) {
           <div class="control-group">
             <div class="controls">
               <button type="submit" class="btn btn-primary">Lagre</button>
-              <button type="submit" class="btn btn-danger" disabled="disabled">Slett</button>
-              <button type="submit" class="btn btn-inverse" disabled="disabled">Send mail</button>
+              <button type="button" data-toggle="modal" class="btn btn-danger" data-target="#confirmDelete">Slett</button>
+              <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
             </div>
           </div>
+          {modal}
         </form>
     , Some(editMatchJS))
+  }
+
+  def modal = {
+    <div id="confirmDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Bekreft sletting</h3>
+      </div>
+      <div class="modal-body">
+        <p>Sikker på at du vil slette denne kampen?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Avbryt</button>
+        <button type="button" class="btn btn-danger" id="delete-match">Slett kamp</button>
+      </div>
+    </div>
   }
 
   def select(selectId:String, defaultDisplay:String, selected:Option[String], options:List[KeyAndValue]) = {

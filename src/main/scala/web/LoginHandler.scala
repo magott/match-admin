@@ -18,6 +18,7 @@ class LoginHandler {
   def handleLogin(req: HttpRequest[_]) = {
     req match{
       case Path("/login") => req match{
+        case XForwardProto("http") => HerokuRedirect(req,"login")
         case GET(_) & LoggedOnUser(user)=> Html5(Pages(req).alreadyLoggedIn)
         case GET(_) & Params(qp)=> Html5(Pages(req).login)
         case POST(_) & Params(p) => {
