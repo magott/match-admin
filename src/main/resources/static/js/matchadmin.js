@@ -31,9 +31,10 @@ function editMatchFunctions() {
         trioOff();
     }
     $('#match-form').change(function(evt) {
-        $('#send-mail').attr("disabled","disabled")
+        $('#send-mail').attr("disabled","disabled");
     });
-    $('#delete-match').click(deleteResource)
+    $('#send-mail').click(sendMail);
+    $('#delete-match').click(deleteResource);
 }
 
 function validateMatchForm() {
@@ -241,7 +242,29 @@ function deleteResource(){
         type: "DELETE",
         url: window.location.href,
         success: function(data){window.location.href=data.href;}
-    })
+    });
+}
+
+function sendMail(evt){
+    var button = $(this)
+    button.attr("disabled","disabled");
+    $('.mail-processing').show();
+    $.ajax({
+        type: "POST",
+        url: window.location.href.replace(/\/$/, "")+"/sendmail",
+        success: function(data){
+            $('.mail-processing').hide();
+            $('.mail-success').fadeIn();
+        },
+        error: function(data){
+            $('.mail-processing').hide();
+            $('.mail-failure').fadeIn();
+        },
+        complete: function(){
+            button.removeAttr("disabled");
+            setTimeout(function(){$(".mail-status").fadeOut()}, 5000);
+        }
+    });
 }
 
 function ajaxinterest(method, url, button, onError){

@@ -12,7 +12,7 @@ class MatchHandler {
 
   def handleMatches(req: HttpRequest[_]) = {
     req match {
-      case Path("/matches") => req match {
+      case Path(Seg("matches" :: Nil)) => req match {
         case GET(_) => {
           val matches = listMatchesNewerThan(DateTime.now.withDayOfYear(1))
           Ok ~> Html5(Pages(req).listMatches(matches, "/matches/"))
@@ -49,7 +49,7 @@ class MatchHandler {
             case Params(RefTypeParam("assRef")) =>{
               if(cancelInterestAsAssistant(new ObjectId(matchId), user.id.get))
                 Ok ~> JsonContent ~> ResponseString("""{"newState": "not-interested"}""")
-              else InternalServerError  
+              else InternalServerError
             }
             case _ => BadRequest~> JsonContent ~> ResponseString("""{"error":"Invalid or no reftype specified" }""")
           }

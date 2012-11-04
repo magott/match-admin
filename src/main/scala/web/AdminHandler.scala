@@ -6,9 +6,16 @@ import service.MongoRepository._
 import org.bson.types.ObjectId
 import unfiltered.response.Html5
 import unfiltered.response.ResponseString
-import data.{MatchValidation, Level, Referee}
+import data._
 import java.util.Date
 import org.joda.time.DateTime
+import service.MailgunService
+import scala.Left
+import data.MailAccepted
+import scala.Right
+import scala.Some
+import unfiltered.response.Html5
+import unfiltered.response.ResponseString
 
 class AdminHandler {
 
@@ -56,6 +63,21 @@ class AdminHandler {
         case DELETE(_) => {
           deleteMatch(new ObjectId(matchId))
           Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
+        }
+      }
+      case Path(Seg("admin" :: "matches" :: matchId :: "sendmail" :: Nil)) => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
+        case _ => {
+          fullMatch(new ObjectId(matchId)) match{
+            case Some(m) => MailgunService.sendAppointmentMail(m) match{
+              case MailAccepted(message) => Ok
+              case MailRejected(code, message) =>{
+                println("Mailsending error code %s message %s".format(message,code))
+                InternalServerError
+              }
+            }
+            case None => NotFound ~> JsonContent ~> ResponseString("""{"error":"Fant ikke kampen"}""")
+          }
         }
       }
       case Path(Seg(List("admin", "users", userId))) => req match{

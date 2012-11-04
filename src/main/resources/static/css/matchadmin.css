@@ -14,10 +14,10 @@
 }
 
 button .int {
-    min-width: 100px;
+    min-width: 117px;
 }
 
-.table-nonfluid {
+.table-nonfluid, .warn-nonfluid {
     width: auto;
 }
 
@@ -158,4 +158,13 @@ button[data-state=login] span {
 }
 button[data-state=login] .login-txt{
     display: block;
+}
+.icon-green{
+    background-image:url("../img/glyphicons-halflings-green.png");
+}
+.icon-red{
+    background-image:url("../img/glyphicons-halflings-red.png");
+}
+.icon-spinner{
+    background-image:url("../img/spinner.gif");
 }

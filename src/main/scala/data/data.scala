@@ -71,7 +71,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   }
 
   def buttonTexts = (
-    <span class="int interested-txt">Interesse meldt</span>
+    <span class="int interested-txt"><i class="icon-ok icon-white"/> Interesse meldt</span>
       <span class="int not-interested-txt">Meld interesse</span>
       <span class="int hover-interested-txt">Meld av</span>
       <span class="int assigned-txt">Kampen er tildelt</span>

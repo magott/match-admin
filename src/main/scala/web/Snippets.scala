@@ -112,6 +112,9 @@ case class Snippets(req: HttpRequest[_]) {
               <button type="submit" class="btn btn-primary">Lagre</button>
               <button type="button" data-toggle="modal" class="btn btn-danger" data-target="#confirmDelete">Slett</button>
               <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
+              <span class="mail-status mail-processing fade in hide"><i class="icon-time"/>Sender..</span>
+              <span class="mail-status mail-success fade in hide"><i class="icon-ok icon-green"/>Mail sendt!</span>
+              <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"/>Feil ved sending av mail</span>
             </div>
           </div>
           {modal}
@@ -166,7 +169,7 @@ case class Snippets(req: HttpRequest[_]) {
         </tr>
         <tr>
           <th>Avspark</th>
-          <td>{m.kickoff.toString("dd.MM.yyyy mm:HH")}</td>
+          <td>{m.kickoff.toString("dd.MM.yyyy HH:mm")}</td>
         </tr>
         <tr>
           <th>Honorar dommer</th>
