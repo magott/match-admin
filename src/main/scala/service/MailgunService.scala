@@ -18,7 +18,7 @@ object MailgunService {
 
   def sendAppointmentMail(m:Match) = {
     import MongoRepository._
-    val mailHelper = AppointmentMail(m, cc, "", m.appointedRef.flatMap(x => userById(x.id)), None, None)
+    val mailHelper = AppointmentMail(m, cc, "", m.appointedRef.flatMap(x => userById(x.id)), m.appointedAssistant1.flatMap(x => userById(x.id)), m.appointedAssistant2.flatMap(x => userById(x.id)))
     val mail = MailMessage(mailHelper.from, mailHelper.to, Seq(cc), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
     sendMail(mail)
   }
