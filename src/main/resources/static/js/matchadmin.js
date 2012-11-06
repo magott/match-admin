@@ -262,7 +262,7 @@ function sendMail(evt){
         },
         complete: function(){
             button.removeAttr("disabled");
-            setTimeout(function(){$(".mail-status").fadeOut()}, 5000);
+            setTimeout(function(){$(".mail-status").fadeOut()}, 7000);
         }
     });
 }
@@ -283,6 +283,48 @@ function setUserLink(){
         $(this).next('a').attr('href','/admin/users/'+userId);
     else
         $(this).next('a').removeAttr("href")
+
+}
+
+function validatePasswordResetForm() {
+
+    $('#reset-password-form').validate(
+        {
+            onkeyup: false,
+            errorPlacement:function (error, element) {
+                error.appendTo(element.nextAll("span"));
+            },
+            rules:{
+
+                password:{
+                    required:true,
+                    minlength: 8
+                },
+                password2: {
+                    required:true,
+                    equalTo: "#password"
+                }
+            },
+            messages:{
+                password:{
+                    required:"Passord må fylles ut",
+                    minlength: "Passordet må bestå av minst {0} tegn"
+                },
+                password2:{
+                    required:"Du må gjenta passordet",
+                    minlength: "Passordet må bestå av minst {0} tegn",
+                    equalTo: "Passordene må være like"
+                }
+            },
+            highlight:function (label) {
+                $(label).closest('.control-group').addClass('error');
+            },
+            success:function (label) {
+                label
+                    .removeClass('error')
+                    .closest('.control-group').removeClass('error');
+            }
+        });
 
 }
 

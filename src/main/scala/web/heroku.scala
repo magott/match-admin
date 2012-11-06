@@ -12,6 +12,5 @@ object HerokuRedirect {
     }
   }
 
-  object XForwardProto extends StringHeader("x-forwarded-proto")
-
 }
+object XForwardProto extends StringHeader("x-forwarded-proto")

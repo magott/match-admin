@@ -9,6 +9,7 @@ object MailgunService {
   val mailgunApiKey = Properties.envOrNone("MAILGUN_API_KEY").get
   val mailgunAppName = Properties.envOrElse("MAILGUN_SMTP_LOGIN", "default@app8516420.mailgun.org").split('@')(1)
   val cc = Properties.envOrElse("MAIL_CC", "ofdl@andersen-gott.com")
+  val sender = "Oslo Fotballdomerlaug <treningskamper@gmail.com>"
 
   def sendMail(mail:MailMessage) : MailReceipt = {
     val resp = Http(mailgunUrl << mail.asMailgunParams)()
@@ -19,8 +20,23 @@ object MailgunService {
   def sendAppointmentMail(m:Match) = {
     import MongoRepository._
     val mailHelper = AppointmentMail(m, cc, "", m.appointedRef.flatMap(x => userById(x.id)), m.appointedAssistant1.flatMap(x => userById(x.id)), m.appointedAssistant2.flatMap(x => userById(x.id)))
-    val mail = MailMessage(mailHelper.from, mailHelper.to, Seq(cc), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
+    val mail = MailMessage(sender, mailHelper.to, Seq(cc), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
     sendMail(mail)
+  }
+
+  def sendLostpasswordMail(email:String, resetUrl:String) = {
+    sendMail( MailMessage(
+      sender,
+      email,
+      "Glemt passord",
+      """Du mottar denne e-postem fordi du glemt passordet ditt. Det er sånt som skjer.
+        |Du kan sette nytt passord ved å gå til %s
+        |Passordet må settes innen 30 minutter fra du mottok denne mailen. Dersom du husker passordet ditt eller ikke ønsker å sette nytt passord kan du se bort ifra denne mailen.
+        |
+        |Mvh,
+        |Oslo Fotballdommerlaug
+        |""".stripMargin.format(resetUrl)
+    ))
   }
 
     def mailgunUrl = {

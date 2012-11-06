@@ -8,6 +8,10 @@ case class MailMessage(from:String, to:Seq[String], cc:Seq[String], bcc:Seq[Stri
 
 }
 
+object MailMessage{
+  def apply(from:String, to:String, subject:String, body:String):MailMessage = MailMessage(from, to :: Nil, Nil, Nil, subject, body, None)
+}
+
 sealed trait MailReceipt{
   def isAccepted:Boolean
 }
@@ -20,7 +24,6 @@ case class MailRejected(message:String, errorCode:Int) extends MailReceipt {
 
 case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User], ass1:Option[User], ass2:Option[User]){
   def subject = "Dommer tildelt oppdrag"
-  def from = "Oslo Fotballdomerlaug <treningskamper@gmail.com>"
   def to:Seq[String] = ref.map(_.email).toSeq ++ ass1.map(_.email).toSeq ++ ass2.map(_.email).toSeq
   def text =
     """

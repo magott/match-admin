@@ -6,13 +6,15 @@ import unfiltered.response.{Ok, Html5}
 
 class Resources extends Plan{
 
+  val loginHandler = new LoginHandler()
   def intent = {
     case r@Path(Seg(List("admin", _*))) => new AdminHandler().handleAdmin(r)
     case r@Path(Seg(List("users", _*))) => new UserHandler().handleUser(r)
     case r@Path(Seg(List("matches", _*))) => new MatchHandler().handleMatches(r)
-    case r@Path("/login") => new LoginHandler().handleLogin(r)
-    case r@Path("/logout") => new LoginHandler().handleLogout(r)
-    case r@Path("/lostPassword") => new LoginHandler().handlePasswordReset(r)
+    case r@Path("/login") => loginHandler.handleLogin(r)
+    case r@Path("/logout") => loginHandler.handleLogout(r)
+    case r@Path("/resetpassword") => loginHandler.handlePasswordReset(r)
+    case r@Path("/lostpassword") => loginHandler.handleLostPassword(r)
     case r@Path("/") => HerokuRedirect(r, "/matches")
 
     case Path("/foo") => {

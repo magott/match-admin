@@ -3,24 +3,26 @@ package web
 import unfiltered.request._
 
 import scala.Predef._
-import service.MongoRepository
-import org.mindrot.jbcrypt.BCrypt
+import service.MongoRepository._
 import data.Session
 import unfiltered.response._
-import web.HerokuRedirect.XForwardProto
+import org.mindrot.jbcrypt.BCrypt._
 import unfiltered.response.Html5
 import unfiltered.Cookie
 import scala.Some
 import unfiltered.response.ResponseString
+import service.{MailgunService, ResetPasswordService}
 
 class LoginHandler {
+
+  val passwordService = new ResetPasswordService
 
   def handleLogin(req: HttpRequest[_]) = {
     req match{
       case Path("/login") => req match{
         case XForwardProto("http") => HerokuRedirect(req,"login")
         case GET(_) & LoggedOnUser(user)=> Html5(Pages(req).alreadyLoggedIn)
-        case GET(_) & Params(qp)=> Html5(Pages(req).login)
+        case GET(_) & Params(qp)=> Html5(Pages(req).login(qp))
         case POST(_) & Params(p) => {
           processLogin(req,p)
         }
@@ -36,7 +38,46 @@ class LoginHandler {
   }
 
   def handlePasswordReset(req:HttpRequest[_]) = {
-    Ok ~> ResponseString("To be implemented")
+    req match {
+      case XForwardProto("http") => HerokuRedirect(req, "/restpassword")
+      case GET(_) & Params(IdParam(id)) => {
+        if(passwordService.validResetId(id))
+          Ok ~> Html5(Pages(req).resetPassword)
+        else
+          NotFound ~> Html5(Pages(req).errorPage(<p>Forespørselen er ugyldig eller for gammel. Resetting av passord må gjøres innen 30 minutter fra du mottok e-post med instruksjoner <a href="/lostpassword">Forsøk å resette passordet på nytt</a></p>))
+      }
+      case GET(_) => BadRequest ~> Html5(Pages(req).errorPage(<p>Siden finnes ikke</p>))
+      case POST(_) & Params(IdParam(id)) & Params(PasswordParam(pwd)) => {
+        passwordService.emailForResetId(id) match{
+          case None => BadRequest ~> Html5(Pages(req).errorPage(<p>Kan ikke sette nytt passord, forespørselen er ugyldig eller for gammel. <a href="/lostpassword">Forsøk på nytt</a></p>))
+          case Some(email) => userByEmail(email) match{
+            case None => BadRequest ~> Html5(Pages(req).errorPage(<p>Kan ikke sette nytt passord, forespørselen er ugyldig eller for gammel. <a href="/lostpassword">Forsøk på nytt</a></p>))
+            case Some(user) => {
+              saveUser(user.copy(password = hashpw(pwd, gensalt())))
+              HerokuRedirect(req, "/login?reset")
+            }
+          }
+        }
+      }
+      case _ => BadRequest ~> Html5(Pages(req).errorPage(<p>Ugyldig forespørsel</p>))
+    }
+  }
+
+  def handleLostPassword(req:HttpRequest[_]) = {
+    req match{
+      case GET(_) => Ok ~> Html5(Pages(req).lostPassword)
+      case POST(_) & Params(EmailParam(email)) =>{
+        val resetId = passwordService.generateResetId(email)
+        val Host(host) = req
+        val protocol = XForwardProto.unapply(req).getOrElse("http")
+        val resetUrl = "%s://%s/resetpassword?id=%s".format(protocol,host,resetId)
+        println(resetUrl)
+        if(userByEmail(email).isDefined)
+          MailgunService.sendLostpasswordMail(email, resetUrl)
+        HerokuRedirect(req, "/login?checkmail")
+      }
+
+    }
   }
 
   def processLogin(req:HttpRequest[_], p:Map[String, Seq[String]]) = {
@@ -51,10 +92,10 @@ class LoginHandler {
     if(email.isEmpty || password.isEmpty){
       HerokuRedirect(req, "/login?failed")
     }else{
-      val userOpt = MongoRepository.userByEmail(email.get.head)
-      if(userOpt.exists(user => BCrypt.checkpw(password.get.head,user.password))){
+      val userOpt = userByEmail(email.get.head)
+      if(userOpt.exists(user => checkpw(password.get.head,user.password))){
         val session = Session.newInstance(userOpt.get)
-        MongoRepository.newSession(session)
+        newSession(session)
         SetCookies(userCookie(session.sessionId, rememberMe)) ~> HerokuRedirect(req, "/matches")
       }else{
         HerokuRedirect(req,"/login?failed")
@@ -67,5 +108,9 @@ class LoginHandler {
     SetCookies(Cookie(name="user.sessionId",value="", secure=secure, path=Some("/"), maxAge = Some(0))) ~>
     HerokuRedirect(req, "/matches")
   }
+
+  object IdParam extends Params.Extract("id", Params.first)
+  object PasswordParam extends Params.Extract("password", Params.first)
+  object EmailParam extends Params.Extract("email", Params.first)
 
 }

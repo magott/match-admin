@@ -278,8 +278,14 @@ case class Snippets(req: HttpRequest[_]) {
     )
   }
 
+  def loginMessages(mp:Map[String, Seq[String]]):NodeSeq = {
+    if(mp.contains("failed")) <div class="alert alert-block">Feil brukernavn/passord, prøve igjen</div>
+    else if(mp.contains("reset")) <div class="alert alert-success">Passordet er endret, logg inn med ditt nye passord </div>
+    else Nil
+  }
+
   def loginForm = {
-    bootstrap("Logg inn",
+    <legend>Logg inn</legend>
     <form class="form-horizontal" id="login-form" name="login-form" method="post">
       <div class="control-group">
         <label class="control-label" for="inputEmail">Email</label>
@@ -298,14 +304,18 @@ case class Snippets(req: HttpRequest[_]) {
       <div class="control-group">
         <div class="controls">
           <label class="checkbox">
-            <input type="checkbox" name="remember"/>
+          <input type="checkbox" name="remember"/>
             Husk meg
           </label>
           <button type="submit" class="btn">Sign in</button>
         </div>
       </div>
+      <div class="control-group">
+        <div class="controls">
+          Har du glemt passordet ditt? <a href="/lostpassword">Trykk her</a>
+        </div>
+      </div>
     </form>
-    ,Some(loginJs))
   }
 
   def userView(user:User) = {
@@ -500,6 +510,27 @@ case class Snippets(req: HttpRequest[_]) {
     </table>
   }
 
+  def resetPasswordform =
+    <form class="form-horizontal" id="reset-password-form" method="POST">
+      <legend>Sett nytt passord</legend>
+      <div class="control-group">
+        <label class="control-label" for="password">Passord</label>
+        <div class="controls">
+          <input type="password" id="password" name="password" placeholder="Passord"/>
+          <span class="help-inline"></span>
+        </div>
+        <div class="controls">
+          <input type="password" id="password2" name="password2" placeholder="Gjenta passord"/>
+          <span class="help-inline"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn btn-primary">Sett nytt passord</button>
+        </div>
+      </div>
+    </form>
+
   val editMatchJS = {
     <script src="/js/jquery.validate.min.js" />
     <script src="/js/additional-methods.min.js" />
@@ -537,6 +568,16 @@ case class Snippets(req: HttpRequest[_]) {
 
           """}
       </script>
+  }
+
+  val resetPasswordFormJs = {
+    <script src="/js/jquery.validate.min.js" />
+    <script type="text/javascript">
+      { """
+            $(document).ready(validatePasswordResetForm());
+
+        """}
+    </script>
   }
 
 }

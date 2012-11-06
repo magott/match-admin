@@ -2,7 +2,6 @@ package web
 
 import unfiltered.request._
 import unfiltered.response._
-import web.HerokuRedirect.XForwardProto
 import data.{Session, User}
 import data.MatchValidation.UserValidation
 import scala.Left

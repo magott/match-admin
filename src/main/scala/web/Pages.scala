@@ -34,6 +34,24 @@ case class Pages(req:HttpRequest[_]) {
 
   def userForm(user:Option[User]) = snippets.editUserForm(user)
 
-  def login = snippets.loginForm
+  def login(queryParams:Map[String, Seq[String]]) = bootstrap(
+    "Logg inn",
+      <div>
+       {snippets.loginMessages(queryParams)}
+      </div> ++
+    snippets.loginForm,
+    Some(snippets.loginJs))
 
+  def resetPassword = bootstrap("Sett nytt passord", resetPasswordform, Some(resetPasswordFormJs))
+
+
+  def lostPassword = bootstrap("Glemt passord",
+    <legend>Glemt passord</legend>
+      <p>Fyll inn skjema under. Du vil da motta en e-post med instruksjoner for å sette nytt passord.</p>
+    <form class="form-inline" method="POST">
+      <input type="email" placeholder="Email" name="email"/>
+      <span class="help-inline"></span>
+      <button type="submit" class="btn">Send</button>
+    </form>
+  )
 }

@@ -7,6 +7,7 @@ import unfiltered.response._
 import org.bson.types.ObjectId
 import unfiltered.response.Html5
 import scala.Some
+import java.net.URI
 
 class MatchHandler {
 
