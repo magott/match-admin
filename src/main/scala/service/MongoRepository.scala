@@ -81,7 +81,8 @@ object MongoRepository {
   }
 
   def updateSession(session:Session){
-    db("sessions").update(q=where("sessionId" -> session.sessionId), o=session.toMongo, upsert=false, multi=false)
+    val old = sessionById(session.sessionId).get
+    db("sessions").update(q=where("sessionId" -> session.sessionId), o=session.copy(expires = old.expires).toMongo, upsert=false, multi=false)
   }
 
   def saveUser(user:User) = {

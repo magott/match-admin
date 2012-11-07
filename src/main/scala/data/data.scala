@@ -166,16 +166,18 @@ object User{
     User(None, name, email, telephone, level, false, refereeNumber, new DateTime, password)
 }
 
-case class Session(userId:ObjectId, username:String, name:String, admin:Boolean, sessionId:String){
+case class Session(userId:ObjectId, username:String, name:String, admin:Boolean, sessionId:String, expires:DateTime){
   def toMongo : MongoDBObject = {
-    MongoDBObject("userId" -> userId, "username" -> username, "name" -> name, "admin"->admin, "sessionId" -> sessionId)
+    MongoDBObject("userId" -> userId, "username" -> username, "name" -> name, "admin"->admin, "sessionId" -> sessionId, "expires" -> expires)
   }
 }
 
 object Session{
-  def fromUser(u:User, sessionId:String) = Session(u.id.get, u.name, u.email, u.admin, sessionId)
-  def newInstance(u:User) = fromUser(u, UUID.randomUUID.toString)
-  def fromMongo(m:DBObject):Session = Session(m.as[ObjectId]("userId"), m.as[String]("name"), m.as[String]("username"), m.getAsOrElse[Boolean]("admin",false), m.as[String]("sessionId"))
+  def fromUser(u:User, sessionId:String):Session = fromUser(u, sessionId, DateTime.now.plusDays(1))
+  def fromUser(u:User, sessionId:String, expires:DateTime):Session = Session(u.id.get, u.email, u.name, u.admin, sessionId,expires)
+  def newInstance(u:User, expires:DateTime):Session = fromUser(u, UUID.randomUUID.toString, expires)
+  def newInstance(u:User):Session = newInstance(u, DateTime.now.plusDays(1))
+  def fromMongo(m:DBObject):Session = Session(m.as[ObjectId]("userId"), m.as[String]("name"), m.as[String]("username"), m.getAsOrElse[Boolean]("admin",false), m.as[String]("sessionId"), m.getAsOrElse[DateTime]("expires", DateTime.now))
 }
 
 object Level{

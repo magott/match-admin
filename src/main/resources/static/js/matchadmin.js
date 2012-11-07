@@ -128,7 +128,7 @@ function validateLogin() {
                     email:"E-post-adressen er ikke gyldig"
                 },
                 password:{
-                    required: "Passord må fylles ut",
+                    required: "Passord må fylles ut"
                 }
             },
             highlight:function (label) {

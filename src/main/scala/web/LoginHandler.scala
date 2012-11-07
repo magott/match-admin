@@ -12,6 +12,7 @@ import unfiltered.Cookie
 import scala.Some
 import unfiltered.response.ResponseString
 import service.{MailgunService, ResetPasswordService}
+import org.joda.time.DateTime
 
 class LoginHandler {
 
@@ -94,7 +95,7 @@ class LoginHandler {
     }else{
       val userOpt = userByEmail(email.get.head)
       if(userOpt.exists(user => checkpw(password.get.head,user.password))){
-        val session = Session.newInstance(userOpt.get)
+        val session = if(rememberMe) Session.newInstance(userOpt.get, DateTime.now.plusYears(1)) else Session.newInstance(userOpt.get)
         newSession(session)
         SetCookies(userCookie(session.sessionId, rememberMe)) ~> HerokuRedirect(req, "/matches")
       }else{

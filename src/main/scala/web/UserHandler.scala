@@ -11,6 +11,7 @@ import scala.Some
 import unfiltered.response.ResponseString
 import service.MongoRepository
 import org.bson.types.ObjectId
+import org.joda.time.DateTime
 
 class UserHandler {
 

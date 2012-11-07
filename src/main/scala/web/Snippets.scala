@@ -229,14 +229,14 @@ case class Snippets(req: HttpRequest[_]) {
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label" for="inputEmail">Email</label>
+          <label class="control-label" for="email">Email</label>
           <div class="controls">
             <input type="email" id="email" placeholder="Email" name="email" value={user.map(_.email).getOrElse("")}/>
             <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label" for="inputPassword">Passord</label>
+          <label class="control-label" for="password">Passord</label>
           <div class="controls">
             <input type="password" id="password" name="password" placeholder="Passord"/>
             <span class="help-inline"></span>
@@ -252,12 +252,14 @@ case class Snippets(req: HttpRequest[_]) {
           <div class="controls">
             <select id="level" name="level">
               {if (user.isEmpty || user.get.level.isEmpty)
-                <option selected="selected" value="">Velg</option>}{Level.all.map(
+                <option selected="selected" value="">Velg</option>}
+              {Level.all.map(
                 (l: KeyAndValue) => user.map(
                   u => if (u.level == l.key) <option selected="selected" value={l.key}>
                   {l.display}
                 </option>
-                else <option>
+                else
+                <option value={l.key}>
                   {l.display}
                 </option>
               ).getOrElse(<option value={l.key}>
@@ -308,6 +310,11 @@ case class Snippets(req: HttpRequest[_]) {
             Husk meg
           </label>
           <button type="submit" class="btn">Sign in</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          Har du ingen bruker? <a href="/users/signup">Registrer deg</a>
         </div>
       </div>
       <div class="control-group">
