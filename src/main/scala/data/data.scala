@@ -13,6 +13,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]){
 
+  def teams:String = "%s - %s".format(homeTeam, awayTeam)
   def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
   def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
   def areAssistantsAppointed = appointedAssistant1.isDefined && appointedAssistant2.isDefined

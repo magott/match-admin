@@ -9,6 +9,10 @@ import data.RefereeType.{Dommer, Trio}
 
 case class Snippets(req: HttpRequest[_]) {
 
+  val Host(host) = req
+  val protocol = XForwardProto.unapply(req).getOrElse("http")
+  val baseUrl = "%s://%s".format(protocol, host)
+
   def editMatch(m: Option[Match]) = {
     val isTrio = m.isDefined && m.get.refereeType==Trio.key
     bootstrap("Kamp",
@@ -119,9 +123,7 @@ case class Snippets(req: HttpRequest[_]) {
           </div>
           {
             if(m.isDefined){
-              val Host(host) = req
-              val protocol = XForwardProto.unapply(req).getOrElse("http")
-              val matchUrl = "%s://%s/matches/%s".format(protocol,host,m.get.id.get.toString)
+              val matchUrl = "%s/matches/%s".format(baseUrl,m.get.id.get.toString)
               <div class="row">
                 <div class="span4 offset3">
                 <a href={"http://www.facebook.com/sharer.php?u=%s".format(matchUrl)}>Legg ut på Facebook</a>
@@ -169,7 +171,7 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   def viewMatch(m:Match, userId:Option[String]) = {
-    bootstrap("Kamp",
+    bootstrap(m.teams,
        <table class="table table-condensed table-bordered table-nonfluid">
         <tr>
           <th>Kamp</th>
@@ -206,7 +208,11 @@ case class Snippets(req: HttpRequest[_]) {
          </tr>
          }
       </table>
-      , Some(viewMatchJS))
+      , Some(viewMatchJS),
+        (<meta property="og:title" content={"%s: %s".format(RefereeType.asMap(m.refereeType), m.teams)} />
+          <meta property="og:description" content={"%s trengs til kamp %s den %s klokken %s".format(RefereeType.asMap(m.refereeType), m.teams, m.kickoff.toString("dd.MM"), m.kickoff.toString("HH.mm"))}/>
+          <meta property="og:image" content={"%s/img/ofdl_logo_big.jpg".format(baseUrl)} />)
+    )
   }
 
   def editUserForm(user: Option[User]) = {
@@ -288,7 +294,6 @@ case class Snippets(req: HttpRequest[_]) {
           </div>
         </div>
       </form>, Some(userFormJS)
-
     )
   }
 
@@ -368,7 +373,7 @@ case class Snippets(req: HttpRequest[_]) {
     </table>
   }
 
-  def bootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None) = {
+  def bootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None, meta:NodeSeq = Nil) = {
 
     <html lang="no">
       <head>
@@ -377,6 +382,7 @@ case class Snippets(req: HttpRequest[_]) {
           {title}
         </title>
 
+        {meta}
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <meta name="description" content=" "/>
         <meta name="author" content=" "/>
