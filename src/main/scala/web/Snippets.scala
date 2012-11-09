@@ -1,7 +1,7 @@
 package web
 
 import xml.NodeSeq
-import unfiltered.request.HttpRequest
+import unfiltered.request.{Host, RequestHeader, HttpRequest}
 import data._
 import data.KeyAndValue
 import scala.Some
@@ -117,6 +117,18 @@ case class Snippets(req: HttpRequest[_]) {
               <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"/>Feil ved sending av mail</span>
             </div>
           </div>
+          {
+            if(m.isDefined){
+              val Host(host) = req
+              val protocol = XForwardProto.unapply(req).getOrElse("http")
+              val matchUrl = "%s://%s/matches/%s".format(protocol,host,m.get.id.get.toString)
+              <div class="row">
+                <div class="span4 offset3">
+                <a href={"http://www.facebook.com/sharer.php?u=%s".format(matchUrl)}>Legg ut på Facebook</a>
+                  </div>
+              </div>
+            }
+          }
           {modal}
         </form>
     , Some(editMatchJS))
