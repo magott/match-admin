@@ -177,7 +177,7 @@ object Session{
   def fromUser(u:User, sessionId:String, expires:DateTime):Session = Session(u.id.get, u.email, u.name, u.admin, sessionId,expires)
   def newInstance(u:User, expires:DateTime):Session = fromUser(u, UUID.randomUUID.toString, expires)
   def newInstance(u:User):Session = newInstance(u, DateTime.now.plusDays(1))
-  def fromMongo(m:DBObject):Session = Session(m.as[ObjectId]("userId"), m.as[String]("name"), m.as[String]("username"), m.getAsOrElse[Boolean]("admin",false), m.as[String]("sessionId"), m.getAsOrElse[DateTime]("expires", DateTime.now))
+  def fromMongo(m:DBObject):Session = Session(m.as[ObjectId]("userId"), m.as[String]("username"), m.as[String]("name"), m.getAsOrElse[Boolean]("admin",false), m.as[String]("sessionId"), m.getAsOrElse[DateTime]("expires", DateTime.now))
 }
 
 object Level{

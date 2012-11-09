@@ -302,16 +302,16 @@ case class Snippets(req: HttpRequest[_]) {
     <legend>Logg inn</legend>
     <form class="form-horizontal" id="login-form" name="login-form" method="post">
       <div class="control-group">
-        <label class="control-label" for="inputEmail">Email</label>
+        <label class="control-label" for="inputEmail">E-post</label>
         <div class="controls">
-          <input type="text" id="email" name="email" placeholder="Email"/>
+          <input type="text" id="email" name="email" placeholder="E-post"/>
           <span class="help-inline"></span>
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label" for="inputPassword">Password</label>
+        <label class="control-label" for="inputPassword">Passord</label>
         <div class="controls">
-          <input type="password" id="password" name="password" placeholder="Password"/>
+          <input type="password" id="password" name="password" placeholder="Passord"/>
           <span class="help-inline"></span>
         </div>
       </div>

@@ -71,7 +71,8 @@ class UserHandler {
     userFromParams(params).right.map{u:User=>
       val updatedUser = u.copy(id=Some(new ObjectId(userId)))
       MongoRepository.saveUser(updatedUser)
-      MongoRepository.updateSession(Session.fromUser(updatedUser, sessionId))
+      val currentSession = MongoRepository.sessionById(sessionId).get
+      MongoRepository.updateUserSessions(currentSession.username, updatedUser)
       sessionId
     }
   }
