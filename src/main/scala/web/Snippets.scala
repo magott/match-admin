@@ -409,7 +409,7 @@ case class Snippets(req: HttpRequest[_]) {
     <![endif]-->
 
         <!-- Le fav and touch icons -->
-        <link rel="shortcut icon" href="../assets/ico/favicon.ico"/>
+        <link rel="shortcut icon" href="/favicon.ico"/>
       </head>
 
       <body>
