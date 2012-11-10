@@ -77,6 +77,12 @@ object MatchValidation {
       import scalaz._
       import Scalaz.{id => _, _}
 
+      def vId = {
+        MongoRepository.userByEmail(email) match {
+          case Some(user) if(user.id != id) => "Det finnes alt en bruker registrert med %s".format(email).failNel
+          case _ => id.successNel
+        }
+      }
       def vPassword = if (password.isEmpty || confirmPassword.isEmpty) "Passord må fylles ut".failNel
         else if(password != confirmPassword) "Passordene er ikke like".failNel
         else if(password.length < 7) "Passord må være på minst 7 tegn".failNel
@@ -96,8 +102,8 @@ object MatchValidation {
         else if(Level.asMap.get(level).isEmpty) "Dommernivå er ugyldig".failNel
         else level.successNel
 
-      (vName |@| vEmail |@| vTelephone |@| vLevel |@| vRefNumber |@|vPassword){
-        (name, mail, tel, level, refNo, cryptPwd) => User(id, name, mail, tel, level, false, refNo, DateTime.now, cryptPwd)
+      (vId |@| vName |@| vEmail |@| vTelephone |@| vLevel |@| vRefNumber |@|vPassword){
+        (oid, name, mail, tel, level, refNo, cryptPwd) => User(oid, name, mail, tel, level, false, refNo, DateTime.now, cryptPwd)
       }.either.left.map(_.list)
     }
   }

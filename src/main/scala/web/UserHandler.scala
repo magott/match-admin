@@ -26,7 +26,7 @@ class UserHandler {
               case Right(sessionId) => {
                 SetCookies(userCookie(req,sessionId)) ~> HerokuRedirect(req,"/matches")
               }
-              case Left(errors) => BadRequest ~> ResponseString(errors.mkString("\n"))
+              case Left(errors) => BadRequest ~> Html5(Pages(req).errorPage(errors.map( e=> <p>{e}</p>)))
             }
           }
         }
@@ -59,7 +59,7 @@ class UserHandler {
   }
 
   def handleSignup(params: Map[String, Seq[String]]) : Either[List[String], String] = {
-    userFromParams(params).right.map{ u:User =>
+    userFromParams(params, None).right.map{ u:User =>
         val user = MongoRepository.saveUser(u)
         val session = Session.newInstance(user.get)
         MongoRepository.newSession(session)
@@ -68,8 +68,8 @@ class UserHandler {
     }
 
   def handleEditUser(params: Map[String, Seq[String]], userId:String, sessionId:String) : Either[List[String], String] = {
-    userFromParams(params).right.map{u:User=>
-      val updatedUser = u.copy(id=Some(new ObjectId(userId)))
+    userFromParams(params, Some(userId)).right.map{u:User=>
+      val updatedUser = u.copy(admin = MongoRepository.userById(new ObjectId(userId)).get.admin)
       MongoRepository.saveUser(updatedUser)
       val currentSession = MongoRepository.sessionById(sessionId).get
       MongoRepository.updateUserSessions(currentSession.username, updatedUser)
@@ -78,9 +78,9 @@ class UserHandler {
   }
 
 
-  def userFromParams(params: Map[String, Seq[String]]): Either[List[String], User] = {
+  def userFromParams(params: Map[String, Seq[String]], userId:Option[String]): Either[List[String], User] = {
     def valueOrBlank(key:String) :String = params.getOrElse(key,List("")).head
-    val validation = UserValidation.validate(None,  valueOrBlank("name"), valueOrBlank("email"), valueOrBlank("telephone"), valueOrBlank("level"), valueOrBlank("refNumber"),valueOrBlank("password"), valueOrBlank("password2"))
+    val validation = UserValidation.validate(userId.map(i=>new ObjectId(i)),  valueOrBlank("name"), valueOrBlank("email"), valueOrBlank("telephone"), valueOrBlank("level"), valueOrBlank("refNumber"),valueOrBlank("password"), valueOrBlank("password2"))
     validation
   }
 

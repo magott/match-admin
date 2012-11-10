@@ -134,10 +134,10 @@ object Referee{
 case class User(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, admin:Boolean, refereeNumber:Int, created:DateTime, password:String){
   def toMongo  = {
     val builder = MongoDBObject.newBuilder
-    if(id.isDefined){
+    if(id.isDefined)
       builder += "_id" -> id.get
-      builder += "admin" -> admin
-    }
+
+    builder += "admin" -> admin
     builder += "name" -> name
     builder += "email" -> email
     builder += "tel" -> telephone
