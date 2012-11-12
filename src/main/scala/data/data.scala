@@ -67,7 +67,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedAssistant1.isDefined && appointedAssistant2.isEmpty){
       interestedButton(userId, "assRef", isInterestedAssistant)
     }else{
-      <div>{appointedAssistant1.map(_.name).getOrElse("")}</div>
+      <div>{appointedAssistant2.map(_.name).getOrElse("")}</div>
     }
   }
 
