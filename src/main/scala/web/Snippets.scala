@@ -63,25 +63,27 @@ case class Snippets(req: HttpRequest[_]) {
               <span class="help-inline"></span>
             </div>
           </div>
-          <label class="control-label">Behov</label>
-          <div class="controls">
-            <label class="radio">
-              {if (isTrio)
-                <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
-            else
-                <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
-              }
-              <div>{Dommer.display}</div>
-              </label>
+          <div class="control-group">
+            <label class="control-label">Behov</label>
+            <div class="controls">
               <label class="radio">
-              {if (!isTrio)
-                <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
-            else
-                <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
-              }
-              <div>{Trio.display}</div>
-              </label>
-              <span class="help-inline"></span>
+                {if (isTrio)
+                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
+              else
+                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
+                }
+                <div>{Dommer.display}</div>
+                </label>
+                <label class="radio">
+                {if (!isTrio)
+                  <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
+              else
+                  <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
+                }
+                <div>{Trio.display}</div>
+                </label>
+                <span class="help-inline"></span>
+            </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="refFee">Honorar</label>
@@ -389,7 +391,6 @@ case class Snippets(req: HttpRequest[_]) {
 
         <!-- Le styles -->
         <link href="/css/bootstrap.css" rel="stylesheet"/>
-        <link href="/css/matchadmin.css" rel="stylesheet"/>
         <style type="text/css">
           {"""
           body{
@@ -402,6 +403,7 @@ case class Snippets(req: HttpRequest[_]) {
            """}
         </style>
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
+        <link href="/css/matchadmin.css" rel="stylesheet"/>
 
         <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
