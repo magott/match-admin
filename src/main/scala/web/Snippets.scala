@@ -462,7 +462,7 @@ case class Snippets(req: HttpRequest[_]) {
             }
             }
             <ul class="nav">
-              <li class="active">
+              <li>
                 <a href="/matches">Kamper</a>
               </li>
               {if(sessOpt.isDefined){
