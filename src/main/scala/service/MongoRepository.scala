@@ -76,6 +76,8 @@ object MongoRepository {
     session
   }
 
+  def allUsers = db("users").find().map(User.fromMongo)
+
   def newSession(session:Session){
     db("sessions").save(session.toMongo)
   }

@@ -80,6 +80,10 @@ class AdminHandler {
           }
         }
       }
+      case Path(Seg("admin" :: "users" :: Nil)) => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
+        case GET(_) => Ok ~> Html5(Pages(req).userList(allUsers))
+      }
       case Path(Seg(List("admin", "users", userId))) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>

@@ -558,6 +558,32 @@ case class Snippets(req: HttpRequest[_]) {
       </div>
     </form>
 
+  def listUserTable(users:Iterator[User]) =
+    <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>Dnr</th>
+          <th>Navn</th>
+          <th>Telefon</th>
+          <th>Nivå</th>
+          <th>E-post</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+        users.map(u =>
+        <tr>
+          <td>{u.refereeNumber}</td>
+          <td><a href={"/admin/users/"+u.id.get.toString}>{u.name}</a></td>
+          <td>{u.telephone}</td>
+          <td>{Level.asMap(u.level)}</td>
+          <td>{u.email}</td>
+        </tr>
+        )
+        }
+      </tbody>
+    </table>
+
   val editMatchJS = {
     <script src="/js/jquery.validate.min.js" />
     <script src="/js/additional-methods.min.js" />
