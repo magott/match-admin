@@ -199,6 +199,7 @@ object Level{
   case object Women2Div extends KeyAndValue("wom2div", "2. div kvinner")
   case object Women3Div extends KeyAndValue("wom3div", "3. div kvinner")
   case object Women4Div extends KeyAndValue("wom4div", "4. div kvinner")
+  case object Boys19IK extends KeyAndValue("g19ik", "Gutter 19 Interkrets")
   case object Boys19 extends KeyAndValue("g19", "Gutter 19")
   case object Boys16 extends KeyAndValue("g16", "Gutter 16")
   case object Boys15 extends KeyAndValue("g15", "Gutter 15")
@@ -210,7 +211,7 @@ object Level{
   case object Girls14 extends KeyAndValue("j14", "Jenter 14")
   case object Girls13 extends KeyAndValue("j13", "Jenter 13")
 
-  val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men8Div, Boys19, Boys16, Boys15, Boys14, Boys13,
+  val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men8Div, Boys19IK, Boys19, Boys16, Boys15, Boys14, Boys13,
     WomenPrem, Women1Div, Women2Div, Women3Div, Women4Div, Girls19, Girls16, Girls15, Girls14, Girls13)
   val asMap = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
 }
