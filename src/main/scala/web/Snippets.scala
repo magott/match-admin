@@ -268,7 +268,7 @@ case class Snippets(req: HttpRequest[_]) {
         </div>
 
         <div class="control-group">
-          <label class="control-label" for="level">Nivå dømt 2012</label>
+          <label class="control-label" for="level">Høyeste nivå som hoveddommer 2012</label>
           <div class="controls">
             <select id="level" name="level">
               {if (user.isEmpty || user.get.level.isEmpty)
