@@ -185,7 +185,7 @@ case class Snippets(req: HttpRequest[_]) {
         </tr>
         <tr>
           <th>Avspark</th>
-          <td>{m.kickoff.toString("dd.MM.yyyy HH:mm")}</td>
+          <td>{m.kickoffDateTimeString}</td>
         </tr>
         <tr>
           <th>Honorar dommer</th>
@@ -422,8 +422,7 @@ case class Snippets(req: HttpRequest[_]) {
 
           {body}<footer>
           <p>
-            &copy;
-            Morten Andersen-Gott 2012</p>
+            <a href="http://www.andersen-gott.com">Morten Andersen-Gott</a> &copy; 2012</p>
         </footer>
 
         </div> <!--/.fluid-container-->
@@ -436,6 +435,19 @@ case class Snippets(req: HttpRequest[_]) {
         {if(bottom.isDefined)
           bottom.get
         }
+        <script type="text/javascript">
+          {"""
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-29904717-2']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+          """}
+        </script>
 
       </body>
     </html>
@@ -521,7 +533,7 @@ case class Snippets(req: HttpRequest[_]) {
         {
           matches.map( m =>
             <tr>
-            <td>{m.kickoff.toString("dd.MM.yyyy HH:mm")}</td>
+            <td>{m.kickoffDateTimeString}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
               <td>{m.venue}</td>

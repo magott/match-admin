@@ -38,7 +38,7 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
       |Assistentdommer: %s (%s kroner)
     """.stripMargin.format(m.homeTeam, m.awayTeam,
           m.venue,
-          m.kickoff.toString("dd.MM.yyyy HH:mm"),
+          m.kickoffDateTimeString,
           m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt"), m.refFee.getOrElse("-"),
           m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt"), m.assistantFee.getOrElse("-"),
           m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt"), m.assistantFee.getOrElse("-")
@@ -58,7 +58,7 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
         </tr>
         <tr>
           <th>Avspark</th>
-          <td>{m.kickoff.toString("dd.MM.yyyy HH:mm")}</td>
+          <td>{m.kickoffDateTimeString}</td>
         </tr>
         <tr>
           <th>Honorar dommer</th>
