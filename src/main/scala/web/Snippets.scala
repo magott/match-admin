@@ -570,7 +570,8 @@ case class Snippets(req: HttpRequest[_]) {
       </div>
     </form>
 
-  def listUserTable(users:Iterator[User]) =
+  def listUserTable(users:List[User]) =
+    <div>{users.size} registrerte brukere</div> ++
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>

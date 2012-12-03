@@ -15,7 +15,7 @@ case class Pages(req:HttpRequest[_]) {
 
   def listMatches(m: Iterator[Match], matchLinkPrefix:String) = bootstrap("Kamper", matchList(m, matchLinkPrefix))
 
-  def userList(users:Iterator[User]) = bootstrap("Brukere", listUserTable(users))
+  def userList(users:List[User]) = bootstrap("Brukere", listUserTable(users))
 
   def alreadyLoggedIn = {
     bootstrap("Logg inn", <div class="well">Du er alt logget inn. Vil du logge ut, så <a href="/logout">trykk her</a></div>)
