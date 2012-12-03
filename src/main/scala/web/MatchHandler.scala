@@ -2,7 +2,7 @@ package web
 
 import unfiltered.request._
 import service.MongoRepository._
-import org.joda.time.DateTime
+import org.joda.time.{DateMidnight, DateTime}
 import unfiltered.response._
 import org.bson.types.ObjectId
 import unfiltered.response.Html5
@@ -15,7 +15,7 @@ class MatchHandler {
     req match {
       case Path(Seg("matches" :: Nil)) => req match {
         case GET(_) => {
-          val matches = listMatchesNewerThan(DateTime.now.withDayOfYear(1))
+          val matches = listUpcomingMatches
           Ok ~> Html5(Pages(req).listMatches(matches, "/matches/"))
         }
       }

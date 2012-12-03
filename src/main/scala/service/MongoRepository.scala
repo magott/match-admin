@@ -6,7 +6,7 @@ import org.bson.types.ObjectId
 import com.mongodb.casbah.Imports._
 import data.{Session, Referee, User, Match}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
-import org.joda.time.DateTime
+import org.joda.time.{DateMidnight, DateTime}
 
 object MongoRepository {
 
@@ -26,13 +26,15 @@ object MongoRepository {
 
   def deleteMatch(matchId: ObjectId) = {
     val foo = db("matches").findAndRemove(where("_id" -> matchId))
-    println(foo)
     foo
+  }
+
+  def listUpcomingMatches = {
+    listMatchesNewerThan(DateMidnight.now.toDateTime)
   }
 
   def listMatchesNewerThan(date:DateTime) = {
     db("matches").find( ("kickoff" $gt date)).sort(by("kickoff" -> 1)).map(Match.fromMongo(_))
-//    db("matches").find(where()).map(Match.fromMongo(_))
   }
 
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {
@@ -76,7 +78,7 @@ object MongoRepository {
     session
   }
 
-  def allUsers = db("users").find().map(User.fromMongo)
+  def allUsers = db("users").find().map(User.fromMongo).toList
 
   def newSession(session:Session){
     db("sessions").save(session.toMongo)
