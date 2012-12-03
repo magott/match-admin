@@ -18,11 +18,6 @@ import unfiltered.response.Html5
 import unfiltered.response.ResponseString
 
 class AdminHandler {
-
-  val ref = Referee(new ObjectId("50799771040279cbe43df564"), "Morten Andersen-Gott", Level.Men3Div.key)
-  val ref2 = Referee(new ObjectId(new Date()), "Fjottlars Trulsen", Level.Girls14.key)
-  val refs = ref :: ref2 :: Nil
-
   def handleAdmin(req: HttpRequest[_]) = {
     req match {
       case Path("/admin/matches/new") => req match{
@@ -32,7 +27,7 @@ class AdminHandler {
       }
       case Path(Seg(List("admin", "matches"))) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
-        case GET(_) => Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/"))
+        case GET(_) => Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.minusMonths(6)), "/admin/matches/"))
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
