@@ -13,7 +13,7 @@ case class Pages(req:HttpRequest[_]) {
     editMatch(m)
   }
 
-  def listMatches(m: Iterator[Match], matchLinkPrefix:String) = bootstrap("Kamper", matchList(m, matchLinkPrefix))
+  def listMatches(m: Seq[Match], matchLinkPrefix:String) = bootstrap("Kamper", matchList(m, matchLinkPrefix), None, <meta property="og:description" content={"%s ledige dommeroppdrag ".format(m.foldLeft(0)(_ + _.availableCount) )}/>)
 
   def userList(users:List[User]) = bootstrap("Brukere", listUserTable(users))
 

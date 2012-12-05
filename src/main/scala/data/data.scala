@@ -72,6 +72,13 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     }
   }
 
+  def availableCount:Int = {
+    appointedRef.map(_=>0).getOrElse(1) +
+      appointedAssistant1.map(_ => 0).getOrElse(if(refereeType==RefereeType.Trio.key) 1 else 0) +
+      appointedAssistant2.map(_ => 0).getOrElse(if(refereeType==RefereeType.Trio.key) 1 else 0)
+  }
+
+
   def buttonTexts = (
     <span class="int interested-txt"><i class="icon-ok icon-white"/> Interesse meldt</span>
       <span class="int not-interested-txt">Meld interesse</span>

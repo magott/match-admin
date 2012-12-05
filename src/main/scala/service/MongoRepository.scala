@@ -29,12 +29,12 @@ object MongoRepository {
     foo
   }
 
-  def listUpcomingMatches = {
+  def listUpcomingMatches : Seq[Match] = {
     listMatchesNewerThan(DateMidnight.now.toDateTime)
   }
 
-  def listMatchesNewerThan(date:DateTime) = {
-    db("matches").find( ("kickoff" $gt date)).sort(by("kickoff" -> 1)).map(Match.fromMongo(_))
+  def listMatchesNewerThan(date:DateTime) : Seq[Match]= {
+    db("matches").find( ("kickoff" $gt date)).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
   }
 
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {

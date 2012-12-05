@@ -213,7 +213,7 @@ case class Snippets(req: HttpRequest[_]) {
       , Some(viewMatchJS),
         (<meta property="og:title" content={"%s: %s".format(RefereeType.asMap(m.refereeType), m.teams)} />
           <meta property="og:description" content={"%s trengs til kamp %s den %s klokken %s".format(RefereeType.asMap(m.refereeType), m.teams, m.kickoff.toString("dd.MM"), m.kickoff.toString("HH.mm"))}/>
-          <meta property="og:image" content={"%s/img/ofdl_logo_big.jpg".format(baseUrl)} />)
+          )
     )
   }
 
@@ -383,11 +383,12 @@ case class Snippets(req: HttpRequest[_]) {
         <title>
           {title}
         </title>
-
+        <meta property="og:image" content={"%s/img/ofdl_logo_big.jpg".format(baseUrl)} />
+        <meta property="og:title" content={title} />
         {meta}
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <meta name="description" content=" "/>
-        <meta name="author" content=" "/>
+        <meta name="description" content=""/>
+        <meta name="author" content="Morten Andersen-Gott"/>
 
         <!-- Le styles -->
         <link href="/css/bootstrap.css" rel="stylesheet"/>
@@ -516,7 +517,7 @@ case class Snippets(req: HttpRequest[_]) {
 
   }
 
-  def matchList(matches:Iterator[Match], matchLinkPath:String) = {
+  def matchList(matches:Seq[Match], matchLinkPath:String) = {
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
