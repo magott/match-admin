@@ -75,7 +75,7 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
         {if(m.refereeType==RefereeType.Trio.key)(
         <tr>
           <th>Assistentdommer 1</th>
-          <td>{m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}</td>
+          <td>{m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt")}</td>
         </tr>
         <tr>
           <th>Assistentdommer 2</th>
