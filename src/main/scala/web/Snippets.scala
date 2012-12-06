@@ -6,6 +6,7 @@ import data._
 import data.KeyAndValue
 import scala.Some
 import data.RefereeType.{Dommer, Trio}
+import org.joda.time.DateTime
 
 case class Snippets(req: HttpRequest[_]) {
 
@@ -533,7 +534,7 @@ case class Snippets(req: HttpRequest[_]) {
       <tbody>
         {
           matches.map( m =>
-            <tr>
+            <tr class={if(m.kickoff.isBefore(DateTime.now))"muted" else ""}>
             <td>{m.kickoffDateTimeString}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
