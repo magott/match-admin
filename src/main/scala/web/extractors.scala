@@ -2,6 +2,7 @@ package web
 
 import unfiltered.request.{Cookies, HttpRequest}
 import service.MongoRepository._
+import data.{User, Session}
 
 object NotAdmin{
   def unapply(req:HttpRequest[_]) = {
@@ -26,29 +27,19 @@ object AdminSession {
 }
 
 object UserSession {
-  def unapply(req: HttpRequest[_]) = {
-    SessionId.unapply(req) match{
-      case Some(sessionId) => sessionById(sessionId)
-      case None => None
-    }
+  def unapply(req: HttpRequest[_]) : Option[Session] = {
+    SessionId.unapply(req).flatMap(sessionId => sessionById(sessionId))
   }
 }
 
 object LoggedOnUser {
-  def unapply(req: HttpRequest[_]) = {
-    SessionId.unapply(req) match{
-      case Some(sessionId) => userForSession(sessionId)
-      case None => None
-    }
+  def unapply(req: HttpRequest[_]) : Option[User] = {
+    SessionId.unapply(req).flatMap(sessionId => userForSession(sessionId))
   }
 }
 
 object SessionId{
-  def unapply[T](req: HttpRequest[T]) = {
-    val cookies = Cookies.unapply(req).get
-    cookies("user.sessionId") match {
-      case Some(c) => Some(c.value)
-      case None => None
-    }
+  def unapply[T](req: HttpRequest[T]):Option[String] = {
+   Cookies.unapply(req).flatMap(cookies => cookies("user.sessionId").map(_.value))
   }
 }
