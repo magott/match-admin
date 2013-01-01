@@ -16,7 +16,7 @@ class MatchHandler {
       case Path(Seg("matches" :: Nil)) => req match {
         case GET(_) => {
           val matches = listUpcomingMatches
-          Ok ~> Html5(Pages(req).listMatches(matches, "/matches/"))
+          Ok ~> Html5(Pages(req).listMatches(matches, "/matches/", UserSession.unapply(req).map(_.userId.toString)))
         }
       }
       case (Path(Seg("matches" :: matchId :: Nil))) => req match {

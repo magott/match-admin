@@ -518,7 +518,10 @@ case class Snippets(req: HttpRequest[_]) {
 
   }
 
-  def matchList(matches:Seq[Match], matchLinkPath:String) = {
+  def matchList(matches:Seq[Match], matchLinkPath:String, userId:Option[String]) = {
+    def interestIndicator(interested: String => Boolean) = {
+      userId.map(u => if (interested(u)) <span>&nbsp;<i class="icon-ok icon-green"/></span>).getOrElse("")
+    }
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -534,14 +537,14 @@ case class Snippets(req: HttpRequest[_]) {
       <tbody>
         {
           matches.map( m =>
-            <tr class={if(m.kickoff.isBefore(DateTime.now))"muted" else ""}>
+            <tr class={if(m.kickoff.isBefore(DateTime.now))"muted " else ""}>
             <td>{m.kickoffDateTimeString}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
               <td>{m.venue}</td>
-              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}</td>
-              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
-              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
+              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}{interestIndicator(m.isInterestedRef)}</td>
+              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{interestIndicator(m.isInterestedAssistant)}</td>
+              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{interestIndicator(m.isInterestedAssistant)}</td>
 
             </tr>
           )
@@ -549,6 +552,7 @@ case class Snippets(req: HttpRequest[_]) {
         }
       </tbody>
     </table>
+
   }
 
   def resetPasswordform =
