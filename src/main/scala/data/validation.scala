@@ -6,6 +6,8 @@ import service.MongoRepository
 
 object MatchValidation {
 
+  private val repo = MongoRepository.singletonWithSessionCaching
+
   def validate(id: Option[String], homeTeam: String, awayTeam: String, venue: String, level: String,
                description: String, kickoffDate: String, kickoffTime: String, refereeType: String, refFee: String,
                assistantFee: String, appointedRef: String, appointedAssistant1: String, appointedAssistant2: String): Either[List[String], Match] = {
@@ -24,17 +26,17 @@ object MatchValidation {
       else if(refereeType!="trio") None.successNel
       else Some(assistantFee.toInt).successNel
 
-    def vAppointedRef = if(appointedRef.isEmpty) None.successNel else MongoRepository.refereeByUserId(new ObjectId(appointedRef)) match{
+    def vAppointedRef = if(appointedRef.isEmpty) None.successNel else repo.refereeByUserId(new ObjectId(appointedRef)) match{
         case None => "Finnes ingen dommer registrert med id %s".format(appointedRef).failNel
         case Some(s) => Some(s).successNel
     }
 
-    def vAppointedAssistant1 = if(appointedAssistant1.isEmpty) None.successNel else MongoRepository.refereeByUserId(new ObjectId(appointedAssistant1)) match{
+    def vAppointedAssistant1 = if(appointedAssistant1.isEmpty) None.successNel else repo.refereeByUserId(new ObjectId(appointedAssistant1)) match{
       case None => "Finnes ingen dommer registrert med id %s".format(appointedAssistant1).failNel
       case Some(s) => Some(s).successNel
     }
 
-    def vAppointedAssistant2 = if(appointedAssistant2.isEmpty) None.successNel else MongoRepository.refereeByUserId(new ObjectId(appointedAssistant2)) match{
+    def vAppointedAssistant2 = if(appointedAssistant2.isEmpty) None.successNel else repo.refereeByUserId(new ObjectId(appointedAssistant2)) match{
       case None => "Finnes ingen dommer registrert med id %s".format(appointedAssistant2).failNel
       case Some(s) => Some(s).successNel
     }
@@ -78,7 +80,7 @@ object MatchValidation {
       import Scalaz.{id => _, _}
 
       def vId = {
-        MongoRepository.userByEmail(email) match {
+        repo.userByEmail(email) match {
           case Some(user) if(user.id != id) => "Det finnes alt en bruker registrert med %s".format(email).failNel
           case _ => id.successNel
         }

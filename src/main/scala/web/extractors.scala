@@ -3,6 +3,7 @@ package web
 import unfiltered.request.{Cookies, HttpRequest}
 import service.MongoRepository._
 import data.{User, Session}
+import service.{CachingSessionRepository, MongoRepository}
 
 object NotAdmin{
   def unapply(req:HttpRequest[_]) = {
@@ -15,9 +16,10 @@ object NotAdmin{
 }
 
 object AdminSession {
+  val repo = MongoRepository.singletonWithSessionCaching
   def unapply(req: HttpRequest[_]) = {
     SessionId.unapply(req) match{
-      case Some(sessionId)  => sessionById(sessionId) match {
+      case Some(sessionId)  => repo.sessionById(sessionId) match {
         case Some(session) if(session.admin) => Some(session)
         case _ => None
       }
@@ -27,14 +29,16 @@ object AdminSession {
 }
 
 object UserSession {
+  val repo = MongoRepository.singletonWithSessionCaching
   def unapply(req: HttpRequest[_]) : Option[Session] = {
-    SessionId.unapply(req).flatMap(sessionId => sessionById(sessionId))
+    SessionId.unapply(req).flatMap(sessionId => repo.sessionById(sessionId))
   }
 }
 
 object LoggedOnUser {
+  val repo = MongoRepository.singletonWithSessionCaching
   def unapply(req: HttpRequest[_]) : Option[User] = {
-    SessionId.unapply(req).flatMap(sessionId => userForSession(sessionId))
+    SessionId.unapply(req).flatMap(sessionId => repo.userForSession(sessionId))
   }
 }
 
