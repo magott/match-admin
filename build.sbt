@@ -19,6 +19,7 @@ libraryDependencies ++=
     "org.scalatest" %% "scalatest" % "1.7.1" % "test",
     "com.google.guava" % "guava" % "11.0.2",
     "org.mongodb" %% "casbah" % "2.4.1",
+    "org.mongodb" % "mongo-java-driver" % "2.10.1",
     "org.scalaz" %% "scalaz-core" % "6.0.4",
     "net.databinder.dispatch" %% "dispatch-core" % "0.9.3"
   )
