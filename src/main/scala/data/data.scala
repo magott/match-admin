@@ -200,7 +200,7 @@ object Level{
   case object Men4Div extends KeyAndValue("men4div", "4. div menn")
   case object Men5Div extends KeyAndValue("men5div", "5. div menn")
   case object Men6Div extends KeyAndValue("men6div", "6. div menn")
-  case object Men7Div extends KeyAndValue("men3div", "7. div menn")
+  case object Men7Div extends KeyAndValue("men7div", "7. div menn")
   case object Men8Div extends KeyAndValue("men8div", "8. div menn")
   case object WomenPrem extends KeyAndValue("womPrem", "Toppserien")
   case object Women1Div extends KeyAndValue("wom1div", "1. div kvinner")
