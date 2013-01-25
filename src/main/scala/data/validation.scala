@@ -39,6 +39,8 @@ object MatchValidation {
       case Some(s) => Some(s).successNel
     }
 
+    def vLevel = if(level.isEmpty) "Nivå for kampen må settes".failNel else if(Level.asMap.get(level).isEmpty) "Ugyldig nivå".failNel else level.successNel
+
 
     def vRefereeType =
       if (refereeType.isEmpty) "Dommertype må være valgt".failNel
@@ -63,9 +65,9 @@ object MatchValidation {
     def nonEmpty(s:String) = if(s.trim.isEmpty) None else Some(s)
 
     (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@|
-      vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2) {
-      (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2) =>
-        Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, level, nonEmpty(description), kickoff, refereeType, refFee, assFee,
+      vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2 |@| vLevel) {
+      (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2, lvl) =>
+        Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, lvl, nonEmpty(description), kickoff, refereeType, refFee, assFee,
         Nil, Nil, appointedRef, appointedAss1, appointedAss2)
     }.either.left.map(_.list)
   }
