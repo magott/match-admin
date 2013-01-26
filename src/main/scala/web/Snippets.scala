@@ -312,7 +312,7 @@ case class Snippets(req: HttpRequest[_]) {
       <div class="control-group">
         <label class="control-label" for="inputEmail">E-post</label>
         <div class="controls">
-          <input type="text" id="email" name="email" placeholder="E-post"/>
+          <input type="email" id="email" name="email" placeholder="E-post"/>
           <span class="help-inline"></span>
         </div>
       </div>

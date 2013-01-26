@@ -94,7 +94,7 @@ object MongoRepository {
   }
 
   def userByEmail(email:String)= {
-    db("users").findOne(where("email" -> email)).map(User.fromMongo)
+    db("users").findOne(where("email" -> email.toLowerCase)).map(User.fromMongo)
   }
 
 

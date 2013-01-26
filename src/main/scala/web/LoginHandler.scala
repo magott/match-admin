@@ -93,8 +93,8 @@ class LoginHandler {
     if(email.isEmpty || password.isEmpty){
       HerokuRedirect(req, "/login?failed")
     }else{
-      val userOpt = userByEmail(email.get.head)
-      if(userOpt.exists(user => checkpw(password.get.head,user.password))){
+      val userOpt = userByEmail(email.get.head.toLowerCase)
+      if(userOpt.exists(user => checkpw(password.get.head, user.password))){
         val session = if(rememberMe) Session.newInstance(userOpt.get, DateTime.now.plusYears(1)) else Session.newInstance(userOpt.get)
         newSession(session)
         SetCookies(userCookie(session.sessionId, rememberMe)) ~> HerokuRedirect(req, "/matches")

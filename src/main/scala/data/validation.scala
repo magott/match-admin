@@ -93,7 +93,7 @@ object MatchValidation {
       def vName = if(name.isEmpty) "Navn må fylles ut".failNel else name.successNel
       def vEmail = if(email.isEmpty) "E-post må fylles ut".failNel
         else if(!email.matches(emailRegex)) "Ugydlig e-post adresse".failNel
-        else email.successNel
+        else email.toLowerCase.successNel
       def vTelephone = if(telephone.isEmpty) "Telefon må fylles ut".failNel
         else if(telephone.length < 8 || telephone.exists(!_.isDigit)) "Telefonnummer skal være på 8 siffer og kun bestå av tall".failNel
         else telephone.successNel
