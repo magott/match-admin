@@ -9,7 +9,7 @@ import unfiltered.response.ResponseString
 import data._
 import java.util.Date
 import org.joda.time.DateTime
-import service.MailgunService
+import service.{MongoRepository, MailgunService}
 import scala.Left
 import data.MailAccepted
 import scala.Right
@@ -17,7 +17,9 @@ import scala.Some
 import unfiltered.response.Html5
 import unfiltered.response.ResponseString
 
-class AdminHandler {
+class AdminHandler(private val repo:MongoRepository) {
+  import repo._
+
   def handleAdmin(req: HttpRequest[_]) = {
     req match {
       case Path("/admin/matches/new") => req match{

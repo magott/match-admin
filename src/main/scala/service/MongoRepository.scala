@@ -7,12 +7,10 @@ import com.mongodb.casbah.Imports._
 import data.{Session, Referee, User, Match}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import org.joda.time.{DateMidnight, DateTime}
+import com.mongodb.casbah.MongoDB
 
-object MongoRepository {
+class MongoRepository(db:MongoDB) extends SessionRepository{
 
-  RegisterJodaTimeConversionHelpers()
-
-  val MongoSetting(db) = Properties.envOrNone("MONGOLAB_URI")
 
   private val where, has, by = MongoDBObject
 
@@ -97,5 +95,11 @@ object MongoRepository {
     db("users").findOne(where("email" -> email.toLowerCase)).map(User.fromMongo)
   }
 
+}
 
+object MongoRepository{
+  RegisterJodaTimeConversionHelpers()
+  private val MongoSetting(db) = Properties.envOrNone("MONGOLAB_URI")
+  private val singleton = new MongoRepository(db) with CachingSessionRepository
+  def singletonWithSessionCaching:MongoRepository = singleton
 }

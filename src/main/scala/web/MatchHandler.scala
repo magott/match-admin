@@ -8,31 +8,32 @@ import org.bson.types.ObjectId
 import unfiltered.response.Html5
 import scala.Some
 import java.net.URI
+import service.MongoRepository
 
-class MatchHandler {
+class MatchHandler(private val repo:MongoRepository) {
 
   def handleMatches(req: HttpRequest[_]) = {
     req match {
       case Path(Seg("matches" :: Nil)) => req match {
         case GET(_) => {
-          val matches = listUpcomingMatches
+          val matches = repo.listUpcomingMatches
           Ok ~> Html5(Pages(req).listMatches(matches, "/matches/", UserSession.unapply(req).map(_.userId.toString)))
         }
       }
       case (Path(Seg("matches" :: matchId :: Nil))) => req match {
-        case GET(_) => fullMatch(new ObjectId(matchId)) match {
+        case GET(_) => repo.fullMatch(new ObjectId(matchId)) match {
           case Some(m) => Ok ~> Html5 (Snippets(req).viewMatch(m, UserSession.unapply(req).map(_.userId.toString)))
           case None => Html5(Pages(req).notFound(Some("Ingen kamp med id "+matchId)))
         }
         case POST(_) => req match{
           case LoggedOnUser(user) => req match {
             case Params(RefTypeParam("ref")) =>{
-              if(refInterestedInMatch(new ObjectId(matchId), user.id.get))
+              if(repo.refInterestedInMatch(new ObjectId(matchId), user.id.get))
                 Ok ~> JsonContent ~> ResponseString("""{"newState": "interested"}""")
               else InternalServerError
             }
             case Params(RefTypeParam("assRef")) =>{
-              if(assistantInterestedInMatch(new ObjectId(matchId), user.id.get))
+              if(repo.assistantInterestedInMatch(new ObjectId(matchId), user.id.get))
                 Ok ~> JsonContent ~> ResponseString("""{"newState": "interested"}""")
               else InternalServerError
             }
@@ -43,12 +44,12 @@ class MatchHandler {
         case DELETE(_) => req match{
           case LoggedOnUser(user) => req match {
             case Params(RefTypeParam("ref")) =>{
-              if(cancelInterestAsReferee(new ObjectId(matchId), user.id.get))
+              if(repo.cancelInterestAsReferee(new ObjectId(matchId), user.id.get))
                 Ok ~> JsonContent ~> ResponseString("""{"newState": "not-interested"}""")
               else InternalServerError
             }
             case Params(RefTypeParam("assRef")) =>{
-              if(cancelInterestAsAssistant(new ObjectId(matchId), user.id.get))
+              if(repo.cancelInterestAsAssistant(new ObjectId(matchId), user.id.get))
                 Ok ~> JsonContent ~> ResponseString("""{"newState": "not-interested"}""")
               else InternalServerError
             }

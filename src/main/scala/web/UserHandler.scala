@@ -13,7 +13,7 @@ import service.MongoRepository
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 
-class UserHandler {
+class UserHandler(private val repo:MongoRepository) {
 
   def handleUser(req: HttpRequest[_])  = {
     req match {
@@ -60,19 +60,19 @@ class UserHandler {
 
   def handleSignup(params: Map[String, Seq[String]]) : Either[List[String], String] = {
     userFromParams(params, None).right.map{ u:User =>
-        val user = MongoRepository.saveUser(u)
+        val user = repo.saveUser(u)
         val session = Session.newInstance(user.get)
-        MongoRepository.newSession(session)
+        repo.newSession(session)
         session.sessionId
       }
     }
 
   def handleEditUser(params: Map[String, Seq[String]], userId:String, sessionId:String) : Either[List[String], String] = {
     userFromParams(params, Some(userId)).right.map{u:User=>
-      val updatedUser = u.copy(admin = MongoRepository.userById(new ObjectId(userId)).get.admin)
-      MongoRepository.saveUser(updatedUser)
-      val currentSession = MongoRepository.sessionById(sessionId).get
-      MongoRepository.updateUserSessions(currentSession.username, updatedUser)
+      val updatedUser = u.copy(admin = repo.userById(new ObjectId(userId)).get.admin)
+      repo.saveUser(updatedUser)
+      val currentSession = repo.sessionById(sessionId).get
+      repo.updateUserSessions(currentSession.username, updatedUser)
       sessionId
     }
   }

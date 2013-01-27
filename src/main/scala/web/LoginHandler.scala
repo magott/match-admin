@@ -11,10 +11,10 @@ import unfiltered.response.Html5
 import unfiltered.Cookie
 import scala.Some
 import unfiltered.response.ResponseString
-import service.{MailgunService, ResetPasswordService}
+import service.{MongoRepository, MailgunService, ResetPasswordService}
 import org.joda.time.DateTime
 
-class LoginHandler {
+class LoginHandler(private val repo:MongoRepository) {
 
   val passwordService = new ResetPasswordService
 
@@ -51,10 +51,10 @@ class LoginHandler {
       case POST(_) & Params(IdParam(id)) & Params(PasswordParam(pwd)) => {
         passwordService.emailForResetId(id) match{
           case None => BadRequest ~> Html5(Pages(req).errorPage(<p>Kan ikke sette nytt passord, forespørselen er ugyldig eller for gammel. <a href="/lostpassword">Forsøk på nytt</a></p>))
-          case Some(email) => userByEmail(email) match{
+          case Some(email) => repo.userByEmail(email) match{
             case None => BadRequest ~> Html5(Pages(req).errorPage(<p>Kan ikke sette nytt passord, forespørselen er ugyldig eller for gammel. <a href="/lostpassword">Forsøk på nytt</a></p>))
             case Some(user) => {
-              saveUser(user.copy(password = hashpw(pwd, gensalt())))
+              repo.saveUser(user.copy(password = hashpw(pwd, gensalt())))
               HerokuRedirect(req, "/login?reset")
             }
           }
@@ -73,7 +73,7 @@ class LoginHandler {
         val protocol = XForwardProto.unapply(req).getOrElse("http")
         val resetUrl = "%s://%s/resetpassword?id=%s".format(protocol,host,resetId)
         println(resetUrl)
-        if(userByEmail(email).isDefined)
+        if(repo.userByEmail(email).isDefined)
           MailgunService.sendLostpasswordMail(email, resetUrl)
         HerokuRedirect(req, "/login?checkmail")
       }
@@ -93,10 +93,10 @@ class LoginHandler {
     if(email.isEmpty || password.isEmpty){
       HerokuRedirect(req, "/login?failed")
     }else{
-      val userOpt = userByEmail(email.get.head.toLowerCase)
-      if(userOpt.exists(user => checkpw(password.get.head, user.password))){
+      val userOpt = repo.userByEmail(email.get.head.toLowerCase)
+      if(userOpt.exists(user => checkpw(password.get.head,user.password))){
         val session = if(rememberMe) Session.newInstance(userOpt.get, DateTime.now.plusYears(1)) else Session.newInstance(userOpt.get)
-        newSession(session)
+        repo.newSession(session)
         SetCookies(userCookie(session.sessionId, rememberMe)) ~> HerokuRedirect(req, "/matches")
       }else{
         HerokuRedirect(req,"/login?failed")

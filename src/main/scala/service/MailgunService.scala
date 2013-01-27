@@ -6,6 +6,7 @@ import dispatch._
 import data.MailMessage
 
 object MailgunService {
+  private val repo = MongoRepository.singletonWithSessionCaching
   val mailgunApiKey = Properties.envOrNone("MAILGUN_API_KEY").get
   val mailgunAppName = Properties.envOrElse("MAILGUN_SMTP_LOGIN", "default@app8516420.mailgun.org").split('@')(1)
   val cc = Properties.envOrElse("MAIL_CC", "ofdl@andersen-gott.com")
@@ -18,8 +19,7 @@ object MailgunService {
   }
 
   def sendAppointmentMail(m:Match) = {
-    import MongoRepository._
-    val mailHelper = AppointmentMail(m, cc, "", m.appointedRef.flatMap(x => userById(x.id)), m.appointedAssistant1.flatMap(x => userById(x.id)), m.appointedAssistant2.flatMap(x => userById(x.id)))
+    val mailHelper = AppointmentMail(m, cc, "", m.appointedRef.flatMap(x => repo.userById(x.id)), m.appointedAssistant1.flatMap(x => repo.userById(x.id)), m.appointedAssistant2.flatMap(x => repo.userById(x.id)))
     val mail = MailMessage(sender, mailHelper.to, Seq(cc), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
     sendMail(mail)
   }
