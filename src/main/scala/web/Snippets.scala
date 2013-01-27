@@ -487,7 +487,8 @@ case class Snippets(req: HttpRequest[_]) {
                 </a>
                 <ul class="dropdown-menu">
                   <a href="/logout">Logg ut</a>
-                  <a href={"/users/"+sessOpt.get.userId.toString}>Endre bruker</a>
+                  <a href={"/users/"+sessOpt.get.userId.toString+"/matches/"}>Mine kamper</a>
+                  <a href={"/users/"+sessOpt.get.userId.toString}>Endre brukerinfo</a>
                 </ul>
               </li>
             }else{

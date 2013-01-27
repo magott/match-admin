@@ -85,7 +85,7 @@ class AdminHandler(private val repo:MongoRepository) {
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>
           userById(new ObjectId(userId)) match{
-            case Some(user) => Ok ~> Html5(Pages(req).user(user))
+            case Some(user) => Ok ~> Html5(Pages(req).user(user, repo.matchesWithReferee(user.id.get), "/admin/matches/"))
             case None => NotFound ~> Html5(Pages(req).notFound(Some("Fant ingen dommer med id %s".format(userId))))
           }
         case _ => MethodNotAllowed

@@ -3,7 +3,7 @@ package service
 import common.MongoSetting
 import util.Properties
 import org.bson.types.ObjectId
-import com.mongodb.casbah.Imports._
+import com.mongodb.casbah.query.Imports._
 import data.{Session, Referee, User, Match}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import org.joda.time.{DateMidnight, DateTime}
@@ -45,14 +45,6 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
     db("matches").update(q= where("_id" -> matchId), o= $addToSet("intRef" -> Referee.fromUser(user).toMongo)).getN == 1
   }
 
-  def hasDeclaredInterestAsAssistant(matchId:ObjectId, refId: ObjectId):Boolean = {
-    db("matches").findOne(where("_id" -> matchId, "intAss._id" -> refId)).isDefined
-  }
-
-  def hasDeclaredInterestAsReferee(matchId:ObjectId, refId: ObjectId):Boolean = {
-    db("matches").findOne(where("_id" -> matchId, "refAss._id" -> refId)).isDefined
-  }
-
   def cancelInterestAsReferee(matchId:ObjectId, refId:ObjectId):Boolean = {
 //    db("foo").update(q= where("_id" -> id), o= $pull(where("number" -> MongoDBObject("num" -> 2))))
     db("matches").update(q= where("_id" -> matchId), o= $pull(where("intRef" -> has("_id" -> refId))), upsert=true, multi=true).getN > 0
@@ -74,6 +66,11 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   def sessionById(sessionId:String) : Option[Session] = {
     val session = db("sessions").findOne(where("sessionId"->sessionId)).map(Session.fromMongo)
     session
+  }
+
+  def matchesWithReferee(refereeId:ObjectId) = {
+    val refereeOrAssistantQuery = $or("referee._id" -> refereeId, "assRef1._id" -> refereeId, "assRef2._id" -> refereeId)
+    db("matches").find(refereeOrAssistantQuery).map(Match.fromMongo(_)).toList
   }
 
   def allUsers = db("users").find().map(User.fromMongo).toList
