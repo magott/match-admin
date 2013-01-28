@@ -188,6 +188,10 @@ case class Snippets(req: HttpRequest[_]) {
           <th>Avspark</th>
           <td>{m.kickoffDateTimeString}</td>
         </tr>
+         <tr>
+          <th>Nivå</th>
+          <td>{Level.asMap(m.level)}</td>
+        </tr>
         <tr>
           <th>Honorar dommer</th>
           <td>{m.refFee.getOrElse("-")}</td>
