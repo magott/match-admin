@@ -8,7 +8,6 @@ class MatchValidationTest extends FunSuite{
   test("Invalid match"){
     val v = MatchValidation.validate(None, "a-lag", "b-lag", "bortebane", "men3div", "", "2-2-2-2", "20:15", "dommer", "600", "", "", "", "").left.map(_.toSet)
     assert(v === Left(Set("2-2-2-2 er ikke et gyldig datoformat (yyyy-MM-dd)")))
-    v
   }
 
   test("Valid match"){

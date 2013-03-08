@@ -527,6 +527,7 @@ case class Snippets(req: HttpRequest[_]) {
     def interestIndicator(interested: String => Boolean) = {
       userId.map(u => if (interested(u)) <span>&nbsp;<i class="icon-ok icon-green"/></span>).getOrElse("")
     }
+    (
     <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
@@ -543,7 +544,7 @@ case class Snippets(req: HttpRequest[_]) {
         {
           matches.map( m =>
             <tr class={if(m.kickoff.isBefore(DateTime.now))"muted " else ""}>
-            <td>{m.kickoffDateTimeString}</td>
+              <td class="date">{m.kickoffDateTimeString}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
               <td>{m.venue}</td>
@@ -556,7 +557,7 @@ case class Snippets(req: HttpRequest[_]) {
 
         }
       </tbody>
-    </table>
+    </table>)
 
   }
 

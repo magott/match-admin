@@ -29,7 +29,12 @@ class AdminHandler(private val repo:MongoRepository) {
       }
       case Path(Seg(List("admin", "matches"))) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
-        case GET(_) => Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.minusMonths(6)), "/admin/matches/", None))
+        case GET(_) =>{
+          if(viewAll(req))
+            Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.minusMonths(6)), "/admin/matches/", None))
+          else
+            Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.minusMonths(6)), "/admin/matches/", None))
+        }
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
@@ -100,4 +105,6 @@ class AdminHandler(private val repo:MongoRepository) {
       params("level").head, "", params("date").head, params("time").head, params("refType").head, params("refFee").head,
       params("assFee").head, params("appointedRef").head, params("appointedAssistant1").head, params("appointedAssistant2").head)
   }
+
+  private def viewAll(req: HttpRequest[_]): Boolean = req.parameterNames.contains("all")
 }
