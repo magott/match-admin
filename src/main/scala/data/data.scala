@@ -47,7 +47,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedAssistant1.isEmpty) unsets += "assRef1"
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
 
-    $set(sets.toSeq:_*) ++ $unset(unsets:_*)
+    $set(Seq(sets.toSeq:_*)) ++ $unset(Seq(unsets:_*))
   }
   def interestedRefButton(userId:Option[String]) =
     if(appointedRef.isEmpty)
@@ -80,7 +80,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
 
   def buttonTexts = (
-    <span class="int interested-txt"><i class="icon-ok icon-white"/> Interesse meldt</span>
+    <span class="int interested-txt"> Interesse meldt</span>
       <span class="int not-interested-txt">Meld interesse</span>
       <span class="int hover-interested-txt">Meld av</span>
       <span class="int assigned-txt">Kampen er tildelt</span>
@@ -193,41 +193,41 @@ object Session{
 
 object Level{
 
-  case object MenPrem extends KeyAndValue("menPrem", "Tippeligaen")
-  case object Men1Div extends KeyAndValue("men1div", "1. div menn")
-  case object Men2Div extends KeyAndValue("men2div", "2. div menn")
-  case object Men3Div extends KeyAndValue("men3div", "3. div menn")
-  case object Men4Div extends KeyAndValue("men4div", "4. div menn")
-  case object Men5Div extends KeyAndValue("men5div", "5. div menn")
-  case object Men6Div extends KeyAndValue("men6div", "6. div menn")
-  case object Men7Div extends KeyAndValue("men7div", "7. div menn")
-  case object Men8Div extends KeyAndValue("men8div", "8. div menn")
-  case object WomenPrem extends KeyAndValue("womPrem", "Toppserien")
-  case object Women1Div extends KeyAndValue("wom1div", "1. div kvinner")
-  case object Women2Div extends KeyAndValue("wom2div", "2. div kvinner")
-  case object Women3Div extends KeyAndValue("wom3div", "3. div kvinner")
-  case object Women4Div extends KeyAndValue("wom4div", "4. div kvinner")
-  case object Boys19IK extends KeyAndValue("g19ik", "Gutter 19 Interkrets")
-  case object Boys19 extends KeyAndValue("g19", "Gutter 19")
-  case object Boys16IK extends KeyAndValue("g16ik", "Gutter 16 Interkrets")
-  case object Boys16 extends KeyAndValue("g16", "Gutter 16")
-  case object Boys15 extends KeyAndValue("g15", "Gutter 15")
-  case object Boys14 extends KeyAndValue("g14", "Gutter 14")
-  case object Boys13 extends KeyAndValue("g13", "Gutter 13")
-  case object Girls19 extends KeyAndValue("j19", "Jenter 19")
-  case object Girls16 extends KeyAndValue("j16", "Jenter 16")
-  case object Girls15 extends KeyAndValue("j15", "Jenter 15")
-  case object Girls14 extends KeyAndValue("j14", "Jenter 14")
-  case object Girls13 extends KeyAndValue("j13", "Jenter 13")
+  object MenPrem extends KeyAndValue("menPrem", "Tippeligaen")
+  object Men1Div extends KeyAndValue("men1div", "1. div menn")
+  object Men2Div extends KeyAndValue("men2div", "2. div menn")
+  object Men3Div extends KeyAndValue("men3div", "3. div menn")
+  object Men4Div extends KeyAndValue("men4div", "4. div menn")
+  object Men5Div extends KeyAndValue("men5div", "5. div menn")
+  object Men6Div extends KeyAndValue("men6div", "6. div menn")
+  object Men7Div extends KeyAndValue("men7div", "7. div menn")
+  object Men8Div extends KeyAndValue("men8div", "8. div menn")
+  object WomenPrem extends KeyAndValue("womPrem", "Toppserien")
+  object Women1Div extends KeyAndValue("wom1div", "1. div kvinner")
+  object Women2Div extends KeyAndValue("wom2div", "2. div kvinner")
+  object Women3Div extends KeyAndValue("wom3div", "3. div kvinner")
+  object Women4Div extends KeyAndValue("wom4div", "4. div kvinner")
+  object Boys19IK extends KeyAndValue("g19ik", "Gutter 19 Interkrets")
+  object Boys19 extends KeyAndValue("g19", "Gutter 19")
+  object Boys16IK extends KeyAndValue("g16ik", "Gutter 16 Interkrets")
+  object Boys16 extends KeyAndValue("g16", "Gutter 16")
+  object Boys15 extends KeyAndValue("g15", "Gutter 15")
+  object Boys14 extends KeyAndValue("g14", "Gutter 14")
+  object Boys13 extends KeyAndValue("g13", "Gutter 13")
+  object Girls19 extends KeyAndValue("j19", "Jenter 19")
+  object Girls16 extends KeyAndValue("j16", "Jenter 16")
+  object Girls15 extends KeyAndValue("j15", "Jenter 15")
+  object Girls14 extends KeyAndValue("j14", "Jenter 14")
+  object Girls13 extends KeyAndValue("j13", "Jenter 13")
 
-  val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men8Div, Boys19IK, Boys19, Boys16IK, Boys16, Boys15, Boys14, Boys13,
+  val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men7Div, Men8Div, Boys19IK, Boys19, Boys16IK, Boys16, Boys15, Boys14, Boys13,
     WomenPrem, Women1Div, Women2Div, Women3Div, Women4Div, Girls19, Girls16, Girls15, Girls14, Girls13)
   val asMap = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
 }
 
 object RefereeType{
-  case object Dommer extends KeyAndValue("dommer", "Dommer")
-  case object Trio extends KeyAndValue("trio", "Trio")
+  object Dommer extends KeyAndValue("dommer", "Dommer")
+  object Trio extends KeyAndValue("trio", "Trio")
   val all = List(Dommer, Trio)
   val asMap = Map(Dommer.key -> Dommer.display, Trio.key -> Trio.display)
 }

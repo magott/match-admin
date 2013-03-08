@@ -2,12 +2,12 @@ package service
 
 import common.MongoSetting
 import util.Properties
-import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
 import data.{Session, Referee, User, Match}
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import org.joda.time.{DateMidnight, DateTime}
 import com.mongodb.casbah.MongoDB
+import org.bson.types.ObjectId
 
 class MongoRepository(db:MongoDB) extends SessionRepository{
 
@@ -80,7 +80,8 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def updateUserSessions(email:String, user:User) = {
-    db("sessions").update(q=where("username" -> email), o= $set("username" -> user.email, "name" -> user.name, "admin" -> user.admin), upsert=false, multi=true)
+    val setting = $set(Seq("username" -> user.email, "name" -> user.name, "admin" -> user.admin))
+    db("sessions").update(q=where("username" -> email), o= setting, upsert=false, multi=true)
   }
 
   def saveUser(user:User) = {
