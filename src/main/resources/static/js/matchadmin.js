@@ -17,6 +17,14 @@ function isTrio() {
     return  refType == "trio"
 }
 
+function filterTableFunctions(){
+    $(document).ready(function(){
+        $('#future').click(filterTable(function(){return moment().startOf('day');}));
+        $('#all').click(filterTable(function(){return moment().dayOfYear(1);}));
+        $('#history').click(fetchHistory);
+    });
+}
+
 function editMatchFunctions() {
     $('#refTypeDommer').click(trioOff);
     $('#refTypeTrio').click(trioOn);
@@ -235,6 +243,26 @@ function refBtn(button){
         button.attr("disabled", "disabled");
         ajaxinterest("DELETE", url, button,function(){})
     }
+}
+
+function fetchHistory(){
+        $.get("matches?all", function(data) {
+            $("#matches").replaceWith($(data).children("#matches"));
+        });
+        $("div button").removeClass("btn-inverse");
+        $(this).addClass("btn-inverse");
+}
+
+function filterTable(dateFunction){
+    return function(){
+        $("tr").show();
+        $("div button").removeClass("btn-inverse");
+        $(this).addClass("btn-inverse");
+        $("tr td.date").filter(function() {
+            var date = moment($(this).text(), "DD.MM.YYYY HH:mm");
+            return dateFunction().isAfter(date);
+        }).parent().hide();
+    };
 }
 
 function deleteResource(){

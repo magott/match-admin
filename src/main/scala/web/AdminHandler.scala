@@ -8,7 +8,7 @@ import unfiltered.response.Html5
 import unfiltered.response.ResponseString
 import data._
 import java.util.Date
-import org.joda.time.DateTime
+import org.joda.time.{DateMidnight, DateTime}
 import service.{MongoRepository, MailgunService}
 import scala.Left
 import data.MailAccepted
@@ -31,9 +31,9 @@ class AdminHandler(private val repo:MongoRepository) {
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>{
           if(viewAll(req))
-            Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.minusMonths(6)), "/admin/matches/", None))
+            Html5(Pages(req).listMatchesWithFilters(listMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime), "/admin/matches/", None))
           else
-            Html5(Pages(req).listMatches(listMatchesNewerThan(DateTime.now.minusMonths(6)), "/admin/matches/", None))
+            Html5(Pages(req).listMatchesWithFilters(listMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/", None))
         }
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{

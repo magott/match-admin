@@ -119,9 +119,9 @@ case class Snippets(req: HttpRequest[_]) {
               <button type="submit" class="btn btn-primary">Lagre</button>
               <button type="button" data-toggle="modal" class="btn btn-danger" data-target="#confirmDelete">Slett</button>
               <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
-              <span class="mail-status mail-processing fade in hide"><i class="icon-time"/>Sender..</span>
-              <span class="mail-status mail-success fade in hide"><i class="icon-ok icon-green"/>Mail sendt!</span>
-              <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"/>Feil ved sending av mail</span>
+              <span class="mail-status mail-processing fade in hide"><i class="icon-time"> </i> Sender..</span>
+              <span class="mail-status mail-success fade in hide"><i class="icon-ok icon-green"> </i> Mail sendt!</span>
+              <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"></i>Feil ved sending av mail</span>
             </div>
           </div>
           {
@@ -523,12 +523,18 @@ case class Snippets(req: HttpRequest[_]) {
 
   }
 
+
+
+  def matchListWithFilters(matches:Seq[Match], matchLinkPath:String, userId:Option[String]) = {
+    matchFilterButtons ++ matchList(matches, matchLinkPath, userId)
+  }
+
   def matchList(matches:Seq[Match], matchLinkPath:String, userId:Option[String]) = {
     def interestIndicator(interested: String => Boolean) = {
       userId.map(u => if (interested(u)) <span>&nbsp;<i class="icon-ok icon-green"/></span>).getOrElse("")
     }
-    (
-    <table class="table table-striped table-bordered table-condensed">
+
+    <table class="table table-striped table-bordered table-condensed" id="matches">
       <thead>
         <tr>
           <th>Tid</th>
@@ -543,7 +549,7 @@ case class Snippets(req: HttpRequest[_]) {
       <tbody>
         {
           matches.map( m =>
-            <tr class={if(m.kickoff.isBefore(DateTime.now))"muted " else ""}>
+            <tr>
               <td class="date">{m.kickoffDateTimeString}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
@@ -554,11 +560,21 @@ case class Snippets(req: HttpRequest[_]) {
 
             </tr>
           )
-
         }
       </tbody>
-    </table>)
+    </table>
 
+  }
+
+  def matchFilterButtons = {
+    <p>
+    <div class="btn-group">
+      <button id="future" name="all" class="btn">Fremtidige</button>
+      <button id="all" name="all" class="btn btn-inverse">I år</button>
+      <button id="history" name="all" class="btn">Alle</button>
+    </div>
+
+    </p>
   }
 
   def resetPasswordform =
@@ -609,9 +625,19 @@ case class Snippets(req: HttpRequest[_]) {
       </tbody>
     </table>
 
+  val filterTableJS = {
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+    <script type="text/javascript">
+      { """
+            $(document).ready(filterTableFunctions);
+
+        """}
+    </script>
+  }
+
   val editMatchJS = {
-    <script src="/js/jquery.validate.min.js" />
-    <script src="/js/additional-methods.min.js" />
+    <script src="/js/jquery.validate.min.js"></script>
+    <script src="/js/additional-methods.min.js"></script>
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);
@@ -621,7 +647,7 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   val loginJs = {
-      <script src="/js/jquery.validate.min.js" />
+      <script src="/js/jquery.validate.min.js"></script>
       <script type="text/javascript">
         { """
             $(document).ready(validateLogin());
@@ -630,7 +656,7 @@ case class Snippets(req: HttpRequest[_]) {
       </script>
   }
   val userFormJS = {
-      <script src="/js/jquery.validate.min.js" />
+      <script src="/js/jquery.validate.min.js"></script>
       <script type="text/javascript">
         { """
             $(document).ready(validateUserForm());
@@ -649,7 +675,7 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   val resetPasswordFormJs = {
-    <script src="/js/jquery.validate.min.js" />
+    <script src="/js/jquery.validate.min.js"></script>
     <script type="text/javascript">
       { """
             $(document).ready(validatePasswordResetForm());
