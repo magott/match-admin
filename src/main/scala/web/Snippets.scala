@@ -469,7 +469,7 @@ case class Snippets(req: HttpRequest[_]) {
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">OFDL Treningskamper</a>
+          <a class="brand" href="/">OFDL Treningskamper</a>
           <div class="nav-collapse collapse">
             {
             if(sessOpt.isDefined){
