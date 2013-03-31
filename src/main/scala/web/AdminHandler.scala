@@ -8,7 +8,7 @@ import unfiltered.response.Html5
 import unfiltered.response.ResponseString
 import data._
 import java.util.Date
-import org.joda.time.{DateMidnight, DateTime}
+import org.joda.time.{LocalDate, DateMidnight, DateTime}
 import service.{MongoRepository, MailgunService}
 import scala.Left
 import data.MailAccepted

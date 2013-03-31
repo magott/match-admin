@@ -33,15 +33,15 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
       |%s - %s
       |%s
       |%s
-      |Dommer: %s (%s kroner)
-      |Assistentdommer: %s (%s kroner)
-      |Assistentdommer: %s (%s kroner)
+      |Dommer: %s %s (%s kroner)
+      |Assistentdommer: %s %s (%s kroner)
+      |Assistentdommer: %s %s (%s kroner)
     """.stripMargin.format(m.homeTeam, m.awayTeam,
           m.venue,
           m.kickoffDateTimeString,
-          m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt"), m.refFee.getOrElse("-"),
-          m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt"), m.assistantFee.getOrElse("-"),
-          m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt"), m.assistantFee.getOrElse("-")
+          m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt"), formatedPhoneNumberOrBlank(ref), m.refFee.getOrElse("-"),
+          m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt"), formatedPhoneNumberOrBlank(ass1), m.assistantFee.getOrElse("-"),
+          m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt"), formatedPhoneNumberOrBlank(ass2) ,m.assistantFee.getOrElse("-")
     )
 
   def html = {
@@ -70,18 +70,20 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
         </tr>
         <tr>
           <th>Dommer</th>
-          <td>{m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt")}</td>
+          <td>{m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ref)}</td>
         </tr>
         {if(m.refereeType==RefereeType.Trio.key)(
         <tr>
           <th>Assistentdommer 1</th>
-          <td>{m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt")}</td>
+          <td>{m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ass1)}</td>
         </tr>
         <tr>
           <th>Assistentdommer 2</th>
-          <td>{m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}</td>
+          <td>{m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")+ formatedPhoneNumberOrBlank(ass2)}</td>
         </tr>)
         }
       </table>
   }
+
+  def formatedPhoneNumberOrBlank(u:Option[User]) = u.map(" (Tel: " + _.telephone + ")").getOrElse("")
 }
