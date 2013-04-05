@@ -1,6 +1,6 @@
 package data
 
-import org.joda.time.DateTime
+import org.joda.time.{LocalDateTime, DateTime}
 import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
 import java.util.UUID
@@ -11,7 +11,8 @@ import xml.NodeSeq
 case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTeam:String, venue:String, level:String,
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
-                 appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]){
+                 appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee],
+                 published:Boolean, clubContact:Option[ContactInfo]){
 
   def kickoffDateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
@@ -31,7 +32,8 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
       "venue" -> venue,
       "level" -> level,
       "kickoff" -> kickoff,
-      "refereeType" -> refereeType
+      "refereeType" -> refereeType,
+      "published" -> published
     )
     description.foreach(x => sets += "desc" -> x)
     refFee.foreach(x => sets += "refFee" -> x)
@@ -39,6 +41,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     appointedRef.foreach(x => sets += "referee" -> x.toMongo)
     appointedAssistant1.foreach(x => sets += "assRef1" -> x.toMongo)
     appointedAssistant2.foreach(x => sets += "assRef2" -> x.toMongo)
+    clubContact.foreach(x => sets += "clubContact" -> x.toMongo)
 
     if(description.isEmpty) unsets += "desc"
     if(refFee.isEmpty) unsets += "refFee"
@@ -46,6 +49,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedRef.isEmpty) unsets += "referee"
     if(appointedAssistant1.isEmpty) unsets += "assRef1"
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
+    if(clubContact.isEmpty) unsets += "clubContact"
 
     $set(Seq(sets.toSeq:_*)) ++ $unset(Seq(unsets:_*))
   }
@@ -111,21 +115,28 @@ object Match{
     val refereeType = m.as[String]("refereeType")
     val refFee = m.getAs[Int]("refFee")
     val assFee = m.getAs[Int]("assFee")
+    val published = m.getAsOrElse[Boolean]("published", true);
     val intRefs = m.getAsOrElse[ArrayBuffer[DBObject]]("intRef", ArrayBuffer.empty).map(Referee.fromMongo).toList
     val intAss = m.getAsOrElse[ArrayBuffer[DBObject]]("intAss", ArrayBuffer.empty).map(Referee.fromMongo).toList
     val referee = m.getAs[DBObject]("referee").map(Referee.fromMongo)
     val assRef1 = m.getAs[DBObject]("assRef1").map(Referee.fromMongo)
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)
+    val clubContact = m.getAs[DBObject]("clubContact").map(ContactInfo.fromMongo)
 
-    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2)
+    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, clubContact)
   }
 
   def newInstance(homeTeam:String, awayTeam:String, venue:String, level:String,
                   description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                   assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                   appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]) =
-    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2)
+    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, None)
 
+}
+case class MatchTemplate(homeTeam: String, awayTeam: String, venue: String, level: String,kickoff:DateTime,
+                         refereeType: String, clubContact:ContactInfo){
+  def toMongo = MongoDBObject("homeTeam" -> homeTeam, "awayTeam" -> awayTeam, "venue" -> venue, "level" -> level,
+                              "kickoff" -> kickoff, "refereeType" -> refereeType, "clubContact" -> clubContact.toMongo)
 }
 
 case class Referee(id:ObjectId, name:String, level:String){
@@ -175,6 +186,13 @@ object User{
 
   def newInstance(name:String, email:String, telephone:String, level:String, refereeNumber:Int, password:String) =
     User(None, name, email, telephone, level, false, refereeNumber, new DateTime, password)
+}
+
+case class ContactInfo(name:String, address:String, zip:String, telephone:String, email:String){
+  def toMongo : MongoDBObject = MongoDBObject("name" -> name, "telephone" -> telephone)
+}
+object ContactInfo{
+  def fromMongo(m:DBObject) = ContactInfo(m.as[String]("name"), m.as[String]("address"), m.as[String]("zip"), m.as[String]("telephone"), m.as[String]("email"))
 }
 
 case class Session(userId:ObjectId, username:String, name:String, admin:Boolean, sessionId:String, expires:DateTime){

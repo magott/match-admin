@@ -22,6 +22,9 @@ case class Snippets(req: HttpRequest[_]) {
         kamp</legend>
         <form class="form-horizontal" action={"/admin/matches/"+m.flatMap(_.id.map(_.toString)).getOrElse("")} method="POST" id="match-form">
           <div class="control-group">
+             {contactInfoFormElements(m.flatMap(_.clubContact))}
+          </div>
+          <div class="control-group">
             <label class="control-label">Kamp</label>
             <div class="controls">
               <input type="text" id="home" name="home" class="input-medium" placeholder="Hjemmelag" required="required" value={m.map(_.homeTeam).getOrElse("")}/>
@@ -116,7 +119,7 @@ case class Snippets(req: HttpRequest[_]) {
 
           <div class="control-group">
             <div class="controls">
-              <button type="submit" class="btn btn-primary">Lagre</button>
+              <button type="submit" class="btn btn-primary">{if(m.map(_.published).getOrElse(true)) "Lagre" else "Publiser"} </button>
               <button type="button" data-toggle="modal" class="btn btn-danger" data-target="#confirmDelete">Slett</button>
               <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
               <span class="mail-status mail-processing fade in hide"><i class="icon-time"> </i> Sender..</span>
@@ -624,6 +627,151 @@ case class Snippets(req: HttpRequest[_]) {
         }
       </tbody>
     </table>
+
+  def newMatchForm = {
+    <legend>Meld inn dommerbehov</legend>
+      <form class="form-horizontal" method="POST" id="match-form">
+        <div class="control-group">
+          <label class="control-label">Kontaktperson</label>
+          <div class="controls">
+            <input type="text" id="name" name="name" placeholder="Navn" class="input-medium" required="required"/>
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <input type="text" id="address" name="address" placeholder="Adresse kontaktperson" class="input-medium" required="required"  />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <input type="number" id="zip" name="zip" placeholder="Postnr" class="input-small" required="required"  />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <input type="tel" id="telephone" name="telephone" placeholder="Telefonnummer" class="input-medium" required="required"  />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <input type="email" id="email" name="email" placeholder="Epost" class="input-medium"  />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Kamp</label>
+          <div class="controls">
+            <input type="text" id="home" name="home" class="input-medium" placeholder="Hjemmelag" required="required" />
+            &nbsp;
+            -
+            &nbsp;
+            <input type="text" id="away" name="away" class="input-medium" placeholder="Bortelag" required="required" />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="venue">Bane</label>
+          <div class="controls">
+            <input type="text" name="venue" id="venue" class="input-large" required="required" placeholder="Bane" />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Kampstart</label>
+          <div class="controls controls-row">
+            <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required"  />
+            <input type="time" id="time" name="time" placeholder="TT:MM" class="input-small" required="required"  />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="level">Nivå</label>
+          <div class="controls">
+            <select id="level" name="level" placeholder="Velg">
+              <option disabled="disabled" selected="selected" value="">Velg</option>
+              {Level.all.map(l => <option value={l.key}> {l.display}</option>)}
+            </select>
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Behov</label>
+          <div class="controls">
+            <label class="radio">
+                <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
+                <div>{Dommer.display}</div>
+            </label>
+            <label class="radio">
+                <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
+                <div>{Trio.display}</div>
+            </label>
+            <span class="help-inline"></span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn btn-primary">Send inn</button>
+          </div>
+        </div>
+      </form>
+  }
+
+  def contactInfoFormElements(c :Option[ContactInfo]) = {
+    <div class="well well-small">
+      <a href="#" data-toggle="collapse" data-target="#clubContact">
+        <div>
+          <p>
+          <i id="contactSectionIcon" class="icon-plus"></i> Klubbkontakt
+          </p>
+        </div>
+      </a>
+        <div id="clubContact"  class="collapse">
+            <div class="control-group">
+              <div class="controls">
+                <input type="text" id="name" name="name" placeholder="Navn" class="input-medium" required="required"/>
+                <span class="help-inline"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <input type="text" id="address" name="address" placeholder="Adresse kontaktperson" class="input-medium" required="required"/>
+                <span class="help-inline"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <input type="number" id="zip" name="zip" placeholder="Postnr" class="input-small" required="required"/>
+                <span class="help-inline"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <input type="tel" id="telephone" name="telephone" placeholder="Telefonnummer" class="input-medium" required="required"/>
+                <span class="help-inline"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <input type="email" id="email" name="email" placeholder="Epost" class="input-medium"/>
+                <span class="help-inline"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <label class="checkbox">
+                  <input type="checkbox" name="saveContact" id="saveContact"> </input>
+                  Lagre kontaktinfo
+                </label>
+              </div>
+            </div>
+          </div>
+      </div>
+  }
 
   val filterTableJS = {
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>

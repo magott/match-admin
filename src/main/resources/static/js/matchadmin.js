@@ -46,7 +46,12 @@ function editMatchFunctions() {
 }
 
 function validateMatchForm() {
-
+    $('#clubContact').on('show', function() {
+        $('#contactSectionIcon').removeClass('icon-plus').addClass('icon-minus');
+    });
+    $('#clubContact').on('hide', function() {
+        $('#contactSectionIcon').removeClass('icon-minus').addClass('icon-plus');
+    });
     $('#match-form').validate(
         {
             onkeyup: false,
@@ -83,13 +88,20 @@ function validateMatchForm() {
                     depends:function (element) {
                         return $("#refTypeTrio:checked")
                     }
+                },
+                name:{
+                    required: isSaveContactChecked
                 }
             },
             messages:{
                 home:"Hjemmelag må fylles ut",
                 away:"Bortelag må fylles ut",
                 venue:"Bane må fylles ut",
-                name:"Navn må fylles ut",
+                name:"Navn må fylles ut, når lagre kontaktinfo er krysset av",
+                address:"Kontaktpersonens adresse må fylles ut, når lagre kontaktinfo er krysset av",
+                zip:"Kontaktpersonens postnummer må fylles ut, når lagre kontaktinfo er krysset av",
+                telephone:"Kontaktpersonens telefonnummer må fylles ut, når lagre kontaktinfo er krysset av",
+                email:"Kontaktpersons epost må fylles ut, når lagre kontaktinfo er krysset av",
                 time:{
                     required: "Tidspunkt for kampen må fylles ut",
                     time: "Ugyldig tidsformat (gyldig format f.eks 23:59)"
@@ -107,8 +119,22 @@ function validateMatchForm() {
                 label
                     .removeClass('error')
                     .closest('.control-group').removeClass('error');
+            },
+            invalidHandler: function(form, validator) {
+                if(mapContains(validator.errorMap, ["name","email", "address", "zip", "telephone"])){
+                    $('#clubContact').collapse('show');
+                }
             }
         });
+    function isSaveContactChecked(){
+        return $('#saveContact:checked');
+    }
+
+    function mapContains(map, values){
+        var keys = _.keys(map);
+        var intersect = _.intersection(keys, values) ;
+        return intersect.length > 0;
+    }
 }
 
 
