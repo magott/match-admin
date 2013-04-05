@@ -45,6 +45,96 @@ function editMatchFunctions() {
     $('#delete-match').click(deleteResource);
 }
 
+function validateNewMatchForm(){
+    $('#ref-order-form').validate(
+        {
+            onkeyup: false,
+            errorPlacement:function (error, element) {
+                error.appendTo(element.nextAll("span"));
+            },
+            rules:{
+                home:{
+                    required:true
+                },
+                away:{
+                    required:true
+                },
+                venue:{
+                    required:true
+                },
+                date:{
+                    required:true
+                },
+                time:{
+                    required:true,
+                    time: true
+                },
+                level:{
+                    required:true
+                },
+                refType:{
+                    required:true
+                },
+                clubContactName:{
+                    required: true
+                },
+                clubContactAddress:{
+                    required: true
+                },
+                clubContactZip:{
+                    required: true,
+                    digits:true,
+                    rangelength: [4, 4]
+                },
+                clubContactTelephone:{
+                    required: true,
+                    digits:true,
+                    rangelength: [8, 8]
+                },
+                clubContactEmail:{
+                    required: true,
+                    email: true
+                }
+            },
+            messages:{
+                home:"Hjemmelag må fylles ut",
+                away:"Bortelag må fylles ut",
+                venue:"Bane må fylles ut",
+                clubContactName:"Navn må fylles ut",
+                clubContactAddress:"Kontaktpersonens adresse må fylles ut",
+                clubContactZip:{
+                    required: "Kontaktpersonens postnummer må fylles ut",
+                    rangelength: "Postnummer skal bestå av {0} tegn",
+                    digits: "Ugyldig postnummer"
+                },
+                clubContactTelephone:{
+                    required: "Kontaktpersonens telefonnummer må fylles ut",
+                    rangelength: "Telefonnummer skal bestå av {0} tegn",
+                    digits: "Ugyldig telefonnummer"
+                },
+                clubContactEmail:{
+                    required: "Kontaktpersonens epost må fylles ut",
+                    email: "Ugyldig epostadresse"
+                },
+                time:{
+                    required: "Tidspunkt for kampen må fylles ut",
+                    time: "Ugyldig tidsformat (gyldig format f.eks 23:59)"
+                },
+                date:"Dato for kampen må fylles ut",
+                level:"Velg høyeste nivå klubbene spiller i",
+                refType:"Velg mellom dommer og trio"
+            },
+            highlight:function (label) {
+                $(label).closest('.control-group').addClass('error');
+            },
+            success:function (label) {
+                label
+                    .removeClass('error')
+                    .closest('.control-group').removeClass('error');
+            }
+        });
+}
+
 function validateMatchForm() {
     $('#clubContact').on('show', function() {
         $('#contactSectionIcon').removeClass('icon-plus').addClass('icon-minus');
@@ -85,23 +175,51 @@ function validateMatchForm() {
                     required:true
                 },
                 assFee:{
-                    depends:function (element) {
+                    depends: function (element) {
                         return $("#refTypeTrio:checked")
                     }
                 },
-                name:{
+                clubContactName:{
                     required: isSaveContactChecked
+                },
+                clubContactAddress:{
+                    required: isSaveContactChecked
+                },
+                clubContactZip:{
+                    required: isSaveContactChecked,
+                    digits:true,
+                    rangelength: [4, 4]
+                },
+                clubContactTelephone:{
+                    required: isSaveContactChecked,
+                    digits:true,
+                    rangelength: [8, 8]
+                },
+                clubContactEmail:{
+                    required: isSaveContactChecked,
+                    email: true
                 }
             },
             messages:{
                 home:"Hjemmelag må fylles ut",
                 away:"Bortelag må fylles ut",
                 venue:"Bane må fylles ut",
-                name:"Navn må fylles ut, når lagre kontaktinfo er krysset av",
-                address:"Kontaktpersonens adresse må fylles ut, når lagre kontaktinfo er krysset av",
-                zip:"Kontaktpersonens postnummer må fylles ut, når lagre kontaktinfo er krysset av",
-                telephone:"Kontaktpersonens telefonnummer må fylles ut, når lagre kontaktinfo er krysset av",
-                email:"Kontaktpersons epost må fylles ut, når lagre kontaktinfo er krysset av",
+                clubContactName:"Navn må fylles ut, når lagre kontaktinfo er krysset av",
+                clubContactAddress:"Kontaktpersonens adresse må fylles ut, når lagre kontaktinfo er krysset av",
+                clubContactZip:{
+                    required: "Kontaktpersonens postnummer må fylles ut, når lagre kontaktinfo er krysset av",
+                    rangelength: "Postnummer skal bestå av {0} tegn",
+                    digits: "Ugyldig postnummer"
+                },
+                clubContactTelephone:{
+                    required: "Kontaktpersonens telefonnummer må fylles ut, når lagre kontaktinfo er krysset av",
+                    rangelength: "Telefonnummer skal bestå av {0} tegn",
+                    digits: "Ugyldig telefonnummer"
+                },
+                clubContactEmail:{
+                    required: "Kontaktpersons epost må fylles ut, når lagre kontaktinfo er krysset av",
+                    email: "Ugyldig epostadresse"
+                },
                 time:{
                     required: "Tidspunkt for kampen må fylles ut",
                     time: "Ugyldig tidsformat (gyldig format f.eks 23:59)"
@@ -121,20 +239,22 @@ function validateMatchForm() {
                     .closest('.control-group').removeClass('error');
             },
             invalidHandler: function(form, validator) {
-                if(mapContains(validator.errorMap, ["name","email", "address", "zip", "telephone"])){
+                if(mapContains(validator.errorMap, ["clubContactName","clubContactEmail", "clubContactAddress", "clubContactZip", "clubContactTelephone"])){
                     $('#clubContact').collapse('show');
                 }
             }
         });
-    function isSaveContactChecked(){
-        return $('#saveContact:checked');
-    }
 
-    function mapContains(map, values){
-        var keys = _.keys(map);
-        var intersect = _.intersection(keys, values) ;
-        return intersect.length > 0;
-    }
+
+}
+function mapContains(map, values){
+    var keys = _.keys(map);
+    var intersect = _.intersection(keys, values) ;
+    return intersect.length > 0;
+}
+
+function isSaveContactChecked(){
+    return $('#saveContact').is(':checked');
 }
 
 

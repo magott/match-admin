@@ -38,11 +38,13 @@ object MatchValidation {
 
     def vKickoffDate = {
       val vTime = try {
+        if(kickoffTime.isEmpty) "Tidspunkt for kampen må fylles ut".failNel else
         LocalTime.parse(kickoffTime).successNel
       } catch {
         case _: Exception => (kickoffTime + " er ikke gyldig tidsformat (HH:mm)").failNel
       }
       val vDate = try {
+        if(kickoffDate.isEmpty) "Dato for kampen må fylles ut".failNel else
         DateMidnight.parse(kickoffDate).successNel
       } catch {
         case _: Exception => (kickoffDate + " er ikke et gyldig datoformat (yyyy-MM-dd)").failNel

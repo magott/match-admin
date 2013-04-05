@@ -3,7 +3,7 @@ package service
 import common.MongoSetting
 import util.Properties
 import com.mongodb.casbah.query.Imports._
-import data.{Session, Referee, User, Match}
+import data._
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import org.joda.time.{DateMidnight, DateTime}
 import com.mongodb.casbah.MongoDB
@@ -28,11 +28,22 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def listUpcomingMatches : Seq[Match] = {
-    listMatchesNewerThan(DateMidnight.now.toDateTime)
+    listPublishedMatchesNewerThan(DateMidnight.now.toDateTime)
   }
 
-  def listMatchesNewerThan(date:DateTime) : Seq[Match]= {
-    db("matches").find( ("kickoff" $gt date)).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
+  def listUnpublishedMatches(date:DateTime) : Seq[Match]= {
+    val unpublished = where("published" -> false)
+    db("matches").find( unpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
+  }
+
+  def saveNewMatchTemplate(m:MatchTemplate) {
+    db("matches").save(m.toMongo)
+  }
+
+  def listPublishedMatchesNewerThan(date:DateTime) : Seq[Match]= {
+    val afterDate = ("kickoff" $gt date)
+    val notUnpublished = ("published" $ne false)
+    db("matches").find( afterDate ++ notUnpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
   }
 
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {

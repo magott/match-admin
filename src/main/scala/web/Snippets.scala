@@ -438,7 +438,7 @@ case class Snippets(req: HttpRequest[_]) {
 
         <!-- Le javascript -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="/js/jquery-1.8.2.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
         <script src="/js/matchadmin.js"></script>
         {if(bottom.isDefined)
@@ -513,6 +513,7 @@ case class Snippets(req: HttpRequest[_]) {
                 <ul class="dropdown-menu">
                   <a href="/admin/matches">Kamper</a>
                   <a href="/admin/matches/new">Legg til kamp</a>
+                  <a href="/admin/matches/orders">Bestillinger</a>
                   <a href="/admin/users">Brukere</a>
                 </ul>
               </li>
@@ -629,36 +630,36 @@ case class Snippets(req: HttpRequest[_]) {
     </table>
 
   def newMatchForm = {
-    <legend>Meld inn dommerbehov</legend>
-      <form class="form-horizontal" method="POST" id="match-form">
+    <legend>Bestill dommer</legend>
+      <form class="form-horizontal" method="POST" id="ref-order-form">
         <div class="control-group">
           <label class="control-label">Kontaktperson</label>
           <div class="controls">
-            <input type="text" id="name" name="name" placeholder="Navn" class="input-medium" required="required"/>
+            <input type="text" id="clubContactName" name="clubContactName" placeholder="Navn" class="input-large" required="required"/>
             <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
           <div class="controls">
-            <input type="text" id="address" name="address" placeholder="Adresse kontaktperson" class="input-medium" required="required"  />
+            <input type="text" id="clubContactAddress" name="clubContactAddress" placeholder="Adresse kontaktperson" class="input-large" required="required"  />
             <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
           <div class="controls">
-            <input type="number" id="zip" name="zip" placeholder="Postnr" class="input-small" required="required"  />
+            <input type="number" id="clubContactZip" name="clubContactZip" placeholder="Postnr" class="input-small" required="required"  />
             <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
           <div class="controls">
-            <input type="tel" id="telephone" name="telephone" placeholder="Telefonnummer" class="input-medium" required="required"  />
+            <input type="tel" id="clubContactTelephone" name="clubContactTelephone" placeholder="Telefonnummer" class="input-medium" required="required"  />
             <span class="help-inline"></span>
           </div>
         </div>
         <div class="control-group">
           <div class="controls">
-            <input type="email" id="email" name="email" placeholder="Epost" class="input-medium"  />
+            <input type="email" id="clubContactEmail" name="clubContactEmail" placeholder="Epost" class="input-large"  />
             <span class="help-inline"></span>
           </div>
         </div>
@@ -733,31 +734,31 @@ case class Snippets(req: HttpRequest[_]) {
         <div id="clubContact"  class="collapse">
             <div class="control-group">
               <div class="controls">
-                <input type="text" id="name" name="name" placeholder="Navn" class="input-medium" required="required"/>
+                <input type="text" id="clubContactName" name="clubContactName" placeholder="Navn" class="input-large"/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="text" id="address" name="address" placeholder="Adresse kontaktperson" class="input-medium" required="required"/>
+                <input type="text" id="clubContactAddress" name="clubContactAddress" placeholder="Adresse kontaktperson" class="input-large"/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="number" id="zip" name="zip" placeholder="Postnr" class="input-small" required="required"/>
+                <input type="number" id="clubContactZip" name="clubContactZip" placeholder="Postnr" class="input-small"/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="tel" id="telephone" name="telephone" placeholder="Telefonnummer" class="input-medium" required="required"/>
+                <input type="tel" id="clubContactTelephone" name="clubContactTelephone" placeholder="Telefonnummer" class="input-medium"/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="email" id="email" name="email" placeholder="Epost" class="input-medium"/>
+                <input type="email" id="clubContactEmail" name="clubContactEmail" placeholder="Epost" class="input-large"/>
                 <span class="help-inline"></span>
               </div>
             </div>
@@ -773,6 +774,13 @@ case class Snippets(req: HttpRequest[_]) {
       </div>
   }
 
+  val matchMomentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+  val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+  val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+  val jQueryValidateAdditionalJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
+
+
+
   val filterTableJS = {
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
     <script type="text/javascript">
@@ -784,8 +792,9 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   val editMatchJS = {
-    <script src="/js/jquery.validate.min.js"></script>
-    <script src="/js/additional-methods.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);
@@ -793,18 +802,27 @@ case class Snippets(req: HttpRequest[_]) {
         """}
     </script>
   }
+  val newMatchJS = {
+    underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++
+      <script type="text/javascript">
+      { """
+            $(document).ready(validateNewMatchForm);
+
+        """}
+    </script>
+  }
 
   val loginJs = {
-      <script src="/js/jquery.validate.min.js"></script>
+      jqueryValidateJs ++ (
       <script type="text/javascript">
         { """
             $(document).ready(validateLogin());
 
           """}
-      </script>
+      </script>)
   }
   val userFormJS = {
-      <script src="/js/jquery.validate.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
       <script type="text/javascript">
         { """
             $(document).ready(validateUserForm());
@@ -823,7 +841,7 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   val resetPasswordFormJs = {
-    <script src="/js/jquery.validate.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
     <script type="text/javascript">
       { """
             $(document).ready(validatePasswordResetForm());

@@ -48,7 +48,7 @@ case class Pages(req:HttpRequest[_]) {
 
   def resetPassword = bootstrap("Sett nytt passord", resetPasswordform, Some(resetPasswordFormJs))
 
-  def clubNewMatch = bootstrap("Meld inn behov for dommer", newMatchForm, None)
+  def clubNewMatch = bootstrap("Meld inn behov for dommer", newMatchForm, Some(newMatchJS))
 
 
   def lostPassword = bootstrap("Glemt passord",

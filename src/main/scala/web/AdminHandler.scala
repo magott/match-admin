@@ -22,7 +22,7 @@ class AdminHandler(private val repo:MongoRepository) {
 
   def handleAdmin(req: HttpRequest[_]) = {
     req match {
-      case Path("/admin/matches/new") => req match{
+      case Path(Seg("admin" :: "matches" :: "new" :: Nil)) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) => Html5(Pages(req).editMatchForm(None))
         case _ => MethodNotAllowed
@@ -31,9 +31,9 @@ class AdminHandler(private val repo:MongoRepository) {
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>{
           if(viewAll(req))
-            Html5(Pages(req).listMatchesWithFilters(listMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime), "/admin/matches/", None))
+            Html5(Pages(req).listMatchesWithFilters(listPublishedMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime), "/admin/matches/", None))
           else
-            Html5(Pages(req).listMatchesWithFilters(listMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/", None))
+            Html5(Pages(req).listMatchesWithFilters(listPublishedMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/", None))
         }
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{
@@ -94,6 +94,9 @@ class AdminHandler(private val repo:MongoRepository) {
             case None => NotFound ~> Html5(Pages(req).notFound(Some("Fant ingen dommer med id %s".format(userId))))
           }
         case _ => MethodNotAllowed
+      }
+      case Path(Seg("admin" :: "matches" :: "orders" :: Nil)) => req match{
+        case GET => Html5(<html>Here be unpublished matches</html>)
       }
       case _ => NotFound ~> Html5(Pages(req).notFound(Some("Ukjent adminside")))
     }

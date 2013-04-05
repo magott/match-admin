@@ -33,7 +33,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
       "level" -> level,
       "kickoff" -> kickoff,
       "refereeType" -> refereeType,
-      "published" -> published
+      "published" -> true //Matches always saved as published, unpublished -> MatchTemplate
     )
     description.foreach(x => sets += "desc" -> x)
     refFee.foreach(x => sets += "refFee" -> x)
@@ -49,7 +49,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedRef.isEmpty) unsets += "referee"
     if(appointedAssistant1.isEmpty) unsets += "assRef1"
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
-    if(clubContact.isEmpty) unsets += "clubContact"
+    if(clubContact.isEmpty) unsets += "clubContact" //TODO: Does it work?
 
     $set(Seq(sets.toSeq:_*)) ++ $unset(Seq(unsets:_*))
   }
@@ -136,7 +136,8 @@ object Match{
 case class MatchTemplate(homeTeam: String, awayTeam: String, venue: String, level: String,kickoff:DateTime,
                          refereeType: String, clubContact:ContactInfo){
   def toMongo = MongoDBObject("homeTeam" -> homeTeam, "awayTeam" -> awayTeam, "venue" -> venue, "level" -> level,
-                              "kickoff" -> kickoff, "refereeType" -> refereeType, "clubContact" -> clubContact.toMongo)
+                              "kickoff" -> kickoff, "published" -> false,"refereeType" -> refereeType,
+                               "created" -> DateTime.now, "clubContact" -> clubContact.toMongo)
 }
 
 case class Referee(id:ObjectId, name:String, level:String){
@@ -189,7 +190,7 @@ object User{
 }
 
 case class ContactInfo(name:String, address:String, zip:String, telephone:String, email:String){
-  def toMongo : MongoDBObject = MongoDBObject("name" -> name, "telephone" -> telephone)
+  def toMongo : MongoDBObject = MongoDBObject("name" -> name, "address" -> address, "zip" -> zip, "telephone" -> telephone, "email" -> email)
 }
 object ContactInfo{
   def fromMongo(m:DBObject) = ContactInfo(m.as[String]("name"), m.as[String]("address"), m.as[String]("zip"), m.as[String]("telephone"), m.as[String]("email"))
