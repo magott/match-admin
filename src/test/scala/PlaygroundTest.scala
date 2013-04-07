@@ -1,3 +1,5 @@
+import data.{MatchTemplate, Level}
+import org.joda.time.DateTime
 import org.scalatest.FunSuite
 
 class PlaygroundTest extends FunSuite{
@@ -8,7 +10,5 @@ class PlaygroundTest extends FunSuite{
       case _ => println("match2")
     }
   }
-
-
 
 }

@@ -24,6 +24,22 @@ object MailgunService {
     sendMail(mail)
   }
 
+  def sendMatchOrderEmail(m:MatchTemplate, matchUrl:String) = {
+    sendMail(
+      MailMessage(
+        sender,
+        cc,
+        "Bestilling av dommer",
+        """Det er bestilt dommer til følgende kamp:
+          |%s
+          |%s (%s)
+          |%s
+          |Gå til %s for å publisere kampen og se mer informasjon om kampen.
+        """.stripMargin.format(m.kickoff.toString("dd.MM.yyyy HH:mm"), m.teams, Level.asMap(m.level).toString, m.venue, matchUrl)
+      )
+    )
+  }
+
   def sendLostpasswordMail(email:String, resetUrl:String) = {
     sendMail( MailMessage(
       sender,

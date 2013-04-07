@@ -734,44 +734,77 @@ case class Snippets(req: HttpRequest[_]) {
         <div id="clubContact"  class="collapse">
             <div class="control-group">
               <div class="controls">
-                <input type="text" id="clubContactName" name="clubContactName" placeholder="Navn" class="input-large"/>
+                <input type="text" id="clubContactName" name="clubContactName" placeholder="Navn" class="input-large" value={c.map(_.name).getOrElse("")}/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="text" id="clubContactAddress" name="clubContactAddress" placeholder="Adresse kontaktperson" class="input-large"/>
+                <input type="text" id="clubContactAddress" name="clubContactAddress" placeholder="Adresse kontaktperson"
+                       class="input-large" value={c.map(_.address).getOrElse("")}/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="number" id="clubContactZip" name="clubContactZip" placeholder="Postnr" class="input-small"/>
+                <input type="number" id="clubContactZip" name="clubContactZip" placeholder="Postnr" class="input-small" value={c.map(_.zip).getOrElse("")}/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="tel" id="clubContactTelephone" name="clubContactTelephone" placeholder="Telefonnummer" class="input-medium"/>
+                <input type="tel" id="clubContactTelephone" name="clubContactTelephone"
+                       placeholder="Telefonnummer" class="input-medium" value={c.map(_.telephone).getOrElse("")}/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
-                <input type="email" id="clubContactEmail" name="clubContactEmail" placeholder="Epost" class="input-large"/>
+                <input type="email" id="clubContactEmail" name="clubContactEmail"
+                       placeholder="Epost" class="input-large" value={c.map(_.email).getOrElse("")}/>
                 <span class="help-inline"></span>
               </div>
             </div>
             <div class="control-group">
               <div class="controls">
                 <label class="checkbox">
-                  <input type="checkbox" name="saveContact" id="saveContact"> </input>
+                  {if(c.isDefined)
+                    <input type="checkbox" name="saveContact" id="saveContact" checked="checked" > </input>
+                  else
+                      <input type="checkbox" name="saveContact" id="saveContact" > </input>
+                  }
                   Lagre kontaktinfo
                 </label>
               </div>
             </div>
           </div>
       </div>
+  }
+
+  def unpublishedMatchesTable(matches:Seq[Match]) = {
+    bootstrap("Bestillinger",
+    <table class="table table-striped table-bordered table-condensed" id="matches">
+      <thead>
+        <tr>
+          <th>Tidspunkt</th>
+          <th>Kamp</th>
+          <th>Bane</th>
+          <th>Dommer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+        matches.map(m =>
+          <td>{m.kickoffDateTimeString}</td>
+          <td><a href={"/admin/matches/"+m.id.get.toString} >{m.teams}</a></td>
+          <td>{m.venue}</td>
+          <td>{Level.asMap(m.level)}</td>
+        )
+        }
+
+      </tbody>
+    </table>, None
+    )
   }
 
   val matchMomentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>

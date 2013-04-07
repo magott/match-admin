@@ -31,13 +31,15 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
     listPublishedMatchesNewerThan(DateMidnight.now.toDateTime)
   }
 
-  def listUnpublishedMatches(date:DateTime) : Seq[Match]= {
+  def listUnpublishedMatches : Seq[Match]= {
     val unpublished = where("published" -> false)
     db("matches").find( unpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
   }
 
-  def saveNewMatchTemplate(m:MatchTemplate) {
-    db("matches").save(m.toMongo)
+  def saveNewMatchTemplate(m:MatchTemplate) = {
+    val mongoObject = m.toMongo
+    db("matches").save(mongoObject)
+    mongoObject.as[ObjectId]("_id")
   }
 
   def listPublishedMatchesNewerThan(date:DateTime) : Seq[Match]= {

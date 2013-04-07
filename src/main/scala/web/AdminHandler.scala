@@ -45,28 +45,6 @@ class AdminHandler(private val repo:MongoRepository) {
           }
         }
       }
-      case Path(Seg(List("admin","matches", matchId))) => req match{
-        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
-        case GET(_) =>{
-          fullMatch(new ObjectId(matchId)) match {
-            case None => BadRequest ~> Html5(Pages(req).notFound(Some("Ingen kamp med id " + matchId)))
-            case Some(m) => Html5(Pages(req).editMatchForm(Some(m)))
-          }
-        }
-        case POST(_) & Params(p)=>{
-          matchFromParams(Some(matchId), p) match{
-            case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
-            case Right(m) => {
-              saveMatch(m)
-              HerokuRedirect(req, "/admin/matches")
-            }
-          }
-        }
-        case DELETE(_) => {
-          deleteMatch(new ObjectId(matchId))
-          Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
-        }
-      }
       case Path(Seg("admin" :: "matches" :: matchId :: "sendmail" :: Nil)) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case _ => {
@@ -96,7 +74,32 @@ class AdminHandler(private val repo:MongoRepository) {
         case _ => MethodNotAllowed
       }
       case Path(Seg("admin" :: "matches" :: "orders" :: Nil)) => req match{
-        case GET => Html5(<html>Here be unpublished matches</html>)
+        case GET(_) => {
+          val unpublishedMatches = repo.listUnpublishedMatches
+          Ok ~> Html5(Pages(req).unpublishedMatches(unpublishedMatches))
+        }
+      }
+      case Path(Seg(List("admin","matches", matchId))) => req match{
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
+        case GET(_) =>{
+          fullMatch(new ObjectId(matchId)) match {
+            case None => BadRequest ~> Html5(Pages(req).notFound(Some("Ingen kamp med id " + matchId)))
+            case Some(m) => Html5(Pages(req).editMatchForm(Some(m)))
+          }
+        }
+        case POST(_) & Params(p)=>{
+          matchFromParams(Some(matchId), p) match{
+            case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
+            case Right(m) => {
+              saveMatch(m)
+              HerokuRedirect(req, "/admin/matches")
+            }
+          }
+        }
+        case DELETE(_) => {
+          deleteMatch(new ObjectId(matchId))
+          Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
+        }
       }
       case _ => NotFound ~> Html5(Pages(req).notFound(Some("Ukjent adminside")))
     }
@@ -110,4 +113,5 @@ class AdminHandler(private val repo:MongoRepository) {
   }
 
   private def viewAll(req: HttpRequest[_]): Boolean = req.parameterNames.contains("all")
+
 }

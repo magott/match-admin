@@ -1,7 +1,7 @@
 package web
 
 import unfiltered.request.HttpRequest
-import data.{User, Match}
+import data.{MatchTemplate, User, Match}
 import xml.NodeSeq
 
 case class Pages(req:HttpRequest[_]) {
@@ -60,4 +60,21 @@ case class Pages(req:HttpRequest[_]) {
       <button type="submit" class="btn">Send</button>
     </form>
   )
+
+  def unpublishedMatches(matches:Seq[Match]) = unpublishedMatchesTable(matches)
+
+  def refereeOrderReceipt(matchTemplate:MatchTemplate) = bootstrap("Takk for bestillingen",
+    <legend>
+      Kampen er registrert
+    </legend>
+  <p>
+    Vi har mottatt opplysninger om kampen. Kontaktpersonen vil bli kontaktet når dommer/trio er satt opp til kampen.
+  </p>
+  <p>
+    Ved spørsmål om kampen, ta kontakt med oss på <a href="mailto:treningskamper@gmail.com">treningskamper@gmail.com</a>
+  </p>
+  <p>
+    <a href="/clubs/matches/new">Bestill dommer til fler kamper</a>
+  </p>
+  ,None)
 }

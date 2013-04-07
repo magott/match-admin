@@ -135,7 +135,10 @@ object Match{
 }
 case class MatchTemplate(homeTeam: String, awayTeam: String, venue: String, level: String,kickoff:DateTime,
                          refereeType: String, clubContact:ContactInfo){
-  def toMongo = MongoDBObject("homeTeam" -> homeTeam, "awayTeam" -> awayTeam, "venue" -> venue, "level" -> level,
+
+  def dateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
+  def teams = " %s - %s".format(homeTeam,awayTeam)
+  def toMongo:MongoDBObject = MongoDBObject("homeTeam" -> homeTeam, "awayTeam" -> awayTeam, "venue" -> venue, "level" -> level,
                               "kickoff" -> kickoff, "published" -> false,"refereeType" -> refereeType,
                                "created" -> DateTime.now, "clubContact" -> clubContact.toMongo)
 }

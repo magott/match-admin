@@ -1,4 +1,5 @@
-package web
+package web {
+
 import unfiltered.request._
 import unfiltered.response._
 import unfiltered.response.Redirect
@@ -12,5 +13,12 @@ object HerokuRedirect {
     }
   }
 
+
 }
+
 object XForwardProto extends StringHeader("x-forwarded-proto")
+
+
+
+}
+
