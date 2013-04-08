@@ -48,7 +48,9 @@ case class Pages(req:HttpRequest[_]) {
 
   def resetPassword = bootstrap("Sett nytt passord", resetPasswordform, Some(resetPasswordFormJs))
 
-  def clubNewMatch = bootstrap("Meld inn behov for dommer", newMatchForm, Some(newMatchJS))
+  def clubNewMatch = bootstrap("Meld inn behov for dommer", <legend>Bestill dommer</legend> ++ newMatchForm, Some(newMatchJS))
+
+  def clubNewMatchNoMenu = noMenuBootstrap("",newMatchForm, Some(newMatchJS))
 
 
   def lostPassword = bootstrap("Glemt passord",
@@ -64,17 +66,8 @@ case class Pages(req:HttpRequest[_]) {
   def unpublishedMatches(matches:Seq[Match]) = unpublishedMatchesTable(matches)
 
   def refereeOrderReceipt(matchTemplate:MatchTemplate) = bootstrap("Takk for bestillingen",
-    <legend>
-      Kampen er registrert
-    </legend>
-  <p>
-    Vi har mottatt opplysninger om kampen. Kontaktpersonen vil bli kontaktet når dommer/trio er satt opp til kampen.
-  </p>
-  <p>
-    Ved spørsmål om kampen, ta kontakt med oss på <a href="mailto:treningskamper@gmail.com">treningskamper@gmail.com</a>
-  </p>
-  <p>
-    <a href="/clubs/matches/new">Bestill dommer til fler kamper</a>
-  </p>
-  ,None)
+    refereeOrderReceiptSnippet(matchTemplate),
+    None)
+
+  def refereeOrderReceiptNoMenu(matchTemplate:MatchTemplate) =  noMenuBootstrap("",refereeOrderReceiptSnippet(matchTemplate))
 }

@@ -46,6 +46,9 @@ function editMatchFunctions() {
 }
 
 function validateNewMatchForm(){
+    jQuery.validator.addMethod("refTypeValidForLevel", function(value, element, param) {
+        return !($('#refTypeDommer').is(':checked') && document.getElementById('level').selectedIndex < 5);
+    }, "");
     $('#ref-order-form').validate(
         {
             onkeyup: false,
@@ -70,10 +73,12 @@ function validateNewMatchForm(){
                     time: true
                 },
                 level:{
-                    required:true
+                    required:true,
+                    refTypeValidForLevel: true
                 },
                 refType:{
-                    required:true
+                    required:true,
+                    refTypeValidForLevel: true
                 },
                 clubContactName:{
                     required: true
@@ -121,8 +126,14 @@ function validateNewMatchForm(){
                     time: "Ugyldig tidsformat (gyldig format f.eks 23:59)"
                 },
                 date:"Dato for kampen må fylles ut",
-                level:"Velg høyeste nivå klubbene spiller i",
-                refType:"Velg mellom dommer og trio"
+                level: {
+                    required: "Velg høyeste nivå klubbene spiller i",
+                    refTypeValidForLevel: "Vi tilbyr kun trio for dette nivået"
+                },
+                refType: {
+                    required: "Velg mellom dommer og trio",
+                    refTypeValidForLevel: "Vi tilbyr kun trio for dette nivået"
+                }
             },
             highlight:function (label) {
                 $(label).closest('.control-group').addClass('error');

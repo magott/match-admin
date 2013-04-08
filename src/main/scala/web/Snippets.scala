@@ -438,7 +438,80 @@ case class Snippets(req: HttpRequest[_]) {
 
         <!-- Le javascript -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        {jQuery}
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/matchadmin.js"></script>
+        {if(bottom.isDefined)
+          bottom.get
+        }
+        <script type="text/javascript">
+          {"""
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-29904717-2']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+          """}
+        </script>
+
+      </body>
+    </html>
+  }
+  def noMenuBootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None, meta:NodeSeq = Nil) = {
+
+    <html lang="no">
+      <head>
+        <meta charset="utf-8"/>
+        <title>
+          {title}
+        </title>
+        <meta property="og:image" content={"%s/img/ofdl_logo_big.jpg".format(baseUrl)} />
+        <meta property="og:title" content={title} />
+        {meta}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="description" content=""/>
+        <meta name="author" content="Morten Andersen-Gott"/>
+
+        <!-- Le styles -->
+        <link href="/css/bootstrap.css" rel="stylesheet"/>
+        <style type="text/css">
+          {"""
+          body{
+            padding-top: 60px;
+            padding-bottom: 40px;
+          }
+          .sidebar-nav{
+          padding: 9 px 0;
+          }
+           """}
+        </style>
+
+        <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
+        <link href="/css/matchadmin.css" rel="stylesheet"/>
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+        <!-- Le fav and touch icons -->
+        <link rel="shortcut icon" href="/favicon.ico"/>
+      </head>
+
+      <body>
+        <div class="container-fluid">
+
+          {body}
+
+        </div> <!--/.fluid-container-->
+
+        <!-- Le javascript -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        {jQuery}
         <script src="/js/bootstrap.min.js"></script>
         <script src="/js/matchadmin.js"></script>
         {if(bottom.isDefined)
@@ -630,7 +703,6 @@ case class Snippets(req: HttpRequest[_]) {
     </table>
 
   def newMatchForm = {
-    <legend>Bestill dommer</legend>
       <form class="form-horizontal" method="POST" id="ref-order-form">
         <div class="control-group">
           <label class="control-label">Kontaktperson</label>
@@ -807,6 +879,21 @@ case class Snippets(req: HttpRequest[_]) {
     )
   }
 
+  def refereeOrderReceiptSnippet(matchTemplate:MatchTemplate) = {
+    <legend>
+      Kampen er registrert
+    </legend>
+      <p>
+        Vi har mottatt opplysninger om kampen. Kontaktpersonen vil bli kontaktet når dommer/trio er satt opp til kampen.
+      </p>
+      <p>
+        Ved spørsmål om kampen, ta kontakt med oss på <a href="mailto:treningskamper@gmail.com">treningskamper@gmail.com</a>
+      </p>
+      <p>
+        <a href="">Bestill dommer til fler kamper</a>
+      </p>
+  }
+  val jQuery = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   val matchMomentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
   val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
   val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
@@ -814,7 +901,7 @@ case class Snippets(req: HttpRequest[_]) {
 
 
 
-  val filterTableJS = {
+  def filterTableJS = {
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
     <script type="text/javascript">
       { """
@@ -824,7 +911,7 @@ case class Snippets(req: HttpRequest[_]) {
     </script>
   }
 
-  val editMatchJS = {
+  def editMatchJS = {
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
@@ -835,7 +922,7 @@ case class Snippets(req: HttpRequest[_]) {
         """}
     </script>
   }
-  val newMatchJS = {
+  def newMatchJS = {
     underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++
       <script type="text/javascript">
       { """
@@ -845,7 +932,7 @@ case class Snippets(req: HttpRequest[_]) {
     </script>
   }
 
-  val loginJs = {
+  def loginJs = {
       jqueryValidateJs ++ (
       <script type="text/javascript">
         { """
@@ -854,7 +941,7 @@ case class Snippets(req: HttpRequest[_]) {
           """}
       </script>)
   }
-  val userFormJS = {
+  def userFormJS = {
       <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
       <script type="text/javascript">
         { """
@@ -864,7 +951,7 @@ case class Snippets(req: HttpRequest[_]) {
       </script>
   }
 
-  val viewMatchJS = {
+  def viewMatchJS = {
       <script type="text/javascript">
         { """
             $(document).ready(interestButtonFunctions());
@@ -873,7 +960,7 @@ case class Snippets(req: HttpRequest[_]) {
       </script>
   }
 
-  val resetPasswordFormJs = {
+  def resetPasswordFormJs = {
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
     <script type="text/javascript">
       { """
@@ -882,5 +969,6 @@ case class Snippets(req: HttpRequest[_]) {
         """}
     </script>
   }
+
 
 }
