@@ -60,7 +60,8 @@ object MatchValidation {
 
   def validate(id: Option[String], homeTeam: String, awayTeam: String, venue: String, level: String,
                description: String, kickoffDate: String, kickoffTime: String, refereeType: String, refFee: String,
-               assistantFee: String, appointedRef: String, appointedAssistant1: String, appointedAssistant2: String): Either[List[String], Match] = {
+               assistantFee: String, appointedRef: String, appointedAssistant1: String, appointedAssistant2: String,
+               saveContact:Boolean, contactName:String, contactTelephone:String, contactAddress:String, contactZip:String, contactEmail:String): Either[List[String], Match] = {
 
     import scalaz._
     import Scalaz.{id => _, _}
@@ -119,11 +120,14 @@ object MatchValidation {
 
     def nonEmpty(s:String) = if(s.trim.isEmpty) None else Some(s)
 
+    def createContact = Some(ContactInfo(contactName, contactAddress, contactZip, contactTelephone, contactEmail))
+
     (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@|
       vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2 |@| vLevel |@| vPublished) {
       (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2, lvl, published) =>
         Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, lvl, nonEmpty(description), kickoff, refereeType, refFee, assFee,
-        Nil, Nil, appointedRef, appointedAss1, appointedAss2, published, None)
+        Nil, Nil, appointedRef, appointedAss1, appointedAss2, published,
+          createContact)
     }.either.left.map(_.list)
   }
 

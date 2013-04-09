@@ -867,10 +867,12 @@ case class Snippets(req: HttpRequest[_]) {
       <tbody>
         {
         matches.map(m =>
-          <td>{m.kickoffDateTimeString}</td>
-          <td><a href={"/admin/matches/"+m.id.get.toString} >{m.teams}</a></td>
-          <td>{m.venue}</td>
-          <td>{Level.asMap(m.level)}</td>
+          <tr>
+            <td>{m.kickoffDateTimeString}</td>
+            <td><a href={"/admin/matches/"+m.id.get.toString} >{m.teams}</a></td>
+            <td>{m.venue}</td>
+            <td>{Level.asMap(m.level)}</td>
+          </tr>
         )
         }
 

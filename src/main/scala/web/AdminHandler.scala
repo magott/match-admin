@@ -109,7 +109,9 @@ class AdminHandler(private val repo:MongoRepository) {
     val params = p.withDefaultValue(List(""))
     MatchValidation.validate(id,params("home").head, params("away").head, params("venue").head,
       params("level").head, "", params("date").head, params("time").head, params("refType").head, params("refFee").head,
-      params("assFee").head, params("appointedRef").head, params("appointedAssistant1").head, params("appointedAssistant2").head)
+      params("assFee").head, params("appointedRef").head, params("appointedAssistant1").head, params("appointedAssistant2").head,
+      params("saveContact").head == "checked", params("clubContactName").head, params("clubContactTelephone").head,
+      params("clubContactAddress").head, params("clubContactZip").head, params("clubContactEmail").head)
   }
 
   private def viewAll(req: HttpRequest[_]): Boolean = req.parameterNames.contains("all")
