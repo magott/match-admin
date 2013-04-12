@@ -47,8 +47,18 @@ function editMatchFunctions() {
 
 function validateNewMatchForm(){
     jQuery.validator.addMethod("refTypeValidForLevel", function(value, element, param) {
-        return !($('#refTypeDommer').is(':checked') && document.getElementById('level').selectedIndex < 5);
+        var selectedIndex = document.getElementById('level').selectedIndex
+        return !($('#refTypeDommer').is(':checked') && (selectedIndex  < 5 || selectedIndex == 17));
     }, "");
+    jQuery.validator.addMethod("futureDate", function(value, element, param) {
+        var input = moment(value);
+        if (!input.isValid()){
+            return false;
+        }else{
+            return input.isAfter(moment().startOf('day'));
+        }
+    }, "Ugyldig dato, kampstart kan ikke være i fortiden");
+
     $('#ref-order-form').validate(
         {
             onkeyup: false,
@@ -66,7 +76,9 @@ function validateNewMatchForm(){
                     required:true
                 },
                 date:{
-                    required:true
+                    required:true,
+                    date: true,
+                    futureDate: true
                 },
                 time:{
                     required:true,
@@ -125,7 +137,10 @@ function validateNewMatchForm(){
                     required: "Tidspunkt for kampen må fylles ut",
                     time: "Ugyldig tidsformat (gyldig format f.eks 23:59)"
                 },
-                date:"Dato for kampen må fylles ut",
+                date:{
+                    required: "Dato for kampen må fylles ut",
+                    date: "Ugyldig dato"
+                },
                 level: {
                     required: "Velg høyeste nivå klubbene spiller i",
                     refTypeValidForLevel: "Vi tilbyr kun trio for dette nivået"
@@ -140,8 +155,8 @@ function validateNewMatchForm(){
             },
             success:function (label) {
                 label
-                    .removeClass('error')
-                    .closest('.control-group').removeClass('error');
+                 .removeClass('error')
+                 .closest('.control-group').removeClass('error');
             }
         });
 }

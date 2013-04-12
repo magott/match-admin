@@ -772,7 +772,7 @@ case class Snippets(req: HttpRequest[_]) {
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label">Behov</label>
+          <label class="control-label" for="refType">Behov</label>
           <div class="controls">
             <label class="radio">
                 <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
@@ -896,7 +896,7 @@ case class Snippets(req: HttpRequest[_]) {
       </p>
   }
   val jQuery = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  val matchMomentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+  val momentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
   val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
   val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
   val jQueryValidateAdditionalJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
@@ -925,7 +925,7 @@ case class Snippets(req: HttpRequest[_]) {
     </script>
   }
   def newMatchJS = {
-    underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++
+    underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++ momentJs ++
       <script type="text/javascript">
       { """
             $(document).ready(validateNewMatchForm);
