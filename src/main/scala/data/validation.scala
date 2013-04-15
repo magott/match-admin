@@ -120,7 +120,7 @@ object MatchValidation {
 
     def nonEmpty(s:String) = if(s.trim.isEmpty) None else Some(s)
 
-    def createContact = Some(ContactInfo(contactName, contactAddress, contactZip, contactTelephone, contactEmail))
+    def createContact = if(saveContact) Some(ContactInfo(contactName, contactAddress, contactZip, contactTelephone, contactEmail)) else None
 
     (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@|
       vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2 |@| vLevel |@| vPublished) {

@@ -110,7 +110,7 @@ class AdminHandler(private val repo:MongoRepository) {
     MatchValidation.validate(id,params("home").head, params("away").head, params("venue").head,
       params("level").head, "", params("date").head, params("time").head, params("refType").head, params("refFee").head,
       params("assFee").head, params("appointedRef").head, params("appointedAssistant1").head, params("appointedAssistant2").head,
-      params("saveContact").head == "checked", params("clubContactName").head, params("clubContactTelephone").head,
+      params("saveContact").head == "on", params("clubContactName").head, params("clubContactTelephone").head,
       params("clubContactAddress").head, params("clubContactZip").head, params("clubContactEmail").head)
   }
 
