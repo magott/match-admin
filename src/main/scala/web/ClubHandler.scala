@@ -5,6 +5,7 @@ import unfiltered.request._
 import unfiltered.response._
 import unfiltered.response.Html5
 import data.MatchValidation
+import unfiltered.request.UserAgent
 
 class ClubHandler(repo:MongoRepository) {
 
@@ -23,23 +24,30 @@ class ClubHandler(repo:MongoRepository) {
             case Right(m) => {
               val matchId = repo.saveNewMatchTemplate(m)
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
+              println("New match from club (%s) : %s".format(matchId, m.toString))
               MailgunService.sendMatchOrderEmail(m, editMatchUrl)
               req match{
                 case Params(Embedded(_)) => Ok ~> Html5(Pages(req).refereeOrderReceiptNoMenu(m))
                 case _ => Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
               }
             }
-            case Left(errors) =>
+            case Left(errors) => {
+              printErrors(errors, req)
               req match{
                 case Params(Embedded(_)) => BadRequest ~> Html5(<div class="alert alert-error"> <h4 class="alert-heading">Feil!</h4> {errors.map(e => <p>{e}</p>)} <a href="">Gå tilbake</a></div>)
                 case _ => BadRequest ~> Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
               }
-
+            }
           }
        }
       }
       case _ => NotFound ~> Html5(Pages(req).notFound())
     }
+  }
+
+  def printErrors(errors:List[String], req:HttpRequest[_]) = {
+    val UserAgent(ua) = req
+    println("400 - User [%s] errors %s".format(ua, errors))
   }
 
   def handleNewMatchFromClub(params: Map[String, Seq[String]]) = {
