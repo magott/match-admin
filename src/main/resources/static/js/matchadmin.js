@@ -58,7 +58,7 @@ function validateNewMatchForm(){
             return input.isAfter(moment().startOf('day'));
         }
     }, "Ugyldig dato, kampstart kan ikke være i fortiden");
-
+    delete $.validator.methods.date;
     $('#ref-order-form').validate(
         {
             onkeyup: false,
@@ -77,7 +77,7 @@ function validateNewMatchForm(){
                 },
                 date:{
                     required:true,
-                    date: true,
+                    dateISO: true,
                     futureDate: true
                 },
                 time:{
@@ -139,7 +139,8 @@ function validateNewMatchForm(){
                 },
                 date:{
                     required: "Dato for kampen må fylles ut",
-                    date: "Ugyldig dato"
+                    dateISO: "Ugyldig datoformat, gyldig format er ÅÅÅÅ-MM-DD (f.eks 2014-12-31)",
+                    futureDate: "Kampdato kan ikke være historisk (i fortiden)"
                 },
                 level: {
                     required: "Velg høyeste nivå klubbene spiller i",
