@@ -900,7 +900,7 @@ case class Snippets(req: HttpRequest[_]) {
   val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
   val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
   val jQueryValidateAdditionalJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
-
+  val jqueryPlaceholder = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.7/jquery.placeholder.min.js"></script>
 
 
   def filterTableJS = {
@@ -914,9 +914,7 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   def editMatchJS = {
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ underscoreJs ++
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);
@@ -925,9 +923,10 @@ case class Snippets(req: HttpRequest[_]) {
     </script>
   }
   def newMatchJS = {
-    underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++ momentJs ++
+    underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++ momentJs ++ jqueryPlaceholder ++
       <script type="text/javascript">
       { """
+            $('input, textarea').placeholder();
             $(document).ready(validateNewMatchForm);
 
         """}
