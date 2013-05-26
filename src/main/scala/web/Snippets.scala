@@ -1,7 +1,7 @@
 package web
 
 import xml.NodeSeq
-import unfiltered.request.{Host, RequestHeader, HttpRequest}
+import unfiltered.request.{Params, Host, RequestHeader, HttpRequest}
 import data._
 import data.KeyAndValue
 import scala.Some
@@ -13,6 +13,7 @@ case class Snippets(req: HttpRequest[_]) {
   val Host(host) = req
   val protocol = XForwardProto.unapply(req).getOrElse("http")
   val baseUrl = "%s://%s".format(protocol, host)
+  val iframeView =  Params.unapply(req).get.contains("embedded")
 
   def editMatch(m: Option[Match]) = {
     val isTrio = m.isDefined && m.get.refereeType==Trio.key
@@ -425,7 +426,7 @@ case class Snippets(req: HttpRequest[_]) {
 
       <body>
 
-        {header}
+        {if(!iframeView) header}
 
         <div class="container-fluid">
 

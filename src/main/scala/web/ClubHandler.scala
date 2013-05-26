@@ -12,12 +12,7 @@ class ClubHandler(repo:MongoRepository) {
   def handleClubRequest(req: HttpRequest[_]) = {
     req match{
       case Path(Seg("clubs"::"matches"::"new"::Nil)) => req match {
-        case GET(_) => {
-          req match {
-            case Params(Embedded(_)) => Ok ~> Html5(Pages(req).clubNewMatchNoMenu)
-            case _ => Ok ~> Html5(Pages(req).clubNewMatch)
-          }
-        }
+        case GET(_) => Ok ~> Html5(Pages(req).clubNewMatch)
         case POST(_) => {
           val Params(p) = req
           handleNewMatchFromClub(p) match {
@@ -26,17 +21,11 @@ class ClubHandler(repo:MongoRepository) {
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
               println("New match from club (%s) : %s".format(matchId, m.toString))
               MailgunService.sendMatchOrderEmail(m, editMatchUrl)
-              req match{
-                case Params(Embedded(_)) => Ok ~> Html5(Pages(req).refereeOrderReceiptNoMenu(m))
-                case _ => Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
-              }
+              Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
             }
             case Left(errors) => {
               printErrors(errors, req)
-              req match{
-                case Params(Embedded(_)) => BadRequest ~> Html5(<div class="alert alert-error"> <h4 class="alert-heading">Feil!</h4> {errors.map(e => <p>{e}</p>)} <a href="">Gå tilbake</a></div>)
-                case _ => BadRequest ~> Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
-              }
+              BadRequest ~> Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             }
           }
        }
@@ -63,7 +52,5 @@ class ClubHandler(repo:MongoRepository) {
       case Host(host) => "http://%s".format(host)
     }
   }
-
-  object Embedded extends Params.Extract("embedded", Params.first)
 
 }

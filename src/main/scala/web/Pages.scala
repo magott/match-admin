@@ -50,9 +50,6 @@ case class Pages(req:HttpRequest[_]) {
 
   def clubNewMatch = bootstrap("Meld inn behov for dommer", <legend>Bestill dommer</legend> ++ newMatchForm, Some(newMatchJS))
 
-  def clubNewMatchNoMenu = noMenuBootstrap("",newMatchForm, Some(newMatchJS))
-
-
   def lostPassword = bootstrap("Glemt passord",
     <legend>Glemt passord</legend>
       <p>Fyll inn skjema under. Du vil da motta en e-post med instruksjoner for å sette nytt passord.</p>
@@ -69,5 +66,4 @@ case class Pages(req:HttpRequest[_]) {
     refereeOrderReceiptSnippet(matchTemplate),
     None)
 
-  def refereeOrderReceiptNoMenu(matchTemplate:MatchTemplate) =  noMenuBootstrap("",refereeOrderReceiptSnippet(matchTemplate))
 }
