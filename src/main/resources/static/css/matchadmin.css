@@ -159,6 +159,18 @@ button[data-state=login] span {
 button[data-state=login] .login-txt{
     display: block;
 }
+button[data-state=open] span {
+    display: none;
+}
+button[data-state=done] span {
+     display: none;
+ }
+button[data-state=open] .open-text {
+    display: block;
+}
+button[data-state=done] .done-text {
+    display: block;
+}
 .icon-green{
     background-image:url("../img/glyphicons-halflings-green.png");
 }

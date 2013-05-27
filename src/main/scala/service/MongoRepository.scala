@@ -48,6 +48,14 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
     db("matches").find( afterDate ++ notUnpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
   }
 
+  def markMatchAsDone(matchId:ObjectId) = {
+    db("matches").update(q= where("_id" -> matchId), o= $set(Seq("adminOk" -> true)))
+  }
+
+  def markMatchAsOpen(matchId:ObjectId) = {
+    db("matches").update(q= where("_id" -> matchId), o= $set(Seq("adminOk" -> false)))
+  }
+
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {
     val user = User.fromMongo(db("users").findOneByID(userId).get)
     db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo)).getN == 1

@@ -31,9 +31,9 @@ class AdminHandler(private val repo:MongoRepository) {
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>{
           if(viewAll(req))
-            Html5(Pages(req).listMatchesWithFilters(listPublishedMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime), "/admin/matches/", None))
+            Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime)))
           else
-            Html5(Pages(req).listMatchesWithFilters(listPublishedMatchesNewerThan(DateTime.now.withDayOfYear(1)), "/admin/matches/", None))
+            Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(DateTime.now.withDayOfYear(1))))
         }
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{
@@ -59,6 +59,16 @@ class AdminHandler(private val repo:MongoRepository) {
             case None => NotFound ~> JsonContent ~> ResponseString("""{"error":"Fant ikke kampen"}""")
           }
         }
+      }
+      case Path(Seg("admin" :: "matches" :: matchId :: "admin-status" :: Nil)) & Params(p)=> {
+        p.get("from-state").map(from => if (from.head == "open"){
+          markMatchAsDone(new ObjectId(matchId))
+          Ok ~> JsonContent ~> ResponseString("""{"newState":"done"}""")
+        }else{
+          markMatchAsOpen(new ObjectId(matchId))
+          Ok ~> JsonContent ~> ResponseString("""{"newState":"open"}""")
+        }
+        ).getOrElse(BadRequest)
       }
       case Path(Seg("admin" :: "users" :: Nil)) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)

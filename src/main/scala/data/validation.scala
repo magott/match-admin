@@ -126,7 +126,7 @@ object MatchValidation {
       vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2 |@| vLevel |@| vPublished) {
       (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2, lvl, published) =>
         Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, lvl, nonEmpty(description), kickoff, refereeType, refFee, assFee,
-        Nil, Nil, appointedRef, appointedAss1, appointedAss2, published,
+        Nil, Nil, appointedRef, appointedAss1, appointedAss2, published, false,
           createContact)
     }.either.left.map(_.list)
   }

@@ -12,7 +12,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee],
-                 published:Boolean, clubContact:Option[ContactInfo]){
+                 published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo]){
 
   def kickoffDateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
@@ -100,6 +100,13 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
         <button id={buttonId} class="btn int" data-state="not-interested">{buttonTexts}</button>
   }
 
+  def adminButton = (
+    <button type="button" class="btn" id="admin-status" data-state={if(adminOk)"done" else "open"}>
+      <span class="open-text"><i class="icon-star-empty"></i> Åpen</span>
+      <span class="done-text"><i class="icon-ok"></i> Ferdig</span>
+    </button>
+  )
+
 }
 
 object Match{
@@ -116,6 +123,7 @@ object Match{
     val refFee = m.getAs[Int]("refFee")
     val assFee = m.getAs[Int]("assFee")
     val published = m.getAsOrElse[Boolean]("published", true);
+    val adminOk = m.getAsOrElse[Boolean]("adminOk", false);
     val intRefs = m.getAsOrElse[ArrayBuffer[DBObject]]("intRef", ArrayBuffer.empty).map(Referee.fromMongo).toList
     val intAss = m.getAsOrElse[ArrayBuffer[DBObject]]("intAss", ArrayBuffer.empty).map(Referee.fromMongo).toList
     val referee = m.getAs[DBObject]("referee").map(Referee.fromMongo)
@@ -123,14 +131,14 @@ object Match{
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)
     val clubContact = m.getAs[DBObject]("clubContact").map(ContactInfo.fromMongo)
 
-    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, clubContact)
+    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, adminOk,clubContact)
   }
 
   def newInstance(homeTeam:String, awayTeam:String, venue:String, level:String,
                   description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                   assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                   appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]) =
-    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, None)
+    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, false, None)
 
 }
 case class MatchTemplate(homeTeam: String, awayTeam: String, venue: String, level: String,kickoff:DateTime,

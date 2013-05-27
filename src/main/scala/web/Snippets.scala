@@ -128,6 +128,11 @@ case class Snippets(req: HttpRequest[_]) {
               <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"></i>Feil ved sending av mail</span>
             </div>
           </div>
+          <div class="control-group">
+            <div class="controls">
+              {m.map(_.adminButton).getOrElse(<div></div>)}
+            </div>
+          </div>
           {
             if(m.isDefined){
               val matchUrl = "%s/matches/%s".format(baseUrl,m.get.id.get.toString)
@@ -603,8 +608,39 @@ case class Snippets(req: HttpRequest[_]) {
 
 
 
-  def matchListWithFilters(matches:Seq[Match], matchLinkPath:String, userId:Option[String]) = {
-    matchFilterButtons ++ matchList(matches, matchLinkPath, userId)
+  def adminMatchList(matches:Seq[Match]) = {
+
+    matchFilterButtons ++
+      <table class="table table-striped table-bordered table-condensed" id="matches">
+        <thead>
+          <tr>
+            <th>Tid</th>
+            <th>Kamp</th>
+            <th>Nivå</th>
+            <th>Sted</th>
+            <th>Dommer</th>
+            <th>AD 1</th>
+            <th>AD 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+          matches.map( m =>
+            <tr class={if(m.adminOk)"success" else ""}>
+              <td class="date">{m.kickoffDateTimeString}</td>
+              <td><a href={"/admin/matches/" + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
+              <td>{Level.asMap(m.level)}</td>
+              <td>{m.venue}</td>
+              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}</td>
+              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
+              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
+
+            </tr>
+          )
+          }
+        </tbody>
+      </table>
+
   }
 
   def matchList(matches:Seq[Match], matchLinkPath:String, userId:Option[String]) = {

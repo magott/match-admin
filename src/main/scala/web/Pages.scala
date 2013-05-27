@@ -13,7 +13,7 @@ case class Pages(req:HttpRequest[_]) {
     editMatch(m)
   }
 
-  def listMatchesWithFilters(m: Seq[Match], matchLinkPrefix:String, userId:Option[String]) = bootstrap("Kamper", matchListWithFilters(m, matchLinkPrefix, userId), Some(filterTableJS), <meta property="og:description" content={"%s ledige dommeroppdrag ".format(m.foldLeft(0)(_ + _.availableCount) )}/>)
+  def adminMatchListView(m: Seq[Match]) = bootstrap("Kamper", adminMatchList(m), Some(filterTableJS), <meta property="og:description" content={"%s ledige dommeroppdrag ".format(m.foldLeft(0)(_ + _.availableCount) )}/>)
 
   def listMatches(m: Seq[Match], matchLinkPrefix:String, userId:Option[String]) = bootstrap("Kamper", matchList(m, matchLinkPrefix, userId), None, <meta property="og:description" content={"%s ledige dommeroppdrag ".format(m.foldLeft(0)(_ + _.availableCount) )}/>)
 

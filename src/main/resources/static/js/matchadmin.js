@@ -40,9 +40,11 @@ function editMatchFunctions() {
     }
     $('#match-form').change(function(evt) {
         $('#send-mail').attr("disabled","disabled");
+        $('#admin-status').attr("disabled","disabled");
     });
     $('#send-mail').click(sendMail);
     $('#delete-match').click(deleteResource);
+    $('#admin-status').click(toggleAdminStatus);
 }
 
 function validateNewMatchForm(){
@@ -443,6 +445,17 @@ function deleteResource(){
         type: "DELETE",
         url: window.location.href,
         success: function(data){window.location.href=data.href;}
+    });
+}
+
+function toggleAdminStatus(evt){
+    var button = $(this)
+    button.attr("disabled","disabled");
+    $.ajax({
+        type: "POST",
+        url: window.location.href.replace(/\/$/, "")+"/admin-status?from-state="+button.attr("data-state"),
+        success: function(data){button.attr("data-state", data.newState);},
+        complete: function(){button.removeAttr("disabled");}
     });
 }
 
