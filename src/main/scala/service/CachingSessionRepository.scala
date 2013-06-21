@@ -12,19 +12,22 @@ trait SessionRepository {
 trait CachingSessionRepository extends SessionRepository{
 
   abstract override def sessionById(sessionId:String) : Option[Session] = {
-    Option(CachingSessionRepository.sessionCache.getIfPresent(sessionId)).orElse{
+    import CachingSessionRepository.sessionCache._
+    Option(getIfPresent(sessionId)).orElse{
       val sessionOption = super.sessionById(sessionId)
-      sessionOption.foreach(session=> CachingSessionRepository.sessionCache.put(sessionId,session))
+      sessionOption.foreach(session=> put(sessionId,session))
       sessionOption
     }
   }
 
   abstract override def userForSession(sessionId:String) : Option[User]= {
-    Option(CachingSessionRepository.userCache.getIfPresent(sessionId)).orElse{
-      val sessionOption = super.userForSession(sessionId)
-      sessionOption.foreach(session=> CachingSessionRepository.userCache.put(sessionId,session))
-      sessionOption
-    }
+    val sessionOption = sessionById(sessionId)
+    import CachingSessionRepository.userCache._
+    sessionOption.flatMap(session=> Option(getIfPresent(session.username)).orElse{
+      val userOpt = sessionOption.flatMap(session => super.userForSession(session.sessionId))
+      userOpt.foreach(user=> put(user.email,user))
+      userOpt
+    })
   }
 }
 
