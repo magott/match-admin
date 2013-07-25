@@ -421,11 +421,12 @@ function refBtn(button){
 }
 
 function fetchHistory(){
-        $.get("matches?all", function(data) {
-            $("#matches").replaceWith($(data).children("#matches"));
-        });
-        $("div button").removeClass("btn-inverse");
-        $(this).addClass("btn-inverse");
+    $.get("matches?all", function(data) {
+        $("#matches").replaceWith($(data).children("#matches"));
+        setMatchCount();
+    });
+    $("div button").removeClass("btn-inverse");
+    $(this).addClass("btn-inverse");
 }
 
 function filterTable(dateFunction){
@@ -437,7 +438,12 @@ function filterTable(dateFunction){
             var date = moment($(this).text(), "DD.MM.YYYY HH:mm");
             return dateFunction().isAfter(date);
         }).parent().hide();
+        setMatchCount();
     };
+}
+
+function setMatchCount(){
+    $("#count").html("Viser "+ (_.size($("tr:visible")) -1) +" kamper");
 }
 
 function deleteResource(){

@@ -611,6 +611,7 @@ case class Snippets(req: HttpRequest[_]) {
   def adminMatchList(matches:Seq[Match]) = {
 
     matchFilterButtons ++
+      <div id="count"> {s"Viser ${matches.size} kamper"}</div>++
       <table class="table table-striped table-bordered table-condensed" id="matches">
         <thead>
           <tr>
@@ -941,7 +942,7 @@ case class Snippets(req: HttpRequest[_]) {
 
 
   def filterTableJS = {
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+   momentJs ++ underscoreJs ++
     <script type="text/javascript">
       { """
             $(document).ready(filterTableFunctions);
