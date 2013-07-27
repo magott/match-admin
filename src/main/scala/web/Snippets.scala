@@ -282,7 +282,7 @@ case class Snippets(req: HttpRequest[_]) {
         </div>
 
         <div class="control-group">
-          <label class="control-label" for="level">Høyeste nivå som hoveddommer 2012</label>
+          <label class="control-label" for="level">Høyeste nivå som hoveddommer siste sesong</label>
           <div class="controls">
             <select id="level" name="level">
               {if (user.isEmpty || user.get.level.isEmpty)
@@ -300,8 +300,8 @@ case class Snippets(req: HttpRequest[_]) {
                 {l.display}
               </option>))}
             </select>
-          </div>
           <span class="help-inline"></span>
+          </div>
         </div>
 
         <div class="control-group">
