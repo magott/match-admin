@@ -7,6 +7,7 @@ import data.{User, Session}
 trait SessionRepository {
   def sessionById(sessionId:String) : Option[Session]
   def userForSession(sessionId:String) : Option[User]
+  def saveUser(user:User) : Option[User]
 }
 
 trait CachingSessionRepository extends SessionRepository{
@@ -29,6 +30,14 @@ trait CachingSessionRepository extends SessionRepository{
       userOpt
     })
   }
+
+  abstract override def saveUser(user:User) : Option[User] = {
+    import CachingSessionRepository._
+    userCache.invalidate(user.email)
+    super.saveUser(user)
+  }
+
+
 }
 
 object CachingSessionRepository{

@@ -400,6 +400,34 @@ function validateUserForm() {
 
 }
 
+function validateLevelForm() {
+
+    $('#level-form').validate(
+        {
+            onkeyup: false,
+            errorPlacement: function (error, element) {
+                error.appendTo($(".help-inline"));
+            },
+            rules:{
+                level:{
+                    required:true
+                }
+            },
+            messages:{
+                level: "Fyll ut hvilket nivå du dømte på siste sesong"
+            },
+            highlight:function (label) {
+                $(label).closest('.control-group').addClass('error');
+            },
+            success:function (label) {
+                label
+                    .removeClass('error')
+                    .closest('.control-group').removeClass('error');
+            }
+        });
+}
+
+
 function interestButtonFunctions(){
     $("#ref").click(function() {
         refBtn($(this))

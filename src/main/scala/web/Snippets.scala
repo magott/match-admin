@@ -933,6 +933,26 @@ case class Snippets(req: HttpRequest[_]) {
         <a href="">Bestill dommer til fler kamper</a>
       </p>
   }
+
+  def confirmLevelForm = {
+    <form class="form-horizontal" id="level-form" method="POST">
+
+      <div class="control-group">
+          <select id="level" name="level" required="required">
+            <option selected="selected" value="">Hoveddommer i:</option>
+            {Level.all.map( l =>
+              <option value={l.key}>
+                {l.display}
+              </option>)
+            }
+          </select>
+        <span class="help-inline"></span>
+      </div>
+      <div class="control-group">
+          <button type="submit" class="btn">Lagre</button>
+      </div>
+    </form>
+  }
   val jQuery = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   val momentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
   val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
@@ -985,6 +1005,15 @@ case class Snippets(req: HttpRequest[_]) {
       <script type="text/javascript">
         { """
             $(document).ready(validateUserForm());
+
+          """}
+      </script>
+  }
+  def levelFormJS = {
+      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+      <script type="text/javascript">
+        { """
+            $(document).ready(validateLevelForm());
 
           """}
       </script>

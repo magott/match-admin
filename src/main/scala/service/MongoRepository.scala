@@ -105,7 +105,7 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
     db("sessions").update(q=where("username" -> email), o= setting, upsert=false, multi=true)
   }
 
-  def saveUser(user:User) = {
+  def saveUser(user:User) : Option[User] = {
     db("users").update(q = user.updateClause, o = user.toMongo, upsert = true, multi = false)
     userByEmail(user.email)
   }

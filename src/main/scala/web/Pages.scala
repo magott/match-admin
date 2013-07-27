@@ -60,6 +60,15 @@ case class Pages(req:HttpRequest[_]) {
     </form>
   )
 
+  def refereeUpdateLevel = {
+    bootstrap("Nivå",
+      <legend>Bekreft nivå</legend>
+      <p>Hva er det høyeste nivået du har dømt kamper <strong>tildelt av kretsen</strong> som <strong style="text-decoration: underline;">hoveddommer</strong></p>
+      <p>Du skal ikke fylle inn nivå du har dømt tidligere sesonger eller nivå du har dømt på i kamper som ikke er administrert av kretsen</p>
+      ++ {confirmLevelForm}, Some(levelFormJS)
+    )
+  }
+
   def unpublishedMatches(matches:Seq[Match]) = unpublishedMatchesTable(matches)
 
   def refereeOrderReceipt(matchTemplate:MatchTemplate) = bootstrap("Takk for bestillingen",

@@ -162,7 +162,7 @@ object Referee{
   def fromMongo(m: DBObject) = Referee(m.as[ObjectId]("_id"), m.as[String]("name"), m.as[String]("level"))
 }
 
-case class User(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, admin:Boolean, refereeNumber:Int, created:DateTime, password:String){
+case class User(id:Option[ObjectId], name:String, email:String, telephone:String, level:String, admin:Boolean, refereeNumber:Int, created:DateTime, password:String, lastUpdate:Option[DateTime] = None){
   def toMongo  = {
     val builder = MongoDBObject.newBuilder
     if(id.isDefined)
@@ -177,6 +177,7 @@ case class User(id:Option[ObjectId], name:String, email:String, telephone:String
     builder += "refNo" -> refereeNumber
     builder += "created" -> created
     builder += "password" -> password
+    builder += "updated" -> DateTime.now()
     builder.result()
   }
   def updateClause : MongoDBObject = if(id.isDefined) MongoDBObject("_id" -> id.get) else toMongo
@@ -193,7 +194,8 @@ object User{
     val refNo = m.as[Int]("refNo")
     val created = m.as[DateTime]("created")
     val password = m.as[String]("password")
-    User(id,name,email,tel,level,admin,refNo,created,password)
+    val updated = m.getAs[DateTime]("updated")
+    User(id,name,email,tel,level,admin,refNo,created,password, updated)
   }
 
   def newInstance(name:String, email:String, telephone:String, level:String, refereeNumber:Int, password:String) =

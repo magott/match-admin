@@ -2,7 +2,7 @@ package web
 
 import unfiltered.request._
 import unfiltered.response._
-import data.{Session, User}
+import data.{Level, Session, User}
 import data.MatchValidation.UserValidation
 import scala.Left
 import unfiltered.Cookie
@@ -43,6 +43,24 @@ class UserHandler(private val repo:MongoRepository) {
             }
           }
           case _ => MethodNotAllowed ~> Html5(Pages(req).forbidden)
+        }
+      }
+      case Path(Seg("users" :: userId :: "level" :: Nil)) => {
+        req match {
+          case GET(_) => Ok ~> Html5(Pages(req).refereeUpdateLevel)
+          case POST(_) => {
+            val LoggedOnUser(user) = req
+            if(user.id.exists(_.toString == userId)){
+              val Params(LevelParam(newLevel)) = req
+              if(Level.asMap.contains(newLevel)){
+                val updated = repo.userById(new ObjectId(userId)).map(_.copy(level = newLevel))
+                if(updated.isEmpty) BadRequest ~> Html5(Pages(req).errorPage(<div>Fant ikke bruker</div>))
+                else {updated.foreach(user => repo.saveUser(user)); HerokuRedirect(req,"/matches")}
+              }else BadRequest ~> Html5(Pages(req).errorPage(<div>Ugyldig verdi for nivå</div>))
+            }else{
+              Forbidden ~> ResponseString("Ingen tilgang")
+            }
+          }
         }
       }
       case Path(Seg("users" :: userId :: Nil)) => {
@@ -104,5 +122,7 @@ class UserHandler(private val repo:MongoRepository) {
     val secure = req match { case XForwardProto("https") => Some(true) case _ => Some(false)}
     Cookie(name="user.sessionId",value=value, secure=secure, path=Some("/"))
   }
+
+  object LevelParam extends Params.Extract("level", Params.first)
 
 }
