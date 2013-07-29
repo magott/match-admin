@@ -526,7 +526,7 @@ function ajaxinterest(method, url, button, onError){
 }
 
 function setUserLink(){
-    var userId = $(this).attr('value')
+    var userId = $(this).val();
     if(userId)
         $(this).next('a').attr('href','/admin/users/'+userId);
     else
