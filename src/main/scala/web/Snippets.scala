@@ -47,7 +47,7 @@ case class Snippets(req: HttpRequest[_]) {
           <label class="control-label">Kampstart</label>
             <div class="controls controls-row">
               <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required" value={m.map(_.kickoff.toString("yyyy-MM-dd")).getOrElse("")}/>
-              <input type="time" id="time" name="time" placeholder="TT:MM" class="input-small" required="required" value={m.map(_.kickoff.toString("HH:mm")).getOrElse("")}/>
+              <input type="time" id="time" name="time" placeholder="TT:MM" class="input-medium" required="required" value={m.map(_.kickoff.toString("HH:mm")).getOrElse("")}/>
               <span class="help-inline"></span>
               </div>
             </div>
@@ -796,7 +796,7 @@ case class Snippets(req: HttpRequest[_]) {
           <label class="control-label">Kampstart</label>
           <div class="controls controls-row">
             <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required"  />
-            <input type="time" id="time" name="time" placeholder="TT:MM" class="input-small" required="required"  />
+            <input type="time" id="time" name="time" placeholder="TT:MM" class="input-medium" required="required"  />
             <span class="help-inline"></span>
           </div>
         </div>

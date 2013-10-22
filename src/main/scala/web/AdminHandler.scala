@@ -16,6 +16,7 @@ import scala.Right
 import scala.Some
 import unfiltered.response.Html5
 import unfiltered.response.ResponseString
+import org.joda.time
 
 class AdminHandler(private val repo:MongoRepository) {
   import repo._
@@ -33,7 +34,7 @@ class AdminHandler(private val repo:MongoRepository) {
           if(viewAll(req))
             Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime)))
           else
-            Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(DateTime.now.withDayOfYear(1))))
+            Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(seasonStart)))
         }
         case POST(_) & Params(p)=>{
           matchFromParams(None, p) match{
@@ -113,6 +114,12 @@ class AdminHandler(private val repo:MongoRepository) {
       }
       case _ => NotFound ~> Html5(Pages(req).notFound(Some("Ukjent adminside")))
     }
+  }
+
+
+  def seasonStart: DateTime = {
+    val novemberFirst = DateTime.now.withTimeAtStartOfDay().withMonthOfYear(11).withDayOfMonth(1)
+    if(novemberFirst.isAfterNow) novemberFirst.minusYears(1) else novemberFirst
   }
 
   def matchFromParams(id:Option[String], p:Map[String, Seq[String]]) = {

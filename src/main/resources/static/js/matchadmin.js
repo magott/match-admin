@@ -20,9 +20,18 @@ function isTrio() {
 function filterTableFunctions(){
     $(document).ready(function(){
         $('#future').click(filterTable(function(){return moment().startOf('day');}));
-        $('#all').click(filterTable(function(){return moment().dayOfYear(1);}));
+        $('#all').click(filterTable(thisSeasonFunction));
         $('#history').click(fetchHistory);
     });
+}
+
+function thisSeasonFunction(){
+    var nov1st = moment().month(10).startOf('month');
+    if(nov1st.isAfter(moment())){
+        return nov1st.subtract('years', 1);
+    }else{
+        return nov1st;
+    }
 }
 
 function editMatchFunctions() {
