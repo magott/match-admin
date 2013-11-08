@@ -380,6 +380,10 @@ case class Snippets(req: HttpRequest[_]) {
         <th>Nivå</th>
         <td>{Level.asMap(user.level)}</td>
       </tr>
+      <tr>
+        <th>Sist oppdatert</th>
+        <td>{user.lastUpdate.getOrElse(user.created).toString("dd.MM.yyyy HH:mm")}</td>
+      </tr>
         {if(user.admin)
         <tr>
         <th></th>
@@ -724,6 +728,7 @@ case class Snippets(req: HttpRequest[_]) {
           <th>Telefon</th>
           <th>Nivå</th>
           <th>E-post</th>
+          <th>Sist oppdatert</th>
         </tr>
       </thead>
       <tbody>
@@ -735,6 +740,7 @@ case class Snippets(req: HttpRequest[_]) {
           <td>{u.telephone}</td>
           <td>{Level.asMap(u.level)}</td>
           <td>{u.email}</td>
+          <td>{u.lastUpdate.getOrElse(u.created).toString("dd.MM.yyyy HH:mm")}</td>
         </tr>
         )
         }
