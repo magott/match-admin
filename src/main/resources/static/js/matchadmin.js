@@ -77,12 +77,8 @@ function fetchPoststed() {
     }
 }
 
-function setupNewMatchScripts(){
-    validateNewMatchForm();
-    $("#clubContactZip").focusout(fetchPoststed);
-}
-
 function validateNewMatchForm(){
+    $("#clubContactZip").focusout(fetchPoststed);
     jQuery.validator.addMethod("refTypeValidForLevel", function(value, element, param) {
         var selectedIndex = document.getElementById('level').selectedIndex
         return !($('#refTypeDommer').is(':checked') && (selectedIndex  < 5 || selectedIndex == 17));
