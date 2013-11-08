@@ -62,7 +62,7 @@ function fetchPoststed() {
     var inputField = $('#clubContactZip');
     var outputElement = $('#poststed');
     if (inputField.val().length == 4) {
-        $.getJSON('http://fraktguide.bring.no/fraktguide/api/postalCode.json?pnr='+ inputField.val() +'&callback=?',
+        $.getJSON('https://fraktguide.bring.no/fraktguide/api/postalCode.json?pnr='+ inputField.val() +'&callback=?',
             function(data){
                 if (data.valid) {
                     outputElement.text(data.result);
