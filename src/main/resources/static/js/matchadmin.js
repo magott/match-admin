@@ -43,6 +43,8 @@ function editMatchFunctions() {
     $('#appointedRef').trigger('change');
     $('#appointedAssistant1').trigger('change');
     $('#appointedAssistant2').trigger('change');
+    $("#clubContactZip").focusout(fetchPoststed);
+    fetchPoststed();
     validateMatchForm();
     if (!isTrio()) {
         trioOff();
@@ -54,6 +56,30 @@ function editMatchFunctions() {
     $('#send-mail').click(sendMail);
     $('#delete-match').click(deleteResource);
     $('#admin-status').click(toggleAdminStatus);
+}
+
+function fetchPoststed() {
+    var inputField = $('#clubContactZip');
+    var outputElement = $('#poststed');
+    if (inputField.val().length == 4) {
+        $.getJSON('http://fraktguide.bring.no/fraktguide/api/postalCode.json?pnr='+ inputField.val() +'&callback=?',
+            function(data){
+                if (data.valid) {
+                    outputElement.text(data.result);
+                }
+                else {
+                    outputElement.text('Ugyldig postnummer');
+                }
+            });
+    }
+    else {
+        outputElement.text('');
+    }
+}
+
+function setupNewMatchScripts(){
+    validateNewMatchForm();
+    $("#clubContactZip").focusout(fetchPoststed);
 }
 
 function validateNewMatchForm(){
