@@ -765,7 +765,7 @@ case class Snippets(req: HttpRequest[_]) {
         <div class="control-group">
           <div class="controls">
             <input type="number" id="clubContactZip" name="clubContactZip" placeholder="Postnr" class="input-small" required="required"  />
-            <span id="poststed"></span>
+            &nbsp;<span id="poststed"></span>
             <span class="help-inline"></span>
           </div>
         </div>
@@ -866,7 +866,7 @@ case class Snippets(req: HttpRequest[_]) {
             <div class="control-group">
               <div class="controls">
                 <input type="number" id="clubContactZip" name="clubContactZip" placeholder="Postnr" class="input-small" value={c.map(_.zip).getOrElse("")}/>
-                <span id="poststed"></span>
+                &nbsp;<span id="poststed"></span>
                 <span class="help-inline"></span>
               </div>
             </div>
