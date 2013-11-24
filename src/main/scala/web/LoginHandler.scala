@@ -8,7 +8,7 @@ import data.Session
 import unfiltered.response._
 import org.mindrot.jbcrypt.BCrypt._
 import unfiltered.response.Html5
-import unfiltered.Cookie
+import unfiltered.{response, Cookie}
 import scala.Some
 import unfiltered.response.ResponseString
 import service.{MongoRepository, MailgunService, ResetPasswordService}
@@ -23,11 +23,11 @@ class LoginHandler(private val repo:MongoRepository) {
       case Path("/login") => req match{
         case XForwardProto("http") => HerokuRedirect(req,"login")
         case GET(_) & LoggedOnUser(user)=> Html5(Pages(req).alreadyLoggedIn)
-        case GET(_) & Params(qp)=> Html5(Pages(req).login(qp))
+        case GET(_) & Params(qp)=> Ok ~> SetCookies(Cookie(name="COOKIE_CHECK",value="check", maxAge = Some(2000))) ~> Html5(Pages(req).login(qp))
         case POST(_) & Params(p) => {
           processLogin(req,p)
         }
-      }
+       }
     }
   }
 

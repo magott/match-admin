@@ -321,6 +321,12 @@ case class Snippets(req: HttpRequest[_]) {
 
   def loginForm = {
     <legend>Logg inn</legend>
+      <div class="alert alert-warning" id="cookie-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4>Advarsel!</h4>
+        Nettleseren din må støtte cookies/informasjonskapsler for at du skal kunne logge inn.
+        Din nettleser ser ikke ut til å akseptere cookies/informasjonskapsler.
+      </div>
     <form class="form-horizontal" id="login-form" name="login-form" method="post">
       <div class="control-group">
         <label class="control-label" for="inputEmail">E-post</label>
@@ -1005,6 +1011,8 @@ case class Snippets(req: HttpRequest[_]) {
       <script type="text/javascript">
         { """
             $(document).ready(validateLogin());
+            $(document).ready(warningOnLoginIfCookiesNotAccepted());
+
 
           """}
       </script>)
