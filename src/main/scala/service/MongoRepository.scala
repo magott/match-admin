@@ -114,6 +114,10 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
     db("users").findOne(where("email" -> email.toLowerCase)).map(User.fromMongo)
   }
 
+  def searchUserByName(partial:String) = {
+    db("users").find(where("name" -> s"(?i)$partial".r)).map(User.fromMongo)
+  }
+
 }
 
 object MongoRepository{

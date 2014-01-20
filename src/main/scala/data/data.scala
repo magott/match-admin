@@ -200,6 +200,8 @@ object User{
 
   def newInstance(name:String, email:String, telephone:String, level:String, refereeNumber:Int, password:String) =
     User(None, name, email, telephone, level, false, refereeNumber, new DateTime, password)
+
+  def toIdNameJson(u:User) = s"""{"id":"${u.id.getOrElse("")}", "label":"${u.name}"}"""
 }
 
 case class ContactInfo(name:String, address:String, zip:String, telephone:String, email:String){

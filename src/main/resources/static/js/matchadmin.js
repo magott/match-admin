@@ -13,8 +13,8 @@ function trioOff() {
 }
 
 function isTrio() {
-    var refType = $('form input[name=refType]:checked').val()
-    return  refType == "trio"
+    var refType = $('form input[name=refType]:checked').val();
+    return refType == "trio";
 }
 
 function filterTableFunctions(){
@@ -37,9 +37,9 @@ function thisSeasonFunction(){
 function editMatchFunctions() {
     $('#refTypeDommer').click(trioOff);
     $('#refTypeTrio').click(trioOn);
-    $('#appointedRef').change(setUserLink)
-    $('#appointedAssistant1').change(setUserLink)
-    $('#appointedAssistant2').change(setUserLink)
+    $('#appointedRef').change(setUserLink);
+    $('#appointedAssistant1').change(setUserLink);
+    $('#appointedAssistant2').change(setUserLink);
     $('#appointedRef').trigger('change');
     $('#appointedAssistant1').trigger('change');
     $('#appointedAssistant2').trigger('change');
@@ -49,9 +49,9 @@ function editMatchFunctions() {
     if (!isTrio()) {
         trioOff();
     }
-    $('#match-form').change(function(evt) {
-        $('#send-mail').attr("disabled","disabled");
-        $('#admin-status').attr("disabled","disabled");
+    $('#match-form').change(function (evt) {
+        $('#send-mail').attr("disabled", "disabled");
+        $('#admin-status').attr("disabled", "disabled");
     });
     $('#send-mail').click(sendMail);
     $('#delete-match').click(deleteResource);
@@ -255,7 +255,7 @@ function validateMatchForm() {
                 },
                 assFee:{
                     depends: function (element) {
-                        return $("#refTypeTrio:checked")
+                        return $("#refTypeTrio:checked");
                     }
                 },
                 clubContactName:{
@@ -451,7 +451,6 @@ function validateUserForm() {
 }
 
 function validateLevelForm() {
-
     $('#level-form').validate(
         {
             onkeyup: false,
@@ -624,6 +623,72 @@ function validatePasswordResetForm() {
             }
         });
 
+}
+
+function adminUserSearchSetup() {
+    $( "#refAutoComplete" ).autocomplete({
+        source: "/admin/users/search",
+        minLength: 2,
+        select: function( event, ui ) {
+            if(ui.item){
+                $("#addRefBtn").val(ui.item.id);
+                $("#addRefBtn").removeAttr("disabled");
+            }
+        },
+        change: function (event, ui) {
+            if (ui.item == null) {
+                clearRefSelection("ref");
+            }
+        }
+    });
+
+    $( "#assRefAutoComplete" ).autocomplete({
+        source: "/admin/users/search",
+        minLength: 2,
+        select: function( event, ui ) {
+            if(ui.item){
+                $("#addAssRefBtn").val(ui.item.id);
+                $("#addAssRefBtn").removeAttr("disabled");
+            }
+        },
+        change: function (event, ui) {
+            if (ui.item == null) {
+                clearRefSelection("assRef");
+            }
+        }
+    });
+
+    $("#addRefBtn").click(function(){
+        addRefToListOfInterested(extractMatchIdFromUrl(), "ref", $(this).val());
+    });
+    $("#addAssRefBtn").click(function(){
+        addRefToListOfInterested(extractMatchIdFromUrl(), "assRef",  $(this).val());
+    });
+
+    function addRefToListOfInterested(matchid, refType, userid){
+        $.ajax({
+            type: "POST",
+            url: location.origin + "/admin/matches/"+matchid+"?reftype="+refType+"&userid="+userid,
+            success: function(data){
+                clearRefSelection(refType);
+                location.reload(true);
+            }
+        });
+    }
+
+    function clearRefSelection(refType){
+        if(refType == "ref"){
+            $("#addRefBtn").val("").attr("disabled", "disabled");
+            $("#refAutoComplete").val("");
+        }else{
+            $("#addAssRefBtn").val("").attr("disabled", "disabled");
+            $("#assRefAutoComplete").val("");
+        }
+    }
+
+    function extractMatchIdFromUrl(){
+        return _.last(window.location.href.replace(/\/$/, "").split("/"));
+    }
 }
 
 

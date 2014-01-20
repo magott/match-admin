@@ -17,6 +17,7 @@ import scala.Some
 import unfiltered.response.Html5
 import unfiltered.response.ResponseString
 import org.joda.time
+import unfiltered.request.Params.Extract
 
 class AdminHandler(private val repo:MongoRepository) {
   import repo._
@@ -71,6 +72,17 @@ class AdminHandler(private val repo:MongoRepository) {
         }
         ).getOrElse(BadRequest)
       }
+      case Path(Seg("admin" :: "users" :: "search" :: Nil)) =>  req match {
+        case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
+        case GET(_) => req match{
+          case Params(NameParam(name)) => {
+            Ok ~> JsonContent ~> ResponseString(repo.searchUserByName(name).map(User.toIdNameJson).mkString("[",",","]"))
+          }
+          case _ => BadRequest ~> ResponseString("""'name' param is required""")
+        }
+        case _ => MethodNotAllowed
+      }
+
       case Path(Seg("admin" :: "users" :: Nil)) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) => Ok ~> Html5(Pages(req).userList(allUsers))
@@ -98,8 +110,19 @@ class AdminHandler(private val repo:MongoRepository) {
             case Some(m) => Html5(Pages(req).editMatchForm(Some(m)))
           }
         }
-        case POST(_) & Params(p)=>{
-          matchFromParams(Some(matchId), p) match{
+        case POST(_) & Params(p)=> req match {
+          case Params(RefTypeParam(reftype)) & Params(UserIdParam(userid)) => req match{
+            case Params(RefTypeParam("ref")) => {
+              repo.refInterestedInMatch(new ObjectId(matchId), new ObjectId(userid))
+              NoContent
+            }
+            case Params(RefTypeParam("assRef")) => {
+              repo.assistantInterestedInMatch(new ObjectId(matchId), new ObjectId(userid))
+              NoContent
+            }
+            case _ => BadRequest~> JsonContent ~> ResponseString("""{"error":"Invalid or no reftype specified" }""")
+          }
+          case _ => matchFromParams(Some(matchId), p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             case Right(m) => {
               saveMatch(m)
@@ -132,5 +155,11 @@ class AdminHandler(private val repo:MongoRepository) {
   }
 
   private def viewAll(req: HttpRequest[_]): Boolean = req.parameterNames.contains("all")
+
+  object NameParam extends Params.Extract("term", Params.first)
+  object UserIdParam extends Params.Extract("userid", Params.first)
+  object RefTypeParam extends Params.Extract("reftype", Params.first)
+
+
 
 }

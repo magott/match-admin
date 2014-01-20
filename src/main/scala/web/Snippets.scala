@@ -106,10 +106,14 @@ case class Snippets(req: HttpRequest[_]) {
               <div class="ref-controls">
                {select("appointedRef", "Dommer", m.flatMap(_.appointedRef.map(_.id.toString)), m.map(_.interestedRefs.map(_.toSelectOption)).getOrElse(Nil))}
                 <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
+                <input type="text" id="refAutoComplete" class="input-large" placeholder="Legg til dommer i liste" value=""></input>
+                <button type="button" class="btn" disabled="disabled" id="addRefBtn" value=""><i class="icon-plus"></i></button>
               </div>
               <div class="ass-controls">
               {select("appointedAssistant1", "AD1", m.flatMap(_.appointedAssistant1.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
                 <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
+                <input type="text" id="assRefAutoComplete" class="input-large" placeholder="Legg til AD i liste" value=""></input>
+                <button type="button" class="btn" disabled="disabled" id="addAssRefBtn" value=""><i class="icon-plus"></i></button>
               </div>
               <div class="ass-controls">
                 {select("appointedAssistant2", "AD2", m.flatMap(_.appointedAssistant2.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
@@ -415,6 +419,8 @@ case class Snippets(req: HttpRequest[_]) {
         <meta http-equiv="Content-Language" content="no" />
         <meta name="author" content="Morten Andersen-Gott"/>
 
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery-ui.css"></link>
+
         <!-- Le styles -->
         <link href="/css/bootstrap.css" rel="stylesheet"/>
         <style type="text/css">
@@ -426,10 +432,14 @@ case class Snippets(req: HttpRequest[_]) {
           .sidebar-nav{
           padding: 9 px 0;
           }
+         .ui-autocomplete-loading {
+             background: white url('/img/spinner_16x16.gif') right center no-repeat;
+           }
            """}
         </style>
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
         <link href="/css/matchadmin.css" rel="stylesheet"/>
+
 
         <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
@@ -969,6 +979,7 @@ case class Snippets(req: HttpRequest[_]) {
     </form>
   }
   val jQuery = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  val jQueryUiJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
   val momentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
   val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
   val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
@@ -987,10 +998,11 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   def editMatchJS = {
-    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ underscoreJs ++
+    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ underscoreJs ++jQueryUiJs ++
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);
+            $(document).ready(adminUserSearchSetup);
 
         """}
     </script>
@@ -1018,22 +1030,22 @@ case class Snippets(req: HttpRequest[_]) {
       </script>)
   }
   def userFormJS = {
-      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+      jqueryValidateJs ++(
       <script type="text/javascript">
-        { """
-            $(document).ready(validateUserForm());
+      { """
+          $(document).ready(validateUserForm());
 
-          """}
-      </script>
+        """}
+      </script>)
   }
   def levelFormJS = {
-      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+      jqueryValidateJs ++ (
       <script type="text/javascript">
         { """
             $(document).ready(validateLevelForm());
 
           """}
-      </script>
+      </script>)
   }
 
   def viewMatchJS = {
@@ -1046,13 +1058,13 @@ case class Snippets(req: HttpRequest[_]) {
   }
 
   def resetPasswordFormJs = {
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+    jqueryValidateJs ++ (
     <script type="text/javascript">
       { """
             $(document).ready(validatePasswordResetForm());
 
         """}
-    </script>
+    </script>)
   }
 
 
