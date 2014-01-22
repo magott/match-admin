@@ -532,7 +532,7 @@ function deleteResource(){
 }
 
 function toggleAdminStatus(evt){
-    var button = $(this)
+    var button = $(this);
     button.attr("disabled","disabled");
     $.ajax({
         type: "POST",
@@ -543,7 +543,7 @@ function toggleAdminStatus(evt){
 }
 
 function sendMail(evt){
-    var button = $(this)
+    var button = $(this);
     button.attr("disabled","disabled");
     $('.mail-processing').show();
     $.ajax({
@@ -579,7 +579,7 @@ function setUserLink(){
     if(userId)
         $(this).next('a').attr('href','/admin/users/'+userId);
     else
-        $(this).next('a').removeAttr("href")
+        $(this).next('a').removeAttr("href");
 
 }
 
@@ -666,18 +666,31 @@ function adminUserSearchSetup() {
     });
 
     function addRefToListOfInterested(matchid, refType, userid){
+        function reloadListOfInterested(selectListId){
+            var selected = $(selectListId).find(":selected").val();
+            $.get("/admin/matches/"+matchid, function(data) {
+                $(selectListId).replaceWith($(data).find(selectListId));
+                $(selectListId).change(setUserLink);
+                $(selectListId).val(selected);
+            });
+        }
         $.ajax({
             type: "POST",
             url: location.origin + "/admin/matches/"+matchid+"?reftype="+refType+"&userid="+userid,
             success: function(data){
+                if(refType === "ref"){
+                    reloadListOfInterested("#appointedRef");
+                }else if(refType === "assRef"){
+                    reloadListOfInterested("#appointedAssistant1");
+                    reloadListOfInterested("#appointedAssistant2");
+                }
                 clearRefSelection(refType);
-                location.reload(true);
             }
         });
     }
 
     function clearRefSelection(refType){
-        if(refType == "ref"){
+        if(refType === "ref"){
             $("#addRefBtn").val("").attr("disabled", "disabled");
             $("#refAutoComplete").val("");
         }else{
