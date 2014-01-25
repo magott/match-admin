@@ -29,6 +29,8 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
     """
       |NB! Bekreft at du aksepterer oppdraget ved å svare på denne mailen!
       |
+      |Kan du ikke dømme kampen må du IKKE bytte kampen selv, men bare svare på denne e-posten og gi beskjed om at du ikke kan
+      |
       |Dommer tildelt oppdrag
       |%s - %s
       |%s
@@ -46,7 +48,10 @@ case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User],
 
   def html = {
      <h2>Dommer tildelt oppdrag</h2>
-      <p><strong>NB! Bekreft at du aksepterer oppdraget ved å svare på denne mailen!</strong></p>
+      <strong>
+        <p>NB! Bekreft at du aksepterer oppdraget ved å svare på denne mailen!</p>
+        <p>Kan du ikke dømme kampen må du <em>IKKE bytte kampen selv</em>, men bare svare på denne e-posten og gi beskjed om at du ikke kan</p>
+      </strong>
       <table style="text-align: left; float: left;">
         <tr>
           <th>Kamp</th>
