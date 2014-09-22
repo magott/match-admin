@@ -1,5 +1,6 @@
 package web
 
+import conf.Config
 import unfiltered.request._
 import service.MongoRepository._
 import org.joda.time.{DateMidnight, DateTime}
@@ -10,7 +11,7 @@ import scala.Some
 import java.net.URI
 import service.MongoRepository
 
-class MatchHandler(private val repo:MongoRepository) {
+class MatchHandler(private val repo:MongoRepository) (implicit val config:Config){
 
   def handleMatches(req: HttpRequest[_]) = {
     req match {

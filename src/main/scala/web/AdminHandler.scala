@@ -1,5 +1,6 @@
 package web
 
+import conf.Config
 import unfiltered.request._
 import unfiltered.response._
 import service.MongoRepository._
@@ -19,7 +20,7 @@ import unfiltered.response.ResponseString
 import org.joda.time
 import unfiltered.request.Params.Extract
 
-class AdminHandler(private val repo:MongoRepository) {
+class AdminHandler (private val repo:MongoRepository) (implicit val config:Config){
   import repo._
 
   def handleAdmin(req: HttpRequest[_]) = {

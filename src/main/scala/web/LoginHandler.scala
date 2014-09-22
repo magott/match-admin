@@ -1,5 +1,6 @@
 package web
 
+import conf.Config
 import unfiltered.request._
 
 import scala.Predef._
@@ -14,7 +15,7 @@ import unfiltered.response.ResponseString
 import service.{MongoRepository, MailgunService, ResetPasswordService}
 import org.joda.time.DateTime
 
-class LoginHandler(private val repo:MongoRepository) {
+class LoginHandler(private val repo:MongoRepository)(implicit val config:Config){
 
   val passwordService = new ResetPasswordService
 

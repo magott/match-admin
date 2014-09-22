@@ -1,5 +1,7 @@
 package web
 
+import conf.Config
+
 import xml.NodeSeq
 import unfiltered.request.{Params, Host, RequestHeader, HttpRequest}
 import data._
@@ -8,7 +10,7 @@ import scala.Some
 import data.RefereeType.{Dommer, Trio}
 import org.joda.time.DateTime
 
-case class Snippets(req: HttpRequest[_]) {
+case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
   val Host(host) = req
   val protocol = XForwardProto.unapply(req).getOrElse("http")
@@ -253,7 +255,7 @@ case class Snippets(req: HttpRequest[_]) {
           <label class="control-label" for="refNumber"> Dommernummer</label>
           <div class="controls">
             <div class="input-prepend">
-              <span class="add-on"><strong>03-</strong></span>
+              <span class="add-on"><strong>{config.refNoPrefix}-</strong></span>
               <input type="text" class="input-mini" id="refNumber" placeholder="Dnr" name="refNumber" value={user.map(_.refereeNumber.toString).getOrElse("")} maxlength="6"/>
               <span class="help-inline"></span>
             </div>
@@ -438,7 +440,7 @@ case class Snippets(req: HttpRequest[_]) {
            """}
         </style>
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
-        <link href="/css/matchadmin.css" rel="stylesheet"/>
+        <link href={config.css} rel="stylesheet"/>
 
 
         <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -572,7 +574,7 @@ case class Snippets(req: HttpRequest[_]) {
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/">OFDL Treningskamper</a>
+          <a class="brand" href="/">{config.heading}</a>
           <div class="nav-collapse collapse">
             {
             if(sessOpt.isDefined){

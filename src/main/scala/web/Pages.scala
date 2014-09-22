@@ -1,10 +1,11 @@
 package web
 
+import conf.Config
 import unfiltered.request.HttpRequest
 import data.{MatchTemplate, User, Match}
 import xml.NodeSeq
 
-case class Pages(req:HttpRequest[_]) {
+case class Pages(req:HttpRequest[_]) (implicit val config:Config){
 
   val snippets = Snippets(req)
   import snippets._

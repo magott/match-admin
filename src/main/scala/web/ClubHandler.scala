@@ -1,5 +1,6 @@
 package web
 
+import conf.Config
 import service.{MailgunService, MongoRepository}
 import unfiltered.request._
 import unfiltered.response._
@@ -7,7 +8,7 @@ import unfiltered.response.Html5
 import data.MatchValidation
 import unfiltered.request.UserAgent
 
-class ClubHandler(repo:MongoRepository) {
+class ClubHandler(repo:MongoRepository) (implicit val config:Config){
 
   def handleClubRequest(req: HttpRequest[_]) = {
     req match{

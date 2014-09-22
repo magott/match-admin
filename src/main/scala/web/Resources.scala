@@ -4,10 +4,12 @@ import unfiltered.filter.Plan
 import unfiltered.request._
 import unfiltered.response.{Ok, Html5}
 import service.{MongoRepository}
+import conf.Config
 
-class Resources extends Plan{
+class Resources(config: Config) extends Plan{
 
   private val repo = MongoRepository.singletonWithSessionCaching
+  implicit val c = config
   val loginHandler = new LoginHandler(repo)
   def intent = {
     case r@GET(_) & XForwardProto("http") => HerokuRedirect(r,r.uri)

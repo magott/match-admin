@@ -1,5 +1,6 @@
 package web
 
+import conf.Config
 import unfiltered.request._
 import unfiltered.response._
 import data.{Level, Session, User}
@@ -13,7 +14,7 @@ import service.MongoRepository
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
 
-class UserHandler(private val repo:MongoRepository) {
+class UserHandler(private val repo:MongoRepository) (implicit val config:Config){
 
   def handleUser(req: HttpRequest[_])  = {
     req match {
