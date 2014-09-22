@@ -1,7 +1,7 @@
 package service
 
 import common.MongoSetting
-import util.Properties
+import scala.util.Properties
 import com.mongodb.casbah.query.Imports._
 import data._
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
@@ -15,7 +15,8 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   private val where, has, by = MongoDBObject
 
   def fullMatch(objId: ObjectId) = {
-    db("matches").findOne(where("_id" -> objId)).map(Match.fromMongo(_))
+    val maybeMatch = db("matches").findOne(where("_id" -> objId)).map(Match.fromMongo(_))
+    maybeMatch
   }
 
   def saveMatch(m: Match) = {
@@ -49,11 +50,11 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def markMatchAsDone(matchId:ObjectId) = {
-    db("matches").update(q= where("_id" -> matchId), o= $set(Seq("adminOk" -> true)))
+    db("matches").update(q= where("_id" -> matchId), o= $set("adminOk" -> true))
   }
 
   def markMatchAsOpen(matchId:ObjectId) = {
-    db("matches").update(q= where("_id" -> matchId), o= $set(Seq("adminOk" -> false)))
+    db("matches").update(q= where("_id" -> matchId), o= $set("adminOk" -> false))
   }
 
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {
@@ -63,7 +64,9 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
 
   def refInterestedInMatch(matchId: ObjectId, userId:ObjectId):Boolean = {
     val user = User.fromMongo(db("users").findOneByID(userId).get)
-    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intRef" -> Referee.fromUser(user).toMongo)).getN == 1
+    val updated = db("matches").update(q = where("_id" -> matchId), o = $addToSet("intRef" -> Referee.fromUser(user).toMongo))
+      .getN
+    updated == 1
   }
 
   def cancelInterestAsReferee(matchId:ObjectId, refId:ObjectId):Boolean = {
@@ -101,7 +104,7 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def updateUserSessions(email:String, user:User) = {
-    val setting = $set(Seq("username" -> user.email, "name" -> user.name, "admin" -> user.admin))
+    val setting = $set("username" -> user.email, "name" -> user.name, "admin" -> user.admin)
     db("sessions").update(q=where("username" -> email), o= setting, upsert=false, multi=true)
   }
 

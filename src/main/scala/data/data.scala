@@ -3,10 +3,11 @@ package data
 import org.joda.time.{LocalDateTime, DateTime}
 import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
-import java.util.UUID
+import java.util.{List => JList, Collections, UUID}
 import collection.mutable
 import collection.mutable.ArrayBuffer
 import xml.NodeSeq
+import scala.collection.JavaConverters._
 
 case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTeam:String, venue:String, level:String,
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
@@ -20,7 +21,8 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
   def areAssistantsAppointed = appointedAssistant1.isDefined && appointedAssistant2.isDefined
 
-  def updateClause : MongoDBObject = if(id.isDefined) MongoDBObject("_id" -> id.get) else toMongo
+//  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
+  def updateClause : MongoDBObject =  if(id.isDefined) MongoDBObject("_id" -> id.get) else MongoDBObject()
 
   def toMongo: MongoDBObject  = {
     val unsets = mutable.MutableList.empty[String]
@@ -51,7 +53,8 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
     if(clubContact.isEmpty) unsets += "clubContact" //TODO: Does it work?
 
-    $set(Seq(sets.toSeq:_*)) ++ $unset(Seq(unsets:_*))
+    val mongoDBObject = $set(sets.toSeq:_*) ++ $unset(unsets:_*)
+    mongoDBObject
   }
   def interestedRefButton(userId:Option[String]) =
     if(appointedRef.isEmpty)
@@ -124,8 +127,9 @@ object Match{
     val assFee = m.getAs[Int]("assFee")
     val published = m.getAsOrElse[Boolean]("published", true);
     val adminOk = m.getAsOrElse[Boolean]("adminOk", false);
-    val intRefs = m.getAsOrElse[ArrayBuffer[DBObject]]("intRef", ArrayBuffer.empty).map(Referee.fromMongo).toList
-    val intAss = m.getAsOrElse[ArrayBuffer[DBObject]]("intAss", ArrayBuffer.empty).map(Referee.fromMongo).toList
+//    val intRefs = m.getAsOrElse[ArrayBuffer[DBObject]]("intRef", ArrayBuffer.empty).map(Referee.fromMongo).toList
+    val intRefs = m.as[Option[JList[DBObject]]]("intRef").map(_.asScala.map(Referee.fromMongo).toList).getOrElse(List.empty)
+    val intAss = m.as[Option[JList[DBObject]]]("intAss").map(_.asScala.map(Referee.fromMongo).toList).getOrElse(List.empty)
     val referee = m.getAs[DBObject]("referee").map(Referee.fromMongo)
     val assRef1 = m.getAs[DBObject]("assRef1").map(Referee.fromMongo)
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)

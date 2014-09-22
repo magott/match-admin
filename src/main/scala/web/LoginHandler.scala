@@ -77,7 +77,6 @@ class LoginHandler(private val repo:MongoRepository) {
           MailgunService.sendLostpasswordMail(email, resetUrl)
         HerokuRedirect(req, "/login?checkmail")
       }
-
     }
   }
 
