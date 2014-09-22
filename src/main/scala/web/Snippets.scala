@@ -639,7 +639,7 @@ case class Snippets(req: HttpRequest[_]) {
             <th>Tid</th>
             <th>Kamp</th>
             <th>Nivå</th>
-            <th>Sted</th>
+            <th>Bane</th>
             <th>Dommer</th>
             <th>AD 1</th>
             <th>AD 2</th>
