@@ -15,7 +15,7 @@ import unfiltered.response.ResponseString
 import service.{MongoRepository, MailgunService, ResetPasswordService}
 import org.joda.time.DateTime
 
-class LoginHandler(private val repo:MongoRepository)(implicit val config:Config){
+class LoginHandler(private val repo:MongoRepository, mailgun:MailgunService)(implicit val config:Config){
 
   val passwordService = new ResetPasswordService
 
@@ -75,7 +75,7 @@ class LoginHandler(private val repo:MongoRepository)(implicit val config:Config)
         val resetUrl = "%s://%s/resetpassword?id=%s".format(protocol,host,resetId)
         println(resetUrl)
         if(repo.userByEmail(email).isDefined)
-          MailgunService.sendLostpasswordMail(email, resetUrl)
+          mailgun.sendLostpasswordMail(email, resetUrl)
         HerokuRedirect(req, "/login?checkmail")
       }
     }

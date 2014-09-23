@@ -20,7 +20,7 @@ import unfiltered.response.ResponseString
 import org.joda.time
 import unfiltered.request.Params.Extract
 
-class AdminHandler (private val repo:MongoRepository) (implicit val config:Config){
+class AdminHandler (private val repo:MongoRepository, private val mailgun:MailgunService) (implicit val config:Config){
   import repo._
 
   def handleAdmin(req: HttpRequest[_]) = {
@@ -52,7 +52,7 @@ class AdminHandler (private val repo:MongoRepository) (implicit val config:Confi
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case _ => {
           fullMatch(new ObjectId(matchId)) match{
-            case Some(m) => MailgunService.sendAppointmentMail(m) match{
+            case Some(m) => mailgun.sendAppointmentMail(m) match{
               case MailAccepted(message) => Ok
               case MailRejected(code, message) =>{
                 println("Mailsending error code %s message %s".format(message,code))

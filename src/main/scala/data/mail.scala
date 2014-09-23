@@ -9,7 +9,7 @@ case class MailMessage(from:String, to:Seq[String], cc:Seq[String], bcc:Seq[Stri
 }
 
 object MailMessage{
-  def apply(from:String, to:String, subject:String, body:String):MailMessage = MailMessage(from, to :: Nil, Nil, Nil, subject, body, None)
+  def apply(from:String, to:String, cc:List[String], subject:String, body:String):MailMessage = MailMessage(from, to :: Nil, cc, Nil, subject, body, None)
 }
 
 sealed trait MailReceipt{
@@ -22,7 +22,7 @@ case class MailRejected(message:String, errorCode:Int) extends MailReceipt {
   val isAccepted = false
 }
 
-case class AppointmentMail(m:Match, cc:String, baseUrl:String, ref:Option[User], ass1:Option[User], ass2:Option[User]){
+case class AppointmentMail(m:Match, cc:List[String], baseUrl:String, ref:Option[User], ass1:Option[User], ass2:Option[User]){
   def subject = "Dommer tildelt oppdrag"
   def to:Seq[String] = ref.map(_.email).toSeq ++ ass1.map(_.email).toSeq ++ ass2.map(_.email).toSeq
   def text =

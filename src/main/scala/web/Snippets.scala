@@ -521,6 +521,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
         <link href="/css/matchadmin.css" rel="stylesheet"/>
+        <link href={config.css} rel="stylesheet"/>
 
         <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>

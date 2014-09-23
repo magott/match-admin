@@ -29,6 +29,7 @@ object Jetty extends App{
     val c = Constretto(
       List(
         json("classpath:conf/ofdl.conf", "config", Some("ofdl")),
+        json("classpath:conf/tfdl.conf", "config", Some("tfdl")),
         json("classpath:conf/dev.conf", "config", Some("dev"))
       )
     )

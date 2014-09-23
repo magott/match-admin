@@ -8,7 +8,7 @@ import unfiltered.response.Html5
 import data.MatchValidation
 import unfiltered.request.UserAgent
 
-class ClubHandler(repo:MongoRepository) (implicit val config:Config){
+class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val config:Config){
 
   def handleClubRequest(req: HttpRequest[_]) = {
     req match{
@@ -21,7 +21,7 @@ class ClubHandler(repo:MongoRepository) (implicit val config:Config){
               val matchId = repo.saveNewMatchTemplate(m)
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
               println("New match from club (%s) : %s".format(matchId, m.toString))
-              MailgunService.sendMatchOrderEmail(m, editMatchUrl)
+              mailgun.sendMatchOrderEmail(m, editMatchUrl)
               Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
             }
             case Left(errors) => {

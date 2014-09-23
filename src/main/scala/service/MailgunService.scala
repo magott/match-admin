@@ -1,5 +1,6 @@
 package service
 
+import conf.Config
 import data._
 import scala.concurrent.{Await, ExecutionContext}
 import util.Properties
@@ -8,7 +9,7 @@ import data.MailMessage
 
 import scala.util.Properties
 
-object MailgunService {
+class MailgunService (private val config:Config){
   private val repo = MongoRepository.singletonWithSessionCaching
   val mailgunApiKey = Properties.envOrNone("MAILGUN_API_KEY").get
   val mailgunAppName = Properties.envOrElse("MAILGUN_SMTP_LOGIN", "postmaster@app15913574.mailgun.org").split('@')(1).trim
@@ -24,7 +25,7 @@ object MailgunService {
   }
 
   def sendAppointmentMail(m:Match) = {
-    val mailHelper = AppointmentMail(m, cc, "", m.appointedRef.flatMap(x => repo.userById(x.id)), m.appointedAssistant1.flatMap(x => repo.userById(x.id)), m.appointedAssistant2.flatMap(x => repo.userById(x.id)))
+    val mailHelper = AppointmentMail(m, config.email.ccOnOrders, "", m.appointedRef.flatMap(x => repo.userById(x.id)), m.appointedAssistant1.flatMap(x => repo.userById(x.id)), m.appointedAssistant2.flatMap(x => repo.userById(x.id)))
     val mail = MailMessage(sender, mailHelper.to, Seq(cc), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
     sendMail(mail)
   }
@@ -32,8 +33,9 @@ object MailgunService {
   def sendMatchOrderEmail(m:MatchTemplate, matchUrl:String) = {
     sendMail(
       MailMessage(
-        sender,
-        cc,
+        config.email.fromFdl,
+        config.email.toOnOrders,
+        List.empty,
         "Bestilling av dommer",
         """Det er bestilt dommer til følgende kamp:
           |%s
@@ -47,8 +49,9 @@ object MailgunService {
 
   def sendLostpasswordMail(email:String, resetUrl:String) = {
     sendMail( MailMessage(
-      sender,
+      config.email.fromFdl,
       email,
+      List.empty,
       "Glemt passord",
       """Du mottar denne e-postem fordi du glemt passordet ditt. Det er sånt som skjer.
         |Du kan sette nytt passord ved å gå til %s
