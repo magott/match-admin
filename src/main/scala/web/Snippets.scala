@@ -440,6 +440,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
            """}
         </style>
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
+        <link href="/css/matchadmin.css" rel="stylesheet"/>
         <link href={config.css} rel="stylesheet"/>
 
 
