@@ -470,6 +470,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <!-- Placed at the end of the document so the pages load faster -->
         {jQuery}
         <script src="/js/bootstrap.min.js"></script>
+        <script src={config.javascript}></script>
         <script src="/js/matchadmin.js"></script>
         {if(bottom.isDefined)
           bottom.get
@@ -544,6 +545,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <!-- Placed at the end of the document so the pages load faster -->
         {jQuery}
         <script src="/js/bootstrap.min.js"></script>
+        <script src={config.javascript}></script>
         <script src="/js/matchadmin.js"></script>
         {if(bottom.isDefined)
           bottom.get

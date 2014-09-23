@@ -98,10 +98,7 @@ function readCookie(name) {
 
 function validateNewMatchForm(){
     $("#clubContactZip").focusout(fetchPoststed);
-    jQuery.validator.addMethod("refTypeValidForLevel", function(value, element, param) {
-        var selectedIndex = document.getElementById('level').selectedIndex
-        return !($('#refTypeDommer').is(':checked') && (selectedIndex  < 5 || selectedIndex == 17));
-    }, "");
+    jQuery.validator.addMethod("refTypeValidForLevel", trioValidation, "");
     jQuery.validator.addMethod("futureDate", function(value, element, param) {
         var input = moment(value);
         if (!input.isValid()){
