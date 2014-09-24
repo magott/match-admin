@@ -22,7 +22,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def areAssistantsAppointed = appointedAssistant1.isDefined && appointedAssistant2.isDefined
 
 //  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
-  def updateClause : MongoDBObject =  if(id.isDefined) MongoDBObject("_id" -> id.get) else MongoDBObject()
+  def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)
 
   def toMongo: MongoDBObject  = {
     val unsets = mutable.MutableList.empty[String]

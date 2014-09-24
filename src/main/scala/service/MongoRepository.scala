@@ -20,7 +20,10 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def saveMatch(m: Match) = {
-    db("matches").update(q = m.updateClause, o= m.toMongo, upsert=true, multi=false)
+    if(m.id.isDefined)
+      db("matches").update(q = m.updateClause, o= m.toMongo, upsert=false, multi=false)
+    else
+      db("matches").save(o=m.toMongo)
   }
 
   def deleteMatch(matchId: ObjectId) = {
@@ -109,7 +112,10 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def saveUser(user:User) : Option[User] = {
-    db("users").update(q = user.updateClause, o = user.toMongo, upsert = true, multi = false)
+    if(user.id.isDefined)
+      db("users").update(q = user.updateClause, o = user.toMongo, upsert = false, multi = false)
+    else
+      db("users").save(user.toMongo)
     userByEmail(user.email)
   }
 
