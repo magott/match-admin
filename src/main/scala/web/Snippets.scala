@@ -413,7 +413,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <title>
           {title}
         </title>
-        <meta property="og:image" content={"%s/img/ofdl_logo_big.jpg".format(baseUrl)} />
+        <meta property="og:image" content={s""""${baseUrl}${config.image}""""} />
         <meta property="og:title" content={title} />
         {meta}
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -500,7 +500,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <title>
           {title}
         </title>
-        <meta property="og:image" content={"%s/img/ofdl_logo_big.jpg".format(baseUrl)} />
+        <meta property="og:image" content={s""""${baseUrl}${config.image}""""} />
         <meta property="og:title" content={title} />
         {meta}
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>

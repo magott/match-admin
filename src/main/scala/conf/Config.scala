@@ -5,7 +5,7 @@ import org.constretto.Converter._
 /**
  *
  */
-case class Config(css:String, heading:String, refNoPrefix:String, email:EmailConfig, javascript:String) {
+case class Config(css:String, heading:String, image:String, refNoPrefix:String, email:EmailConfig, javascript:String) {
 
 }
 
@@ -28,6 +28,7 @@ object Config{
     obj[String]("css"),
     obj[String]("heading"),
     obj[String]("refNoPrefix"),
+    obj[String]("ogImage"),
     obj[EmailConfig]("email"),
     obj[String]("javascript")
     )
