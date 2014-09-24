@@ -374,7 +374,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       <table class="table table-condensed table-bordered table-nonfluid">
         <tr>
           <th>Dommernummer</th>
-          <td>03-{user.refereeNumber}</td>
+          <td>{config.refNoPrefix}-{user.refereeNumber}</td>
         </tr>
         <tr>
           <th>Navn</th>
