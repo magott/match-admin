@@ -27,8 +27,8 @@ object Config{
     Config(
     obj[String]("css"),
     obj[String]("heading"),
-    obj[String]("refNoPrefix"),
     obj[String]("ogImage"),
+    obj[String]("refNoPrefix"),
     obj[EmailConfig]("email"),
     obj[String]("javascript")
     )
