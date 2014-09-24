@@ -24,7 +24,8 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 //  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
   def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)
 
-  def toMongo: MongoDBObject  = {
+
+  private def setsAndUnsets = {
     val unsets = mutable.MutableList.empty[String]
 
     val sets = mutable.Map[String, Any](
@@ -52,9 +53,18 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedAssistant1.isEmpty) unsets += "assRef1"
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
     if(clubContact.isEmpty) unsets += "clubContact" //TODO: Does it work?
-
+    (sets, unsets)
+  }
+  
+  def asUpdate: MongoDBObject  = {
+    val (sets, unsets) = setsAndUnsets
     val mongoDBObject = $set(sets.toSeq:_*) ++ $unset(unsets:_*)
     mongoDBObject
+  }
+
+  def asInsert: MongoDBObject = {
+    val sets = setsAndUnsets._1
+    MongoDBObject(sets.toSeq:_*)
   }
   def interestedRefButton(userId:Option[String]) =
     if(appointedRef.isEmpty)

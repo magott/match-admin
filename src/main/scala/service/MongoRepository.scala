@@ -21,9 +21,9 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
 
   def saveMatch(m: Match) = {
     if(m.id.isDefined)
-      db("matches").update(q = m.updateClause, o= m.toMongo, upsert=false, multi=false)
+      db("matches").update(q = m.updateClause, o= m.asUpdate, upsert=false, multi=false)
     else
-      db("matches").save(o=m.toMongo)
+      db("matches").save(o=m.asInsert)
   }
 
   def deleteMatch(matchId: ObjectId) = {
