@@ -958,7 +958,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         Vi har mottatt opplysninger om kampen. Kontaktpersonen vil bli kontaktet når dommer/trio er satt opp til kampen.
       </p>
       <p>
-        Ved spørsmål om kampen, ta kontakt med oss på <a href="mailto:treningskamper@gmail.com">treningskamper@gmail.com</a>
+        Ved spørsmål om kampen, ta kontakt med oss på <a href={s""""mailto:${config.email.toOnOrders}""""}>{config.email.toOnOrders}</a>
       </p>
       <p>
         <a href="">Bestill dommer til fler kamper</a>
