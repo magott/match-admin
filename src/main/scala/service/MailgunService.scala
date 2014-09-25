@@ -34,7 +34,7 @@ class MailgunService (private val config:Config){
       MailMessage(
         config.email.fromFdl,
         config.email.toOnOrders,
-        List.empty,
+        config.email.ccOnOrders,
         "Bestilling av dommer",
         """Det er bestilt dommer til følgende kamp:
           |%s
