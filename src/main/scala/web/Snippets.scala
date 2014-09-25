@@ -128,10 +128,12 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
             <div class="controls">
               <button type="submit" class="btn btn-primary">{if(m.map(_.published).getOrElse(true)) "Lagre" else "Publiser"} </button>
               <button type="button" data-toggle="modal" class="btn btn-danger" data-target="#confirmDelete">Slett</button>
-              <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
-              <span class="mail-status mail-processing fade in hide"><i class="icon-time"> </i> Sender..</span>
-              <span class="mail-status mail-success fade in hide"><i class="icon-ok icon-green"> </i> Mail sendt!</span>
-              <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"></i>Feil ved sending av mail</span>
+              {if(m.exists(_.assigned)){
+                <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
+                <span class="mail-status mail-processing fade in hide"><i class="icon-time"> </i> Sender..</span>
+                <span class="mail-status mail-success fade in hide"><i class="icon-ok icon-green"> </i> Mail sendt!</span>
+                <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"></i> Feil ved sending av mail</span>
+              }}
             </div>
           </div>
           <div class="control-group">
