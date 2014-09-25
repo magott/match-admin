@@ -13,15 +13,11 @@ class MailgunService (private val config:Config){
   private val repo = MongoRepository.singletonWithSessionCaching
   val mailgunApiKey = Properties.envOrNone("MAILGUN_API_KEY").get
   val mailgunAppName = Properties.envOrElse("MAILGUN_SMTP_LOGIN", "postmaster@app15913574.mailgun.org").split('@')(1).trim
-  val cc = Properties.envOrElse("MAIL_CC", "ofdl@andersen-gott.com")
-  val sender = "Oslo Fotballdomerlaug <treningskamper@gmail.com>"
 
   def sendMail(mail:MailMessage) : MailReceipt = {
     import ExecutionContext.Implicits.global
     import scala.concurrent.duration._
     val req = mailgunUrl << mail.asMailgunParams
-    val url = req.toRequest.getUrl
-    println(s"Sending mail using url '${url}' and key '$mailgunApiKey' and app '$mailgunAppName'")
     val resp = Await.result(Http(req), 5.seconds)
     if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody)
     else MailRejected(resp.getResponseBody, resp.getStatusCode)
@@ -29,7 +25,7 @@ class MailgunService (private val config:Config){
 
   def sendAppointmentMail(m:Match) = {
     val mailHelper = AppointmentMail(m, config.email.ccOnOrders, "", m.appointedRef.flatMap(x => repo.userById(x.id)), m.appointedAssistant1.flatMap(x => repo.userById(x.id)), m.appointedAssistant2.flatMap(x => repo.userById(x.id)))
-    val mail = MailMessage(sender, mailHelper.to, Seq(cc), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
+    val mail = MailMessage(config.email.fromFdl, mailHelper.to, Seq(config.email.toOnOrders), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
     sendMail(mail)
   }
 
@@ -68,7 +64,6 @@ class MailgunService (private val config:Config){
 
     def mailgunUrl = {
       url("https://api.mailgun.net/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).
-//      url("http://localhost:5000/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).
         POST <:< (Map("Content-Type" -> "application/x-www-form-urlencoded"))
   }
 
