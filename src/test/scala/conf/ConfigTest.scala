@@ -15,6 +15,28 @@ class ConfigTest extends FlatSpec with Matchers{
       )
     )
     val config = c[Config]("config")
+    config.email.ccOnOrders.length shouldBe (1)
+  }
+
+  "Tfdl config" should "be parsable" in {
+    System.setProperty("CONSTRETTO_TAGS", "tfdl")
+    val c = Constretto(
+      List(
+        json("classpath:conf/tfdl.conf", "config", Some("tfdl"))
+      )
+    )
+    val config = c[Config]("config")
+    config.email.ccOnOrders shouldBe empty
+  }
+
+  "Dev config" should "be parsable" in {
+    System.setProperty("CONSTRETTO_TAGS", "dev")
+    val c = Constretto(
+      List(
+        json("classpath:conf/dev.conf", "config", Some("dev"))
+      )
+    )
+    val config = c[Config]("config")
     config.email.ccOnOrders.length shouldBe (2)
   }
 
