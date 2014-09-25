@@ -2,7 +2,7 @@ package web
 
 import unfiltered.filter.Plan
 import unfiltered.request._
-import unfiltered.response.{Ok, Html5}
+import unfiltered.response.{Pass, Ok, Html5}
 import service.{MailgunService, MongoRepository}
 import conf.Config
 
@@ -22,7 +22,12 @@ class Resources(config: Config) extends Plan{
     case r@Path("/logout") => loginHandler.handleLogout(r)
     case r@Path("/resetpassword") => loginHandler.handlePasswordReset(r)
     case r@Path("/lostpassword") => loginHandler.handleLostPassword(r)
+    case r@Path("/favicon.ico") => new FaviconPlan(c.favicon).handleFavicon(r)
     case r@Path("/") => HerokuRedirect(r, "/matches")
+    case r@(Path(p)) => {
+      println(p)
+      Pass
+    }
 
   }
 }

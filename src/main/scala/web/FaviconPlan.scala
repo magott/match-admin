@@ -2,18 +2,25 @@ package web
 
 import unfiltered.filter.Plan
 import unfiltered.filter.Plan.Intent
-import unfiltered.request.Path
+import unfiltered.request.{HttpRequest, Path}
 import unfiltered.response.Pass
 
 /**
  *
  */
-class FaviconPlan(fdlFaviconPath: String) extends Plan{
+class FaviconPlan(fdlFaviconPath: String) {
 
-  override def intent: Intent = {
-    case req@Path("/favicon.ico") => {
-      if(fdlFaviconPath.equals("/favicon.ico")) Pass
-      else HerokuRedirect(req, fdlFaviconPath)
-    } 
+  def handleFavicon(req: HttpRequest[_]) = {
+    req match {
+      case Path("/favicon.ico") => {
+        if (fdlFaviconPath.equals("/favicon.ico")) {
+          Pass
+        }
+        else {
+          HerokuRedirect(req, fdlFaviconPath)
+        }
+      }
+      case _ => Pass
+    }
   }
 }
