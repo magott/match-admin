@@ -19,7 +19,10 @@ class MailgunService (private val config:Config){
   def sendMail(mail:MailMessage) : MailReceipt = {
     import ExecutionContext.Implicits.global
     import scala.concurrent.duration._
-    val resp = Await.result(Http(mailgunUrl << mail.asMailgunParams), 5.seconds)
+    val req = mailgunUrl << mail.asMailgunParams
+    val url = req.toRequest.getUrl
+    println(s"Sending mail using url '${url}' and key '$mailgunApiKey' and app '$mailgunAppName'")
+    val resp = Await.result(Http(req), 5.seconds)
     if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody)
     else MailRejected(resp.getResponseBody, resp.getStatusCode)
   }
@@ -64,7 +67,8 @@ class MailgunService (private val config:Config){
   }
 
     def mailgunUrl = {
-      url("http://api.mailgun.net/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).
+      url("https://api.mailgun.net/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).
+//      url("http://localhost:5000/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).
         POST <:< (Map("Content-Type" -> "application/x-www-form-urlencoded"))
   }
 
