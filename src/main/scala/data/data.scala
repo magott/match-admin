@@ -25,7 +25,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)
 
 
-  def assigned = if(refereeType == "trio") (List(appointedRef,appointedAssistant1,appointedAssistant2).forall(_.isDefined)) else appointedRef.isDefined
+  def assigned = if(refereeType == RefereeType.Trio.key) (List(appointedRef,appointedAssistant1,appointedAssistant2).forall(_.isDefined)) else appointedRef.isDefined
 
   private def setsAndUnsets = {
     val unsets = mutable.MutableList.empty[String]
