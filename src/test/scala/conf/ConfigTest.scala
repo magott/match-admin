@@ -2,6 +2,8 @@ package conf
 
 import org.scalatest.{Matchers, FlatSpec}
 import org.constretto.{Constretto, Converter}, Constretto._
+import org.scalatest.OptionValues._
+
 /**
  *
  */
@@ -27,6 +29,8 @@ class ConfigTest extends FlatSpec with Matchers{
     )
     val config = c[Config]("config")
     config.email.ccOnOrders shouldBe empty
+    config.email.mailgunAppName.value shouldBe ("tfdl.no")
+
   }
 
   "Dev config" should "be parsable" in {
@@ -38,6 +42,7 @@ class ConfigTest extends FlatSpec with Matchers{
     )
     val config = c[Config]("config")
     config.email.ccOnOrders.length shouldBe (2)
+    config.email.mailgunAppName.value shouldBe ("andersen-gott.com")
   }
 
 }

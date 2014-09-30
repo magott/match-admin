@@ -12,7 +12,8 @@ import scala.util.Properties
 class MailgunService (private val config:Config){
   private val repo = MongoRepository.singletonWithSessionCaching
   val mailgunApiKey = Properties.envOrNone("MAILGUN_API_KEY").get
-  val mailgunAppName = Properties.envOrElse("MAILGUN_SMTP_LOGIN", "postmaster@app15913574.mailgun.org").split('@')(1).trim
+  val mailgunAppName = config.email.mailgunAppName orElse
+    Properties.envOrNone("MAILGUN_SMTP_LOGIN").map(_.split("@")(1).trim) getOrElse "app15913574.mailgun.org"
 
   def sendMail(mail:MailMessage) : MailReceipt = {
     import ExecutionContext.Implicits.global

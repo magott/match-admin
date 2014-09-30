@@ -9,14 +9,15 @@ case class Config(css:String, heading:String, image:String, refNoPrefix:String, 
 
 }
 
-case class EmailConfig(fromFdl:String, toOnOrders:String, ccOnOrders:List[String])
+case class EmailConfig(fromFdl:String, toOnOrders:String, ccOnOrders:List[String], mailgunAppName: Option[String])
 
 object EmailConfig{
   implicit val emailConfigC = fromObject{obj =>
     EmailConfig(
       obj[String]("fromFdl"),
       obj[String]("toOnOrders"),
-      obj[List[String]]("ccOnOrders")
+      obj[List[String]]("ccOnOrders"),
+      obj.get[String]("mailgunAppName")
     )
   }
 }
