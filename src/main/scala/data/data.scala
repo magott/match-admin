@@ -20,6 +20,10 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
   def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
   def areAssistantsAppointed = appointedAssistant1.isDefined && appointedAssistant2.isDefined
+  def showInterestedRefIcon = appointedRef.isEmpty && interstedRefsAvailable(interestedRefs)
+  def showAss1RefIcon = appointedAssistant1.isEmpty && interstedRefsAvailable(interestedAssistants)
+  def showAss2RefIcon = appointedAssistant2.isEmpty && interstedRefsAvailable(interestedAssistants)
+  private def interstedRefsAvailable(interested:List[Referee]) = !interested.filterNot(Set(appointedAssistant1, appointedAssistant2, appointedRef).flatten.contains(_)).isEmpty
 
 //  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
   def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)

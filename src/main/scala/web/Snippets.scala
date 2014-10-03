@@ -661,10 +661,9 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
               <td><a href={"/admin/matches/" + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
               <td>{m.venue}</td>
-              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}</td>
-              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
-              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}</td>
-
+              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}{if(m.showInterestedRefIcon) <i class="icon-user"></i>}</td>
+              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{if(m.showAss1RefIcon) <i class="icon-user"></i>}</td>
+              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{if(m.showAss2RefIcon) <i class="icon-user"></i>}</td>
             </tr>
           )
           }
