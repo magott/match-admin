@@ -140,7 +140,7 @@ object MatchValidation {
 
       def vId = {
         repo.userByEmail(email) match {
-          case Some(user) if(user.id != id) => "Det finnes alt en bruker registrert med %s".format(email).failureNel
+          case Some(user) if(user.id != id) => "Det finnes alt en bruker registrert med %s. Har du glemt passordet, gå velg logg inn i menyen og trykk på lenken for glemt passord".format(email).failureNel
           case _ => id.successNel
         }
       }
