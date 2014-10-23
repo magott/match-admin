@@ -17,14 +17,14 @@ class MongoRepositoryInterationTest extends FunSuite{
   val m = Match(None, DateTime.now,"home","away","venue","level",Some("desc"),DateTime.now.plusDays(7),"trio",None,None,Nil,Nil,None,None,None, true, false, None)
 
   test("Foo"){
-    val mongo = m.toMongo
+    val mongo = m.asInsert
     println(mongo.toString)
   }
 
   test("Insert new match"){
     RegisterJodaTimeConversionHelpers()
     val m1 = m.copy(homeTeam = "BLAH", description=None)
-    db("a").update(m1.updateClause, m.toMongo, true, false)
+    db("a").update(m1.updateClause, m.asInsert, true, false)
   }
 
   test("Multiple inserts"){
