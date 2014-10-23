@@ -17,7 +17,7 @@ class ConfigTest extends FlatSpec with Matchers{
       )
     )
     val config = c[Config]("config")
-    config.email.ccOnOrders.length shouldBe (1)
+    config.email.ccOnOrders.length shouldBe (2)
   }
 
   "Tfdl config" should "be parsable" in {
