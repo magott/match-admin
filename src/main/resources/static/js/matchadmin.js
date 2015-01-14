@@ -104,7 +104,7 @@ function validateNewMatchForm(){
         if (!input.isValid()){
             return false;
         }else{
-            return input.isAfter(moment().startOf('day'));
+            return !(input.isBefore(moment().startOf('day')));
         }
     }, "Ugyldig dato, kampstart kan ikke være i fortiden");
     delete $.validator.methods.date;
