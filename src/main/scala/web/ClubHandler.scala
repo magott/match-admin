@@ -20,7 +20,8 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
             case Right(m) => {
               val matchId = repo.saveNewMatchTemplate(m)
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
-              println("New match from club (%s) : %s".format(matchId, m.toString))
+              val UserAgent(ua) = req
+              println("New match from club (%s) : %s [UA:%s]".format(matchId, m.toString, ua))
               mailgun.sendMatchOrderEmail(m, editMatchUrl)
               Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
             }
