@@ -1,6 +1,7 @@
 package web
 
 import conf.Config
+import org.joda.time.Period
 import service.{MailgunService, MongoRepository}
 import unfiltered.request._
 import unfiltered.response._
@@ -22,7 +23,10 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
               val UserAgent(ua) = req
               println("New match from club (%s) : %s [UA:%s]".format(matchId, m.toString, ua))
+              val before = System.currentTimeMillis()
               mailgun.sendMatchOrderEmail(m, editMatchUrl)
+              val after = System.currentTimeMillis()
+              println(s"Sending mail took ${(after-before)/1000}s")
               Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
             }
             case Left(errors) => {
