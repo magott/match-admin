@@ -1,5 +1,6 @@
 package data
 
+import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{LocalTime, DateMidnight, DateTime}
 import org.bson.types.ObjectId
 import service.MongoRepository
@@ -41,13 +42,13 @@ object MatchValidation {
         if(kickoffTime.isEmpty) "Tidspunkt for kampen må fylles ut".failureNel else
         LocalTime.parse(kickoffTime).successNel
       } catch {
-        case _: Exception => (kickoffTime + " er ikke gyldig tidsformat (HH:mm)").failureNel
+        case _: Exception => (kickoffTime + " er ikke gyldig tidsformat (bruk formatet time:minutt [HH:mm])").failureNel
       }
       val vDate = try {
         if(kickoffDate.isEmpty) "Dato for kampen må fylles ut".failureNel else
-        DateMidnight.parse(kickoffDate).successNel
+        DateMidnight.parse(kickoffDate, ISODateTimeFormat.date).successNel
       } catch {
-        case _: Exception => (kickoffDate + " er ikke et gyldig datoformat (yyyy-MM-dd)").failureNel
+        case _: Exception => (kickoffDate + " er ikke et gyldig datoformat (bruk formatet år-måned-dag [yyyy-MM-dd]").failureNel
       }
 
       (vDate |@| vTime){ (date,time) => date.toDateTime.withHourOfDay(time.getHourOfDay).withMinuteOfHour(time.getMinuteOfHour)}

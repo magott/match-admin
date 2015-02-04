@@ -14,4 +14,9 @@ class MatchValidationTest extends FunSuite{
     val v = MatchValidation.validate(None, "a-lag", "b-lag", "bortebane", "men3div", "", "2012-10-01", "20:15", "trio", "600", "400", "", "", "",true, "","","","","")
     assert(v.isRight)
   }
+
+  test("Invalid matchtemplate, wrong dateformat") {
+    val mt = MatchValidation.unpublished("home", "away", "venuue", "men3div", "20150329", "11:00", "trio", "name", "12345678", "Adresse", "1358", "email@mail.com")
+    assert(mt.isLeft)
+  }
 }
