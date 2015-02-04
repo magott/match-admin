@@ -6,7 +6,7 @@ import service.{MailgunService, MongoRepository}
 import unfiltered.request._
 import unfiltered.response._
 import unfiltered.response.Html5
-import data.MatchValidation
+import data.{MatchTemplate, MatchValidation}
 import unfiltered.request.UserAgent
 import common.numberFormatter
 
@@ -47,8 +47,9 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
     println("400 - User [%s] errors %s".format(ua, errors))
   }
 
-  def handleNewMatchFromClub(params: Map[String, Seq[String]]) = {
+  def handleNewMatchFromClub(params: Map[String, Seq[String]]) : Either[List[String], MatchTemplate] = {
     val p = params.withDefaultValue(List(""))
+    println("New match posted with params "+params.mkString)
     MatchValidation.unpublished(p("home").head, p("away").head, p("venue").head, p("level").head, p("date").head,
                                 p("time").head, p("refType").head, p("clubContactName").head, p("clubContactTelephone").head,
                                 p("clubContactAddress").head, p("clubContactZip").head, p("clubContactEmail").head)
