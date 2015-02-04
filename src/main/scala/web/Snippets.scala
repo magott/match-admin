@@ -825,7 +825,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <div class="control-group">
           <label class="control-label">Kampstart</label>
           <div class="controls controls-row">
-            <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required"  />
+            <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required"  min={DateTime.now().toString("yyyy-MM-dd")}/>
             <input type="time" id="time" name="time" placeholder="TT:MM" class="input-medium" required="required"  />
             <span class="help-inline"></span>
           </div>
