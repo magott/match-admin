@@ -19,16 +19,22 @@ class MailgunService (private val config:Config){
   def sendMail(mail:MailMessage) : MailReceipt = {
     import ExecutionContext.Implicits.global
     import scala.concurrent.duration._
+    printPoolSize
     val start = System.currentTimeMillis
     val req = mailgunUrl << mail.asMailgunParams
     val futureReceipt = for {
       resp <- Http(req)
       receipt = if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody) else MailRejected(resp.getResponseBody, resp.getStatusCode)
     } yield receipt
-    val receipt = Await.result(futureReceipt, 5.seconds)
+    val receipt = Await.result(futureReceipt, 10.seconds)
     val duration = (System.currentTimeMillis - start)
     println(s"Mail receipt (took ${numberFormatter.format(duration)} seconds): $receipt")
     receipt
+  }
+
+  def printPoolSize = {
+    val poolSize = (Runtime.getRuntime.availableProcessors)
+    println("Pool size is probably "+poolSize)
   }
 
   def sendAppointmentMail(m:Match) = {
