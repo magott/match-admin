@@ -38,18 +38,19 @@ class MailgunService (private val config:Config){
   }
 
   def sendMatchOrderEmail(m:MatchTemplate, matchUrl:String) = {
+    import m._
     sendMail(
       MailMessage(
         config.email.fromFdl,
         config.email.toOnOrders,
         config.email.ccOnOrders,
         "Bestilling av dommer",
-        """Det er bestilt dommer til følgende kamp:
-          |%s
-          |%s (%s)
-          |%s
-          |Gå til %s for å publisere kampen og se mer informasjon om kampen.
-        """.stripMargin.format(m.kickoff.toString("dd.MM.yyyy HH:mm"), m.teams, Level.asMap(m.level).toString, m.venue, matchUrl)
+        s"""Det er bestilt $refereeType til følgende kamp:
+          |${kickoff.toString("dd.MM.yyyy HH:mm")}
+          |$teams (${Level.asMap(m.level).toString})
+          |$venue
+          |Gå til $matchUrl for å publisere kampen og se mer informasjon om kampen.
+        """.stripMargin
       )
     )
   }

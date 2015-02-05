@@ -284,6 +284,7 @@ object RefereeType{
   object Trio extends KeyAndValue("trio", "Trio")
   val all = List(Dommer, Trio)
   val asMap = Map(Dommer.key -> Dommer.display, Trio.key -> Trio.display)
+  def displayName(key: String) = asMap.get(key).get
 }
 
 case class KeyAndValue(key:String, display:String)
