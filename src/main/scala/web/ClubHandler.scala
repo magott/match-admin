@@ -8,8 +8,7 @@ import unfiltered.response._
 import unfiltered.response.Html5
 import data.{MatchTemplate, MatchValidation}
 import unfiltered.request.UserAgent
-import common.numberFormatter
-
+import common._
 
 class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val config:Config){
 
@@ -21,15 +20,15 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
           val Params(p) = req
           handleNewMatchFromClub(p) match {
             case Right(m) => {
-              val before = System.currentTimeMillis()
+              val before = System.currentTimeMillis
               val matchId = repo.saveNewMatchTemplate(m)
               val storedAt = System.currentTimeMillis
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
               val UserAgent(ua) = req
-              println("New match from club (%s) : %s [UA:%s] (stored in %s s)".format(matchId, m.toString, ua, numberFormatter.format(storedAt-before)))
+              println("New match from club (%s) : %s [UA:%s] (stored in %s s)".format(matchId, m.toString, ua, durationSeconds(storedAt, before)))
               mailgun.sendMatchOrderEmail(m, editMatchUrl)
-              val after = System.currentTimeMillis()
-              println(s"Processing new match took ${numberFormatter.format(after-before)}s")
+              val after = System.currentTimeMillis
+              println(s"Processing new match took ${durationSeconds(before, after)}")
               Ok ~> Html5(Pages(req).refereeOrderReceipt(m))
             }
             case Left(errors) => {

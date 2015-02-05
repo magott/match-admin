@@ -6,7 +6,7 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Properties
 import dispatch._
 import data.MailMessage
-import common.numberFormatter
+import common._
 
 import scala.util.Properties
 
@@ -27,8 +27,8 @@ class MailgunService (private val config:Config){
       receipt = if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody) else MailRejected(resp.getResponseBody, resp.getStatusCode)
     } yield receipt
     val receipt = Await.result(futureReceipt, 10.seconds)
-    val duration = (System.currentTimeMillis - start)
-    println(s"Mail receipt (took ${numberFormatter.format(duration)} seconds): $receipt")
+    val end = System.currentTimeMillis
+    println(s"Mail receipt (took ${durationSeconds(start, end)} seconds): $receipt")
     receipt
   }
 
