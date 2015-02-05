@@ -28,6 +28,12 @@ case class Pages(req:HttpRequest[_]) (implicit val config:Config){
     bootstrap("Siden finnes ikke", <div class="alert alert-error"> <h4 class="alert-heading">Siden finnes ikke!</h4> {text.getOrElse("")} </div> , None)
   }
 
+  def newMatchError(errorMessages:List[String]) = {
+    val errors: NodeSeq = errorMessages.map(e => <p>{e}</p>)
+    val content: NodeSeq = (<div class="alert alert-error"> <h4 class="alert-heading">Det var noen mangler...</h4> {errors}</div> <p>Dersom du står fast kan du sende en e-post til {config.email.toOnOrders}</p>)
+    bootstrap("Feil", content , None)
+  }
+
   def errorPage(errorMessage:NodeSeq) = {
     bootstrap("Feil", <div class="alert alert-error"> <h4 class="alert-heading">Feil!</h4> {errorMessage}</div> , None)
   }

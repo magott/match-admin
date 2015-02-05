@@ -23,9 +23,10 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
             case Right(m) => {
               val before = System.currentTimeMillis()
               val matchId = repo.saveNewMatchTemplate(m)
+              val storedAt = System.currentTimeMillis
               val editMatchUrl = rootUrl(req) + "/admin/matches/"+matchId
               val UserAgent(ua) = req
-              println("New match from club (%s) : %s [UA:%s]".format(matchId, m.toString, ua))
+              println("New match from club (%s) : %s [UA:%s] (stored in %s s)".format(matchId, m.toString, ua, numberFormatter.format(storedAt-before)))
               mailgun.sendMatchOrderEmail(m, editMatchUrl)
               val after = System.currentTimeMillis()
               println(s"Processing new match took ${numberFormatter.format(after-before)}s")
@@ -33,7 +34,7 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
             }
             case Left(errors) => {
               printErrors(errors, req)
-              BadRequest ~> Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
+              BadRequest ~> Html5(Pages(req).newMatchError(errors))
             }
           }
        }
