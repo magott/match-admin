@@ -25,7 +25,6 @@ class Resources(config: Config) extends Plan{
     case r@Path("/favicon.ico") => new FaviconPlan(c.favicon).handleFavicon(r)
     case r@Path("/") => HerokuRedirect(r, "/matches")
     case r@(Path(p)) => {
-      println(p)
       Pass
     }
 
