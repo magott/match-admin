@@ -73,7 +73,6 @@ class LoginHandler(private val repo:MongoRepository, mailgun:MailgunService)(imp
         val Host(host) = req
         val protocol = XForwardProto.unapply(req).getOrElse("http")
         val resetUrl = "%s://%s/resetpassword?id=%s".format(protocol,host,resetId)
-        println(resetUrl)
         if(repo.userByEmail(email).isDefined)
           mailgun.sendLostpasswordMail(email, resetUrl)
         HerokuRedirect(req, "/login?checkmail")
