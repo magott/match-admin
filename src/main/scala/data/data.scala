@@ -28,6 +28,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 //  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
   def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)
 
+  def isAppointed(userId:String) = appointedRef.exists(_.id.toString == userId)
 
   def assigned = if(refereeType == RefereeType.Trio.key) (List(appointedRef,appointedAssistant1,appointedAssistant2).forall(_.isDefined)) else appointedRef.isDefined
 

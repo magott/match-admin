@@ -190,48 +190,81 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
     .getOrElse(<option value={o.key}>{o.display}</option>))
   }
 
+
+  def matchContactsTable(m: Match, appointees: Tuple3[Option[User], Option[User], Option[User]]) = {
+    val contactRows = appointees._1.map(u => contactRow("Dommer", u.name, u.telephone, u.email)).toList ::
+    appointees._2.map(u => contactRow("AD1", u.name, u.telephone, u.email)).toList ::
+    appointees._3.map(u => contactRow("AD2", u.name, u.telephone, u.email)).toList ::
+    m.clubContact.map(cc => contactRow("Kontaktperson hjemmelag", cc.name, cc.telephone, cc.email)).toList
+    <table class="table table-condensed table-bordered table-nonfluid">
+      {contactRows}
+    </table>
+  }
+
+  def contactRow(role:String, name:String, tel:String, email:String) = {
+    <tr>
+      <th>Rolle</th>
+      <th>{role}</th>
+    </tr>
+    <tr>
+      <th>Navn</th>
+      <td>{name}</td>
+    </tr>
+    <tr>
+      <th>Telefon</th>
+      <td><a href={s"tel:$tel"}>{tel}</a> &nbsp;(<a href={s"sms:$tel"}>Send SMS</a>)</td>
+    </tr>
+    <tr>
+      <th>E-post</th>
+      <td><a href={s"mailto:$email"}>{email}</a></td>
+    </tr>
+  }
+
+  def viewMatchTable(m: Match, userId:Option[String]) = {
+    <table class="table table-condensed table-bordered table-nonfluid">
+      <tr>
+        <th>Kamp</th>
+        <td>{m.homeTeam} - {m.awayTeam}</td>
+      </tr>
+      <tr>
+        <th>Bane</th>
+        <td>{m.venue}</td>
+      </tr>
+      <tr>
+        <th>Avspark</th>
+        <td>{m.kickoffDateTimeString}</td>
+      </tr>
+      <tr>
+        <th>Nivå</th>
+        <td>{Level.asMap(m.level)}</td>
+      </tr>
+      <tr>
+        <th>Honorar dommer</th>
+        <td>{m.refFee.getOrElse("-")}</td>
+      </tr>
+      <tr>
+        <th>Honorar Assistentdommer</th>
+        <td>{m.assistantFee.getOrElse("-")}</td>
+      </tr>
+      <tr>
+        <th>Dommer</th>
+        <td>{m.interestedRefButton(userId)}</td>
+      </tr>
+      {if(m.refereeType==Trio.key)
+      <tr>
+        <th>Assistentdommer</th>
+        <td>{m.interestedAssistant1Button(userId)}</td>
+      </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <td>{m.interestedAssistant2Button(userId)}</td>
+        </tr>
+      }
+    </table>
+  }
+
   def viewMatch(m:Match, userId:Option[String]) = {
-    bootstrap(m.teams,
-       <table class="table table-condensed table-bordered table-nonfluid">
-        <tr>
-          <th>Kamp</th>
-          <td>{m.homeTeam} - {m.awayTeam}</td>
-        </tr>
-        <tr>
-          <th>Bane</th>
-          <td>{m.venue}</td>
-        </tr>
-        <tr>
-          <th>Avspark</th>
-          <td>{m.kickoffDateTimeString}</td>
-        </tr>
-         <tr>
-          <th>Nivå</th>
-          <td>{Level.asMap(m.level)}</td>
-        </tr>
-        <tr>
-          <th>Honorar dommer</th>
-          <td>{m.refFee.getOrElse("-")}</td>
-        </tr>
-        <tr>
-          <th>Honorar Assistentdommer</th>
-          <td>{m.assistantFee.getOrElse("-")}</td>
-        </tr>
-        <tr>
-          <th>Dommer</th>
-          <td>{m.interestedRefButton(userId)}</td>
-        </tr>
-         {if(m.refereeType==Trio.key)
-         <tr>
-           <th>Assistentdommer</th>
-           <td>{m.interestedAssistant1Button(userId)}</td>
-         </tr>
-           <tr>
-           <th>&nbsp;</th>
-           <td>{m.interestedAssistant2Button(userId)}</td>
-         </tr>
-         }
-      </table>
+    bootstrap(m.teams, viewMatchTable(m, userId)
       , Some(viewMatchJS),
         (<meta property="og:title" content={"%s: %s".format(RefereeType.asMap(m.refereeType), m.teams)} />
           <meta property="og:description" content={"%s trengs til kamp %s den %s klokken %s".format(RefereeType.asMap(m.refereeType), m.teams, m.kickoff.toString("dd.MM"), m.kickoff.toString("HH.mm"))}/>

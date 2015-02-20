@@ -2,7 +2,7 @@ package web
 
 import conf.Config
 import unfiltered.request.HttpRequest
-import data.{MatchTemplate, User, Match}
+import data.{RefereeType, MatchTemplate, User, Match}
 import xml.NodeSeq
 
 case class Pages(req:HttpRequest[_]) (implicit val config:Config){
@@ -77,6 +77,17 @@ case class Pages(req:HttpRequest[_]) (implicit val config:Config){
   }
 
   def unpublishedMatches(matches:Seq[Match]) = unpublishedMatchesTable(matches)
+
+  def viewMatchWithContacts(m: Match, userId:String, appointees: Tuple3[Option[User], Option[User], Option[User]]) = {
+    val matchWithContacts = viewMatchTable(m, Some(userId)) ++ matchContactsTable(m, appointees)
+
+    bootstrap(m.teams, matchWithContacts
+      , Some(viewMatchJS),
+      (<meta property="og:title" content={"%s: %s".format(RefereeType.asMap(m.refereeType), m.teams)} />
+          <meta property="og:description" content={"%s trengs til kamp %s den %s klokken %s".format(RefereeType.asMap(m.refereeType), m.teams, m.kickoff.toString("dd.MM"), m.kickoff.toString("HH.mm"))}/>
+        )
+    )
+  }
 
   def refereeOrderReceipt(matchTemplate:MatchTemplate) = bootstrap("Takk for bestillingen",
     refereeOrderReceiptSnippet(matchTemplate),
