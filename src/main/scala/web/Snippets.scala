@@ -195,7 +195,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
     val contactRows = appointees._1.map(u => contactRow("Dommer", u.name, u.telephone, u.email)).toList ::
     appointees._2.map(u => contactRow("AD1", u.name, u.telephone, u.email)).toList ::
     appointees._3.map(u => contactRow("AD2", u.name, u.telephone, u.email)).toList ::
-    m.clubContact.map(cc => contactRow("Kontaktperson hjemmelag", cc.name, cc.telephone, cc.email)).toList
+    m.clubContact.map(cc => contactRow("Kontaktperson dommerbestilling", cc.name, cc.telephone, cc.email)).toList
     <table class="table table-condensed table-bordered table-nonfluid">
       {contactRows}
     </table>
