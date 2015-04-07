@@ -207,6 +207,11 @@ function validateNewMatchForm(){
                 label
                  .removeClass('error')
                  .closest('.control-group').removeClass('error');
+            },
+            submitHandler: function(f){
+                $('form button[type=submit]').attr('disabled', 'disabled');
+                $('form button[type=submit]').text('Sender inn..');
+                form.submit();
             }
         });
 }
