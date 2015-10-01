@@ -20,7 +20,7 @@ libraryDependencies ++=
     "org.scalatest" %% "scalatest" % "2.2.2" % "test",
     "com.google.guava" % "guava" % "11.0.2",
     "org.mongodb" %% "casbah" % "2.7.3" excludeAll(ExclusionRule(organization = "org.slf4j")),
-    "org.mongodb" % "mongo-java-driver" % "2.12.3",
+    "org.mongodb" % "mongo-java-driver" % "2.13.2",
     "org.scalaz" %% "scalaz-core" % "7.1.0",
     "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
     "org.constretto" %% "constretto-scala" % "1.1",
