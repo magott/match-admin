@@ -28,7 +28,7 @@ class ConfigTest extends FlatSpec with Matchers{
       )
     )
     val config = c[Config]("config")
-    config.email.ccOnOrders shouldBe empty
+    config.email.ccOnOrders should (not be empty)
     config.email.mailgunAppName.value shouldBe ("tfdl.no")
 
   }
