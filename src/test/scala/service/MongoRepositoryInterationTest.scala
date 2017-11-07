@@ -30,7 +30,7 @@ class MongoRepositoryInterationTest extends FunSuite{
   test("Multiple inserts"){
     val m1 = m
 //    val id = MongoRepository.saveMatch(m)
-    val int = m1.interestedAssistants ::: List(new ObjectId(new Date,3,3))
+    val int = m1.interestedAssistants ::: List(new ObjectId(new Date))
 //    val m2 = m1.copy(id = Some(id), interestedAssistants = int, description = None)
   }
 

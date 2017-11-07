@@ -4,7 +4,7 @@ SbtStartScript.startScriptForClassesSettings
 
 name:="match-admin"
 
-scalaVersion:="2.11.2"
+scalaVersion:="2.11.8"
 
 organization := "com.andersen-gott"
 
@@ -19,8 +19,8 @@ libraryDependencies ++=
     "org.joda" % "joda-convert" % "1.2",
     "org.scalatest" %% "scalatest" % "2.2.2" % "test",
     "com.google.guava" % "guava" % "11.0.2",
-    "org.mongodb" %% "casbah" % "2.7.3" excludeAll(ExclusionRule(organization = "org.slf4j")),
-    "org.mongodb" % "mongo-java-driver" % "2.13.2",
+    "org.mongodb" %% "casbah" % "3.1.1" excludeAll(ExclusionRule(organization = "org.slf4j")),
+//    "org.mongodb" % "mongo-java-driver" % "2.13.2",
     "org.scalaz" %% "scalaz-core" % "7.1.0",
     "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
     "org.constretto" %% "constretto-scala" % "1.1",

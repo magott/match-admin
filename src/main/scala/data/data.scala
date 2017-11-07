@@ -145,8 +145,8 @@ object Match{
     val published = m.getAsOrElse[Boolean]("published", true);
     val adminOk = m.getAsOrElse[Boolean]("adminOk", false);
 //    val intRefs = m.getAsOrElse[ArrayBuffer[DBObject]]("intRef", ArrayBuffer.empty).map(Referee.fromMongo).toList
-    val intRefs = m.as[Option[JList[DBObject]]]("intRef").map(_.asScala.map(Referee.fromMongo).toList).getOrElse(List.empty)
-    val intAss = m.as[Option[JList[DBObject]]]("intAss").map(_.asScala.map(Referee.fromMongo).toList).getOrElse(List.empty)
+    val intRefs:List[Referee] = m.getAs[List[DBObject]]("intRef").map(_.map(Referee.fromMongo)).getOrElse(List.empty)
+    val intAss:List[Referee] = m.getAs[List[DBObject]]("intAss").map(_.map(Referee.fromMongo)).getOrElse(List.empty)
     val referee = m.getAs[DBObject]("referee").map(Referee.fromMongo)
     val assRef1 = m.getAs[DBObject]("assRef1").map(Referee.fromMongo)
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)
@@ -277,7 +277,7 @@ object Level{
 
   val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men7Div, Men8Div, Boys19IK, Boys19, Boys16IK, Boys16, Boys15, Boys14, Boys13,
     WomenPrem, Women1Div, Women2Div, Women3Div, Women4Div, Girls19, Girls16, Girls15, Girls14, Girls13)
-  val asMap = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
+  val asMap: Map[String, String] = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
 }
 
 object RefereeType{

@@ -6,7 +6,7 @@ import com.mongodb.casbah.query.Imports._
 import data._
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import org.joda.time.{DateMidnight, DateTime}
-import com.mongodb.casbah.MongoDB
+import com.mongodb.casbah.{WriteConcern, MongoDB}
 import org.bson.types.ObjectId
 
 class MongoRepository(db:MongoDB) extends SessionRepository{
@@ -62,24 +62,25 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
 
   def assistantInterestedInMatch(matchId: ObjectId, userId:ObjectId) = {
     val user = User.fromMongo(db("users").findOneByID(userId).get)
-    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo)).getN == 1
+    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo), concern = WriteConcern.Acknowledged).getN > 0
+    db("matches").update(q= where("_id" -> matchId), o= $addToSet("intAss" -> Referee.fromUser(user).toMongo), concern = WriteConcern.Acknowledged).getN > 0
   }
 
   def refInterestedInMatch(matchId: ObjectId, userId:ObjectId):Boolean = {
     val user = User.fromMongo(db("users").findOneByID(userId).get)
-    val updated = db("matches").update(q = where("_id" -> matchId), o = $addToSet("intRef" -> Referee.fromUser(user).toMongo))
+    val updated = db("matches").update(q = where("_id" -> matchId), o = $addToSet("intRef" -> Referee.fromUser(user).toMongo), concern = WriteConcern.Acknowledged)
       .getN
     updated == 1
   }
 
   def cancelInterestAsReferee(matchId:ObjectId, refId:ObjectId):Boolean = {
 //    db("foo").update(q= where("_id" -> id), o= $pull(where("number" -> MongoDBObject("num" -> 2))))
-    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intRef" -> has("_id" -> refId))), upsert=true, multi=true).getN > 0
+    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intRef" -> has("_id" -> refId))), upsert=true, multi=true, concern = WriteConcern.Acknowledged).getN > 0
   }
 
   def cancelInterestAsAssistant(matchId:ObjectId, refId:ObjectId):Boolean = {
 //    db("foo").update(q= where("_id" -> id), o= $pull(where("number" -> MongoDBObject("num" -> 2))))
-    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intAss" -> has("_id" -> refId))), upsert=true, multi=true).getN > 0
+    db("matches").update(q= where("_id" -> matchId), o= $pull(where("intAss" -> has("_id" -> refId))), upsert=true, multi=true, concern = WriteConcern.Acknowledged).getN > 0
   }
 
   def userForSession(sessionId:String) : Option[User]= {
