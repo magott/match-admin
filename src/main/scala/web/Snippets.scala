@@ -496,7 +496,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
           {body}<footer>
           <p>
-            <a href="http://www.andersen-gott.com">Morten Andersen-Gott</a> &copy; 2012</p>
+            Løsningen er utvikles og vedlikeholdes for lauget av <a href="http://www.andersen-gott.com">Morten Andersen-Gott</a> &copy; 2012</p>
         </footer>
 
         </div> <!--/.fluid-container-->
