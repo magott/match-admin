@@ -160,6 +160,13 @@ function validateNewMatchForm(){
                 clubContactEmail:{
                     required: true,
                     email: true
+                },
+                payerEmail:{
+                    required: true,
+                    email: true
+                },
+                whoPays:{
+                    required: true
                 }
             },
             messages:{
@@ -168,6 +175,8 @@ function validateNewMatchForm(){
                 venue:"Bane må fylles ut",
                 clubContactName:"Navn må fylles ut",
                 clubContactAddress:"Kontaktpersonens adresse må fylles ut",
+                payerEmail: "Vi må ha epostadresse for dommerregning",
+                whoPays: "Vi må vite hvilket lag som er ansvarlig for betaling",
                 clubContactZip:{
                     required: "Kontaktpersonens postnummer må fylles ut",
                     rangelength: "Postnummer skal bestå av {0} tegn",

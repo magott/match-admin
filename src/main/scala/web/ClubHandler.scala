@@ -52,7 +52,9 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
     println("New match posted with params "+params.mkString)
     MatchValidation.unpublished(p("home").head, p("away").head, p("venue").head, p("level").head, p("date").head,
                                 p("time").head, p("refType").head, p("clubContactName").head, p("clubContactTelephone").head,
-                                p("clubContactAddress").head, p("clubContactZip").head, p("clubContactEmail").head)
+                                p("clubContactAddress").head, p("clubContactZip").head, p("clubContactEmail").head,
+                                p("payingTeam").head, p("payerEmail").head
+    )
   }
 
   def rootUrl(req: HttpRequest[_]) = {

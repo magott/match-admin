@@ -14,7 +14,7 @@ class MongoRepositoryInterationTest extends FunSuite{
   val MongoSetting(db) = None
   val where = MongoDBObject
 
-  val m = Match(None, DateTime.now,"home","away","venue","level",Some("desc"),DateTime.now.plusDays(7),"trio",None,None,Nil,Nil,None,None,None, true, false, None)
+  val m = Match(None, DateTime.now,"home","away","venue","level",Some("desc"),DateTime.now.plusDays(7),"trio",None,None,Nil,Nil,None,None,None, true, false, None, "payer@example.com", Some("away"))
 
   test("Foo"){
     val mongo = m.asInsert

@@ -13,7 +13,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee],
-                 published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo]){
+                 published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo], payerEmail:String, payingTeam: Option[String]){
 
   def kickoffDateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
@@ -43,8 +43,10 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
       "level" -> level,
       "kickoff" -> kickoff,
       "refereeType" -> refereeType,
-      "published" -> true //Matches always saved as published, unpublished -> MatchTemplate
+      "published" -> true, //Matches always saved as published, unpublished -> MatchTemplate
+      "payerEmail" -> payerEmail
     )
+    payingTeam.foreach(x => sets += "payingTeam" -> x)
     description.foreach(x => sets += "desc" -> x)
     refFee.foreach(x => sets += "refFee" -> x)
     assistantFee.foreach(x => sets += "assFee" -> x)
@@ -151,25 +153,36 @@ object Match{
     val assRef1 = m.getAs[DBObject]("assRef1").map(Referee.fromMongo)
     val assRef2 = m.getAs[DBObject]("assRef2").map(Referee.fromMongo)
     val clubContact = m.getAs[DBObject]("clubContact").map(ContactInfo.fromMongo)
+    val payerEmail = m.getAsOrElse[String]("payerEmail","")
+    val payingTeam = m.getAs[String]("payingTeam")
 
-    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, adminOk,clubContact)
+
+    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, adminOk,clubContact, payerEmail, payingTeam)
   }
 
   def newInstance(homeTeam:String, awayTeam:String, venue:String, level:String,
                   description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                   assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
-                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]) =
-    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, false, None)
+                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]
+                  ) =
+    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, false, None, "", None)
+
 
 }
 case class MatchTemplate(homeTeam: String, awayTeam: String, venue: String, level: String,kickoff:DateTime,
-                         refereeType: String, clubContact:ContactInfo){
+                         refereeType: String, clubContact:ContactInfo, payerEmail:String, payingTeam: String){
 
   def dateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
-  def teams = " %s - %s".format(homeTeam,awayTeam)
+  def teams = "%s - %s".format(homeTeam,awayTeam)
   def toMongo:MongoDBObject = MongoDBObject("homeTeam" -> homeTeam, "awayTeam" -> awayTeam, "venue" -> venue, "level" -> level,
                               "kickoff" -> kickoff, "published" -> false,"refereeType" -> refereeType,
-                               "created" -> DateTime.now, "clubContact" -> clubContact.toMongo)
+                               "created" -> DateTime.now, "clubContact" -> clubContact.toMongo,
+                                "payerEmail" -> payerEmail, "payingTeam" -> payingTeam)
+  def betalendeLag = Paying.fromString(payingTeam) match {
+    case Some(Home) => homeTeam
+    case Some(Away) => awayTeam
+    case _ => "Ukjent"
+  }
 }
 
 case class Referee(id:ObjectId, name:String, level:String){
@@ -278,6 +291,29 @@ object Level{
   val all = List(MenPrem, Men1Div, Men2Div, Men3Div, Men4Div, Men5Div, Men6Div, Men7Div, Men8Div, Boys19IK, Boys19, Boys16IK, Boys16, Boys15, Boys14, Boys13,
     WomenPrem, Women1Div, Women2Div, Women3Div, Women4Div, Girls19, Girls16, Girls15, Girls14, Girls13)
   val asMap: Map[String, String] = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
+}
+
+abstract class Paying(team:String)
+case object Home extends Paying("home")
+case object Away extends Paying("away")
+
+object Paying{
+  def fromString(s:String): Option[Paying] = {
+    s match {
+      case "home" => Some(Home)
+      case "away" => Some(Away)
+      case _ => None
+    }
+  }
+  def isValid(s:String) = fromString(s).isDefined
+}
+
+object PayingTeam{
+  object Home extends KeyAndValue("home", "Hjemmelag")
+  object Away extends KeyAndValue("away", "Bortelag")
+  val all = List(Home, Away)
+  def isValid(value:String) = all.find(_.key == value).isDefined
+  def fromString(value: String) = all.find(_.key == value)
 }
 
 object RefereeType{

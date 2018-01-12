@@ -49,6 +49,8 @@ class MailgunService (private val config:Config){
           |${kickoff.toString("dd.MM.yyyy HH:mm")}
           |$teams (${Level.asMap(m.level).toString})
           |$venue
+          |Regningen betales av ${m.betalendeLag}
+          |Regning sendes til ${m.payerEmail}
           |Gå til $matchUrl for å publisere kampen og se mer informasjon om kampen.
         """.stripMargin
       )

@@ -25,7 +25,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         kamp</legend>
         <form class="form-horizontal" action={"/admin/matches/"+m.flatMap(_.id.map(_.toString)).getOrElse("")} method="POST" id="match-form">
           <div class="control-group">
-             {contactInfoFormElements(m.flatMap(_.clubContact))}
+             {contactInfoFormElements(m)}
           </div>
           <div class="control-group">
             <label class="control-label">Kamp</label>
@@ -838,6 +838,26 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           </div>
         </div>
         <div class="control-group">
+          <label class="control-label">Hvem betaler dommer</label>
+          <div class="controls">
+            <label class="radio">
+              <input type="radio" name="payingTeam" id="whoPaysHome" value="home"/>
+              Hjemmelag
+            </label>
+            <label class="radio">
+              <input type="radio" name="payingTeam" id="whoPaysAway" value="away"/>
+              Bortelag
+            </label>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Regning sendes til</label>
+          <div class="controls">
+            <input type="email" id="payerEmail" name="payerEmail" placeholder="Epost for dommerregning" class="input-large"  />
+            <span class="help-inline"></span>
+          </div>
+        </div>
+        <div class="control-group">
           <label class="control-label">Kamp</label>
           <div class="controls">
             <input type="text" id="home" name="home" class="input-medium" placeholder="Hjemmelag" required="required" />
@@ -896,7 +916,10 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </form>
   }
 
-  def contactInfoFormElements(c :Option[ContactInfo]) = {
+  def contactInfoFormElements(m: Option[Match]) = {
+    val c = m.flatMap(_.clubContact)
+    val whoPays:Option[Paying] = m.flatMap(_.payingTeam.flatMap(Paying.fromString))
+    val payerEmail = m.map(_.payerEmail).getOrElse("")
     <div class="well well-small">
       <a href="#" data-toggle="collapse" data-target="#clubContact">
         <div>
@@ -940,6 +963,34 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                 <span class="help-inline"></span>
               </div>
             </div>
+          <div class="control-group">
+            <label class="control-label">Hvem betaler dommer</label>
+            <div class="controls">
+              <label class="radio">
+                {if (whoPays.exists(_ == Home))
+                  <input type="radio" name="payingTeam" id="whoPaysHome" value="home" checked="checked"/>
+                else
+                  <input type="radio" name="payingTeam" id="whoPaysHome" value="home"/>
+                }
+                Hjemmelag
+              </label>
+              <label class="radio">
+                {if (whoPays.exists(_ == Away))
+                  <input type="radio" name="payingTeam" id="whoPaysAway" value="away" checked="checked"/>
+                else
+                  <input type="radio" name="payingTeam" id="whoPaysAway" value="away"/>
+                }
+                Bortelag
+              </label>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">Regning sendes til</label>
+            <div class="controls">
+              <input type="email" id="payerEmail" name="payerEmail" placeholder="Epost for dommerregning" class="input-large"  value={payerEmail}/>
+              <span class="help-inline"></span>
+            </div>
+          </div>
             <div class="control-group">
               <div class="controls">
                 <label class="checkbox">
@@ -989,7 +1040,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       Kampen er registrert
     </legend>
       <p>
-        <a href="">Trykk her for å bestill dommer til fler kamper</a>
+        <a href="">Trykk her for å bestille dommer til fler kamper</a>
       </p>
       <p>
         Vi har mottatt opplysninger om kampen. Kontaktpersonen vil bli kontaktet når dommer/trio er satt opp til kampen.

@@ -1,7 +1,8 @@
 package data
 
+import data.MatchValidation.BusinessRules.validateEmail
 import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.{LocalTime, DateMidnight, DateTime}
+import org.joda.time.{DateMidnight, DateTime, LocalTime}
 import org.bson.types.ObjectId
 import service.MongoRepository
 
@@ -11,7 +12,7 @@ object MatchValidation {
 
   def unpublished(homeTeam: String, awayTeam: String, venue: String, level: String,kickoffDate: String,
                   kickoffTime: String, refereeType: String, contactName:String, contactTelephone:String,
-                  contactAddress:String, contactZip:String, contactEmail:String) = {
+                  contactAddress:String, contactZip:String, contactEmail:String, payingTeam:String, payerEmail:String) = {
     import scalaz._
     import Scalaz.{id => _, _}
     import BusinessRules._
@@ -19,6 +20,8 @@ object MatchValidation {
     def vAwayTeam = if (awayTeam.isEmpty) "Bortelag må være satt".failureNel else awayTeam.successNel
     def vVenue = if (venue.isEmpty) "Bane må være satt".failureNel else venue.successNel
     def vLevel = if(level.isEmpty) "Nivå for kampen må settes".failureNel else if(Level.asMap.get(level).isEmpty) "Ugyldig nivå".failureNel else level.successNel
+    def vPayerEmai = validateEmail(payerEmail)
+    def vPayingTeam = if(Paying.isValid(payingTeam)) payingTeam.successNel else "Ugyldig valg for betalende lag".failureNel
     def vContact = {
       val vName = if(contactName.isEmpty) "Navn på kontakt kan ikke være blankt".failureNel else contactName.successNel
       val vAddress = if(contactAddress.isEmpty) "Adresse kan ikke være blank".failureNel else contactAddress.successNel
@@ -53,8 +56,8 @@ object MatchValidation {
 
       (vDate |@| vTime){ (date,time) => date.toDateTime.withHourOfDay(time.getHourOfDay).withMinuteOfHour(time.getMinuteOfHour)}
     }
-    (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vLevel |@| vContact){
-      (kickoff, home, away, venue, refType, level, contact) => MatchTemplate(home, away, venue, level, kickoff, refereeType, contact)
+    (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vLevel |@| vContact |@| vPayerEmai |@| vPayingTeam){
+      (kickoff, home, away, venue, refType, level, contact, payerEmail, payingTeam) => MatchTemplate(home, away, venue, level, kickoff, refereeType, contact, payerEmail, payingTeam)
     }.toEither.left.map(_.list)
 
   }
@@ -62,7 +65,8 @@ object MatchValidation {
   def validate(id: Option[String], homeTeam: String, awayTeam: String, venue: String, level: String,
                description: String, kickoffDate: String, kickoffTime: String, refereeType: String, refFee: String,
                assistantFee: String, appointedRef: String, appointedAssistant1: String, appointedAssistant2: String,
-               saveContact:Boolean, contactName:String, contactTelephone:String, contactAddress:String, contactZip:String, contactEmail:String): Either[List[String], Match] = {
+               saveContact:Boolean, contactName:String, contactTelephone:String, contactAddress:String, contactZip:String,
+                contactEmail:String, payerEmail:String, payingTeam:String): Either[List[String], Match] = {
 
     import scalaz._
     import Scalaz.{id => _, _}
@@ -99,6 +103,10 @@ object MatchValidation {
 
     def vClubContact = if(true) None.successNel else "Ugydlig kontaktinfo for klubbkontakt".failureNel
 
+    def vPayerEmail = if(payerEmail.isEmpty) payerEmail.successNel else validateEmail(payerEmail)
+    def vPayingTeam = if(PayingTeam.isValid(payingTeam)) payingTeam.successNel else "Ugyldig valg for betalende lag".failureNel
+
+
     def vRefereeType =
       if (refereeType.isEmpty) "Dommertype må være valgt".failureNel
       else if(!RefereeType.asMap.contains(refereeType)) "%s er en ugyldig dommertype".format(refereeType).failureNel
@@ -124,11 +132,11 @@ object MatchValidation {
     def createContact = if(saveContact) Some(ContactInfo(contactName, contactAddress, contactZip, contactTelephone, contactEmail)) else None
 
     (vKickoffDate |@| vHomeTeam |@| vAwayTeam |@| vVenue |@| vRefereeType |@| vRefFee |@|
-      vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2 |@| vLevel |@| vPublished) {
-      (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2, lvl, published) =>
+      vAssFee |@| vAppointedRef |@| vAppointedAssistant1 |@| vAppointedAssistant2 |@| vLevel |@| vPayerEmail) {
+      (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2, lvl, payerEmail) =>
         Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, lvl, nonEmpty(description), kickoff, refereeType, refFee, assFee,
-        Nil, Nil, appointedRef, appointedAss1, appointedAss2, published, false,
-          createContact)
+        Nil, Nil, appointedRef, appointedAss1, appointedAss2, true, false,
+          createContact, payerEmail, Some(payingTeam))
     }.toEither.left.map(_.list)
   }
 

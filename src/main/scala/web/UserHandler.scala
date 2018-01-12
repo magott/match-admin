@@ -35,8 +35,9 @@ class UserHandler(private val repo:MongoRepository) (implicit val config:Config)
       case Path(Seg("users" :: userId :: "matches" :: Nil)) => {
         req match{
           case GET(_) =>{
-            LoggedOnUser.unapply(req) match{
-              case Some(user) if(user.id.get == userId) =>{
+            val loggedOnUser = LoggedOnUser.unapply(req)
+            loggedOnUser match{
+              case Some(user) if(user.id.exists(_.toString == userId)) =>{
                 Html5(Pages(req).user(user, repo.matchesWithReferee(user.id.get), "/matches/"))
               }
               case Some(user) => Forbidden ~> Html5(Pages(req).forbidden)

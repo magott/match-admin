@@ -152,7 +152,8 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
       params("level").head, "", params("date").head, params("time").head, params("refType").head, params("refFee").head,
       params("assFee").head, params("appointedRef").head, params("appointedAssistant1").head, params("appointedAssistant2").head,
       params("saveContact").head == "on", params("clubContactName").head, params("clubContactTelephone").head,
-      params("clubContactAddress").head, params("clubContactZip").head, params("clubContactEmail").head)
+      params("clubContactAddress").head, params("clubContactZip").head, params("clubContactEmail").head,
+      params("payerEmail").head, params("payingTeam").head)
   }
 
   private def viewAll(req: HttpRequest[_]): Boolean = req.parameterNames.contains("all")
