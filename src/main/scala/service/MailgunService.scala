@@ -71,7 +71,7 @@ class MailgunService (private val config:Config){
 
   def newMatchEmails(m: MatchTemplate, rootUrl:String, matchUrl:String) : MailReceipt = {
     println("Running: "+LocalDateTime.now)
-    val orderConfirmation = OrderConfirmationMail(m, config, matchUrl)
+    val orderConfirmation = OrderConfirmationMail(m, config, rootUrl)
     val tfdlMail = NewMatchMail(m, matchUrl, config)
     sendAll(tfdlMail.toMailMessage :: orderConfirmation.toMailMessage :: Nil)
       .head
