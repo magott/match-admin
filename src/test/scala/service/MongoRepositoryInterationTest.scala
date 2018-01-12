@@ -24,7 +24,7 @@ class MongoRepositoryInterationTest extends FunSuite{
   test("Insert new match"){
     RegisterJodaTimeConversionHelpers()
     val m1 = m.copy(homeTeam = "BLAH", description=None)
-    db("a").update(m1.updateClause, m.asInsert, true, false)
+//    db("a").update(m1.updateClause, m.asInsert, true, false)
   }
 
   test("Multiple inserts"){
