@@ -1,5 +1,7 @@
 package data
 
+import conf.Config
+
 import xml.NodeSeq
 
 case class MailMessage(from:String, to:Seq[String], cc:Seq[String], bcc:Seq[String], subject:String, body:String, bodyHtml:Option[NodeSeq]) {
@@ -21,8 +23,48 @@ case class MailAccepted(message:String) extends MailReceipt {
 case class MailRejected(message:String, errorCode:Int) extends MailReceipt {
   val isAccepted = false
 }
+case class OrderConfirmationMail(m: MatchTemplate, config:Config, baseUrl:String){
+  def subject = "Bekreftelse på mottatt dommerbestilling"
+  def to:Seq[String] = m.clubContact.email :: Nil
+  def text =
+    s"""
+      |Vi bekrefter å ha mottatt din bestilling på følgende kamp:
+      |
+      |${m.teams}
+      |${m.venue}
+      |${m.kickoff.toString("dd.MM.yyyy HH:mm")}
+      |
+      |Kampen vil snart legges ut på ${baseUrl+"/matches"} der våre medlemmer kan melde interesse.
+      |Noen dager før kampen vil vi oppnevne dommere som i best mulig grad matcher kampen for både lag og dommere. Dere vil da få beskjed fra oss.
+      |
+      |Takk for at dere benytter ${config.name}
+    """.stripMargin
 
-case class AppointmentMail(m:Match, cc:List[String], baseUrl:String, ref:Option[User], ass1:Option[User], ass2:Option[User]){
+  def toMailMessage : MailMessage = {
+    MailMessage(config.email.fromFdl, to, Seq.empty, Seq.empty, subject, text, None)
+  }
+}
+
+case class NewMatchMail(m: MatchTemplate, matchUrl:String, config:Config){
+  def toMailMessage = {
+    import m._
+    MailMessage(
+      config.email.fromFdl,
+      config.email.toOnOrders,
+      config.email.ccOnOrders,
+      "Bestilling av dommer",
+      s"""Det er bestilt $refereeType til følgende kamp:
+         |${kickoff.toString("dd.MM.yyyy HH:mm")}
+         |$teams (${Level.asMap(m.level).toString})
+         |$venue
+         |Regningen betales av ${m.betalendeLag}
+         |Regning sendes til ${m.payerEmail}
+         |Gå til $matchUrl for å publisere kampen og se mer informasjon om kampen.
+        """.stripMargin)
+  }
+}
+
+case class AppointmentMail(m:Match, config:Config, baseUrl:String, ref:Option[User], ass1:Option[User], ass2:Option[User]){
   def subject = "Dommer tildelt oppdrag"
   def to:Seq[String] = ref.map(_.email).toSeq ++ ass1.map(_.email).toSeq ++ ass2.map(_.email).toSeq
   def text =
@@ -99,4 +141,87 @@ case class AppointmentMail(m:Match, cc:List[String], baseUrl:String, ref:Option[
   }
 
   def formatedPhoneNumberOrBlank(u:Option[User]) = u.map(" (Tel: " + _.telephone + ")").getOrElse("")
+
+  def toMailMessage = {
+    val to = ref.map(_.email).toSeq ++ ass1.map(_.email).toSeq ++ ass2.map(_.email).toSeq
+    MailMessage(config.email.fromFdl, to, Nil, Nil, subject, text, Some(html))
+  }
+
+}
+
+case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], ass1:Option[User], ass2:Option[User]){
+  def to = m.clubContact.map(_.email)
+  def text = {
+    s"""
+       |Det er blitt satt opp dommere til følgende kamp:
+       |${m.teams}
+       |${m.venue}
+       |${m.kickoffDateTimeString}
+       |Dommer: ${m.appointedRef.map(_.name).getOrElse("")}${ref.map(", " + _.telephone).getOrElse("")}
+       |${if(m.refereeType == RefereeType.Trio.key)
+          s"""|AD1: ${m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt")}${ass1.map(", "+_.telephone).getOrElse("")}
+              |AD2: ${m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}${ass2.map(", "+_.telephone).getOrElse("")}
+           """.stripMargin
+    }
+     """.stripMargin
+  }
+  def html : NodeSeq = {
+    <h2>Dommeroppsett</h2>
+      <p>
+        {config.name}
+        har satt opp dommer for kamp</p>
+      <table style="text-align: left; float: left;">
+        <tr>
+          <th>Kamp</th>
+          <td>
+            {m.homeTeam}
+            -
+            {m.awayTeam}
+          </td>
+        </tr>
+        <tr>
+          <th>Bane</th>
+          <td>
+            {m.venue}
+          </td>
+        </tr>
+        <tr>
+          <th>Avspark</th>
+          <td>
+            {m.kickoffDateTimeString}
+          </td>
+        </tr>
+        <tr>
+          <th>Dommerregning sendes til</th>
+          <td>
+            {m.payerEmail}
+          </td>
+        </tr>
+        <tr>
+          <th>Dommer</th>
+          <td>
+            {m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ref)}
+          </td>
+        </tr>{if (m.refereeType == RefereeType.Trio.key) (
+        <tr>
+          <th>Assistentdommer 1</th>
+          <td>
+            {m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ass1)}
+          </td>
+        </tr>
+          <tr>
+            <th>Assistentdommer 2</th>
+            <td>
+              {m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ass2)}
+            </td>
+          </tr>)}
+      </table>
+    }
+
+    def formatedPhoneNumberOrBlank(u:Option[User]) = u.map(" (Tel: " + _.telephone + ")").getOrElse("")
+
+    def toMailMessage: MailMessage = {
+      MailMessage(config.email.fromFdl, m.clubContact.map(_.email).getOrElse(config.email.fromFdl) :: Nil, Nil, Nil, "Dommeroppsett klart", text, Some(html))
+    }
+
 }

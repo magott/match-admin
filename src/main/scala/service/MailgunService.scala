@@ -2,11 +2,13 @@ package service
 
 import conf.Config
 import data._
+
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Properties
 import dispatch._
 import data.MailMessage
 import common._
+import org.joda.time.{LocalDate, LocalDateTime}
 
 import scala.util.Properties
 
@@ -16,45 +18,68 @@ class MailgunService (private val config:Config){
   val mailgunAppName = config.email.mailgunAppName orElse
     Properties.envOrNone("MAILGUN_SMTP_LOGIN").map(_.split("@")(1).trim) getOrElse "app15913574.mailgun.org"
 
+
+  def sendAll(messages: List[MailMessage]) : List[MailReceipt]= {
+    import scala.concurrent.duration._
+    import ExecutionContext.Implicits.global
+    val futures : List[Future[MailReceipt]] = messages.map(sendMailAsync)
+    val combined = Future.sequence(futures)
+    val result = Await.result(combined, 10.seconds)
+    println(s"Mail ble sendt med response: ${result}")
+    result
+  }
+
+  def sendMailAsync(mailMessage: MailMessage) : Future[MailReceipt] = {
+    import ExecutionContext.Implicits.global
+    val req = mailgunUrl << mailMessage.asMailgunParams
+    for {
+      resp <- Http(req)
+      receipt = if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody) else MailRejected(resp.getResponseBody, resp.getStatusCode)
+    } yield receipt
+  }
+
   def sendMail(mail:MailMessage) : MailReceipt = {
     import ExecutionContext.Implicits.global
     import scala.concurrent.duration._
     val start = System.currentTimeMillis
     val req = mailgunUrl << mail.asMailgunParams
-    val futureReceipt = for {
-      resp <- Http(req)
-      receipt = if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody) else MailRejected(resp.getResponseBody, resp.getStatusCode)
-    } yield receipt
+    val futureReceipt = sendMailAsync(mail)
     val receipt = Await.result(futureReceipt, 10.seconds)
     val end = System.currentTimeMillis
     println(s"Mail receipt (took ${durationSeconds(start, end)}): $receipt")
     receipt
   }
 
+  def refereesAppointed(m: Match) = {
+    val ref = m.appointedRef.flatMap(x => repo.userById(x.id))
+    val ass1 = m.appointedAssistant1.flatMap(x => repo.userById(x.id))
+    val ass2 = m.appointedAssistant2.flatMap(x => repo.userById(x.id))
+    val appointmentMail = AppointmentMail(m, config, "", ref, ass1, ass2).toMailMessage
+    val clubNotificationMail = ClubRefereeNotification(m, config, ref, ass1, ass2).toMailMessage
+    sendAll(appointmentMail :: clubNotificationMail :: Nil)
+      .head
+  }
+
   def sendAppointmentMail(m:Match) = {
-    val mailHelper = AppointmentMail(m, config.email.ccOnOrders, "", m.appointedRef.flatMap(x => repo.userById(x.id)), m.appointedAssistant1.flatMap(x => repo.userById(x.id)), m.appointedAssistant2.flatMap(x => repo.userById(x.id)))
-    val mail = MailMessage(config.email.fromFdl, mailHelper.to, Seq(config.email.toOnOrders), Nil, mailHelper.subject, mailHelper.text, Some(mailHelper.html))
+    val ref = m.appointedRef.flatMap(x => repo.userById(x.id))
+    val ass1 = m.appointedAssistant1.flatMap(x => repo.userById(x.id))
+    val ass2 = m.appointedAssistant2.flatMap(x => repo.userById(x.id))
+    val mailHelper = AppointmentMail(m, config, "", ref, ass1, ass2)
+    val mail = mailHelper.toMailMessage
     sendMail(mail)
+  }
+
+  def newMatchEmails(m: MatchTemplate, rootUrl:String, matchUrl:String) : MailReceipt = {
+    println("Running: "+LocalDateTime.now)
+    val orderConfirmation = OrderConfirmationMail(m, config, matchUrl)
+    val tfdlMail = NewMatchMail(m, matchUrl, config)
+    sendAll(tfdlMail.toMailMessage :: orderConfirmation.toMailMessage :: Nil)
+      .head
   }
 
   def sendMatchOrderEmail(m:MatchTemplate, matchUrl:String) = {
     import m._
-    sendMail(
-      MailMessage(
-        config.email.fromFdl,
-        config.email.toOnOrders,
-        config.email.ccOnOrders,
-        "Bestilling av dommer",
-        s"""Det er bestilt $refereeType til følgende kamp:
-          |${kickoff.toString("dd.MM.yyyy HH:mm")}
-          |$teams (${Level.asMap(m.level).toString})
-          |$venue
-          |Regningen betales av ${m.betalendeLag}
-          |Regning sendes til ${m.payerEmail}
-          |Gå til $matchUrl for å publisere kampen og se mer informasjon om kampen.
-        """.stripMargin
-      )
-    )
+    sendMail( NewMatchMail(m, matchUrl, config).toMailMessage)
   }
 
   def sendLostpasswordMail(email:String, resetUrl:String) = {

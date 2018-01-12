@@ -5,7 +5,7 @@ import org.constretto.Converter._
 /**
  *
  */
-case class Config(tag:String, css:String, heading:String, image:String, refNoPrefix:String, email:EmailConfig, javascript:String, favicon:String) {
+case class Config(tag:String, name:String, css:String, heading:String, image:String, refNoPrefix:String, email:EmailConfig, javascript:String, favicon:String) {
 
 }
 
@@ -27,6 +27,7 @@ object Config{
   implicit val configC = fromObject{obj =>
     Config(
     obj[String]("tag"),
+    obj[String]("name"),
     obj[String]("css"),
     obj[String]("heading"),
     obj[String]("ogImage"),

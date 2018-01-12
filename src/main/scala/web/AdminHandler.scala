@@ -52,7 +52,7 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case _ => {
           fullMatch(new ObjectId(matchId)) match{
-            case Some(m) => mailgun.sendAppointmentMail(m) match{
+            case Some(m) => mailgun.refereesAppointed(m) match{
               case MailAccepted(message) => Ok
               case MailRejected(code, message) =>{
                 println("Mailsending error code %s message %s".format(message,code))
