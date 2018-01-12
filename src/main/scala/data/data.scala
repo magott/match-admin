@@ -129,6 +129,21 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     </button>
   )
 
+  def betalendeLag = {
+    payingTeam.flatMap(Paying.fromString) match {
+      case Some(Home) => homeTeam
+      case Some(Away) => awayTeam
+      case None => "Ikke oppgitt i bestilling, hør med lagene på kampdag"
+    }
+  }
+
+  def dommerregningSendesTil = {
+    if (payerEmail.isEmpty)
+      clubContact.map(_.email).filterNot(_.isEmpty).getOrElse("Ingen epost oppgitt i bestilling, hør med lagene på kampdag")
+    else payerEmail
+
+  }
+
 }
 
 object Match{
@@ -293,7 +308,7 @@ object Level{
   val asMap: Map[String, String] = all.foldLeft(Map.empty[String,String])((acc, opt) => acc.+((opt.key, opt.display)))
 }
 
-abstract class Paying(team:String)
+sealed abstract class Paying(team:String)
 case object Home extends Paying("home")
 case object Away extends Paying("away")
 

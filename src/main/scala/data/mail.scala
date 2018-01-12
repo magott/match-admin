@@ -74,6 +74,14 @@ case class AppointmentMail(m:Match, cc:List[String], baseUrl:String, ref:Option[
           <td>{m.assistantFee.getOrElse("-")}</td>
         </tr>
         <tr>
+          <th>Dommerregning betales av</th>
+          <td>{m.betalendeLag}</td>
+        </tr>
+        <tr>
+          <th>Dommerregning sendes til</th>
+          <td>{m.dommerregningSendesTil}</td>
+        </tr>
+        <tr>
           <th>Dommer</th>
           <td>{m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ref)}</td>
         </tr>
