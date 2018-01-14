@@ -151,6 +151,7 @@ case class AppointmentMail(m:Match, config:Config, baseUrl:String, ref:Option[Us
 
 case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], ass1:Option[User], ass2:Option[User]){
   def to = m.clubContact.map(_.email)
+  def cc = config.email.toOnOrders :: Nil
   def text = {
     s"""
        |Det er blitt satt opp dommere til følgende kamp:
@@ -221,7 +222,12 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
     def formatedPhoneNumberOrBlank(u:Option[User]) = u.map(" (Tel: " + _.telephone + ")").getOrElse("")
 
     def toMailMessage: MailMessage = {
-      MailMessage(config.email.fromFdl, m.clubContact.map(_.email).getOrElse(config.email.fromFdl) :: Nil, Nil, Nil, "Dommeroppsett klart", text, Some(html))
+      MailMessage(config.email.fromFdl,
+        m.clubContact.map(_.email).getOrElse(config.email.fromFdl) :: Nil,
+        cc,
+        Nil,
+        "Dommeroppsett klart",
+        text, Some(html))
     }
 
 }
