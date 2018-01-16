@@ -69,7 +69,7 @@ class UserHandler(private val repo:MongoRepository) (implicit val config:Config)
         req match{
           case GET(_) =>{
             LoggedOnUser.unapply(req) match{
-              case Some(user) if(user.id.get == userId) => Html5(Pages(req).userForm(Some(user)))
+              case Some(user) if(user.id.exists(_.toString == userId)) => Html5(Pages(req).userForm(Some(user)))
               case Some(user) => Forbidden ~> Html5(Pages(req).forbidden)
               case None => Forbidden ~> Html5(Pages(req).forbidden) //Hva er rett kode??
             }
@@ -77,7 +77,7 @@ class UserHandler(private val repo:MongoRepository) (implicit val config:Config)
           case POST(_) =>{
             val Params(p) = req
             LoggedOnUser.unapply(req) match{
-              case Some(user) if(user.id.get == userId) => handleEditUser(p, userId, SessionId.unapply(req).get) match{
+              case Some(user) if(user.id.exists(_.toString == userId)) => handleEditUser(p, userId, SessionId.unapply(req).get) match{
                 case Right(_) => HerokuRedirect(req, "/matches")
                 case Left(errors) => BadRequest ~> Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
               }

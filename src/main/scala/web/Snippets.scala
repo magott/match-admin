@@ -636,6 +636,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                 <ul class="dropdown-menu">
                   <a href="/logout">Logg ut</a>
                   <a href={"/users/"+sessOpt.get.userId.toString+"/matches/"}>Mine kamper</a>
+                  <a href={"/users/"+sessOpt.get.userId.toString+"/level"}>Endre nivå</a>
                   <a href={"/users/"+sessOpt.get.userId.toString}>Endre brukerinfo</a>
                 </ul>
               </li>
