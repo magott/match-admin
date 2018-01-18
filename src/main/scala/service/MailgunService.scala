@@ -69,17 +69,17 @@ class MailgunService (private val config:Config){
     sendMail(mail)
   }
 
-  def newMatchEmails(m: MatchTemplate, rootUrl:String, matchUrl:String) : MailReceipt = {
+  def newMatchEmails(m: MatchTemplate, rootUrl:String, matchUrl:String, matchId:String) : MailReceipt = {
     println("Running: "+LocalDateTime.now)
-    val orderConfirmation = OrderConfirmationMail(m, config, rootUrl)
-    val tfdlMail = NewMatchMail(m, matchUrl, config)
+    val orderConfirmation = OrderConfirmationMail(m, config, rootUrl, matchId)
+    val tfdlMail = NewMatchMail(m, matchUrl, config, matchId)
     sendAll(tfdlMail.toMailMessage :: orderConfirmation.toMailMessage :: Nil)
       .head
   }
 
-  def sendMatchOrderEmail(m:MatchTemplate, matchUrl:String) = {
+  def sendMatchOrderEmail(m:MatchTemplate, matchUrl:String, matchId: String) = {
     import m._
-    sendMail( NewMatchMail(m, matchUrl, config).toMailMessage)
+    sendMail( NewMatchMail(m, matchUrl, config, matchId).toMailMessage)
   }
 
   def sendLostpasswordMail(email:String, resetUrl:String) = {

@@ -27,7 +27,7 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
               val editMatchUrl = root + "/admin/matches/"+matchId
               val UserAgent(ua) = req
               println("New match from club (%s) : %s [UA:%s] (stored in %s)".format(matchId, m.toString, ua, durationSeconds(before, storedAt)))
-              mailgun.newMatchEmails(m, root, editMatchUrl)
+              mailgun.newMatchEmails(m, root, editMatchUrl, matchId.toString)
               val after = System.currentTimeMillis
               println(s"Processing new match took ${durationSeconds(before, after)}")
               Ok ~> Html5(Pages(req).refereeOrderReceipt(m))

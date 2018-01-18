@@ -1,17 +1,24 @@
 package data
 
 import conf.Config
+import io.circe.Json
+import io.circe.Json.JString
 
 import xml.NodeSeq
 
-case class MailMessage(from:String, to:Seq[String], cc:Seq[String], bcc:Seq[String], subject:String, body:String, bodyHtml:Option[NodeSeq]) {
+case class MailMessage(from:String, to:Seq[String], cc:Seq[String], bcc:Seq[String], subject:String, body:String, bodyHtml:Option[NodeSeq], matchId: Option[String]) {
 
-  def asMailgunParams = Seq("from" -> from, "subject" -> subject, "text"->body) ++ to.map("to"-> _) ++ cc.map("cc" -> _) ++ bcc.map("bcc" -> _) ++ bodyHtml.map("html" -> _.toString)
+  def asMailgunParams : Seq[(String,String)] = Seq("from" -> from, "subject" -> subject, "text"->body) ++ to.map("to"-> _) ++ cc.map("cc" -> _) ++ bcc.map("bcc" -> _) ++
+    bodyHtml.map("html" -> _.toString) ++
+    matchId.map(id => Seq("v:matchId" -> id)).getOrElse(Seq.empty)
 
 }
 
 object MailMessage{
-  def apply(from:String, to:String, cc:List[String], subject:String, body:String):MailMessage = MailMessage(from, to :: Nil, cc, Nil, subject, body, None)
+  import io.circe.syntax._
+  import io.circe._, io.circe.syntax._
+  def apply(from:String, to:String, cc:List[String], subject:String, body:String):MailMessage = MailMessage(from, to :: Nil, cc, Nil, subject, body, None, None)
+  def matchIdJson(matchId:String) = Some(Json.obj("matchId" -> matchId.asJson))
 }
 
 sealed trait MailReceipt{
@@ -23,7 +30,7 @@ case class MailAccepted(message:String) extends MailReceipt {
 case class MailRejected(message:String, errorCode:Int) extends MailReceipt {
   val isAccepted = false
 }
-case class OrderConfirmationMail(m: MatchTemplate, config:Config, baseUrl:String){
+case class OrderConfirmationMail(m: MatchTemplate, config:Config, baseUrl:String, matchId:String){
   def subject = "Bekreftelse på mottatt dommerbestilling"
   def to:Seq[String] = m.clubContact.email :: Nil
   def text =
@@ -41,17 +48,18 @@ case class OrderConfirmationMail(m: MatchTemplate, config:Config, baseUrl:String
     """.stripMargin
 
   def toMailMessage : MailMessage = {
-    MailMessage(config.email.fromFdl, to, Seq.empty, Seq.empty, subject, text, None)
+    MailMessage(config.email.fromFdl, to, Seq.empty, Seq.empty, subject, text, None, Some(matchId))
   }
 }
 
-case class NewMatchMail(m: MatchTemplate, matchUrl:String, config:Config){
+case class NewMatchMail(m: MatchTemplate, matchUrl:String, config:Config, matchId:String){
   def toMailMessage = {
     import m._
     MailMessage(
       config.email.fromFdl,
-      config.email.toOnOrders,
+      Seq(config.email.toOnOrders),
       config.email.ccOnOrders,
+      Seq.empty,
       "Bestilling av dommer",
       s"""Det er bestilt $refereeType til følgende kamp:
          |${kickoff.toString("dd.MM.yyyy HH:mm")}
@@ -60,7 +68,8 @@ case class NewMatchMail(m: MatchTemplate, matchUrl:String, config:Config){
          |Regningen betales av ${m.betalendeLag}
          |Regning sendes til ${m.payerEmail}
          |Gå til $matchUrl for å publisere kampen og se mer informasjon om kampen.
-        """.stripMargin)
+        """.stripMargin,
+      None, Some(matchId))
   }
 }
 
@@ -144,7 +153,7 @@ case class AppointmentMail(m:Match, config:Config, baseUrl:String, ref:Option[Us
 
   def toMailMessage = {
     val to = ref.map(_.email).toSeq ++ ass1.map(_.email).toSeq ++ ass2.map(_.email).toSeq
-    MailMessage(config.email.fromFdl, to, Nil, Nil, subject, text, Some(html))
+    MailMessage(config.email.fromFdl, to, Nil, Nil, subject, text, Some(html), Some(m.id.get.toString))
   }
 
 }
@@ -164,6 +173,7 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
               |AD2: ${m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}${ass2.map(", "+_.telephone).getOrElse("")}
            """.stripMargin
     }
+    |
      """.stripMargin
   }
   def html : NodeSeq = {
@@ -227,7 +237,7 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
         cc,
         Nil,
         "Dommeroppsett klart",
-        text, Some(html))
+        text, Some(html), m.id.map(_.toString))
     }
 
 }

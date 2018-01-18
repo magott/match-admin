@@ -4,7 +4,7 @@ SbtStartScript.startScriptForClassesSettings
 
 name:="match-admin"
 
-scalaVersion:="2.11.8"
+scalaVersion:="2.11.12"
 
 organization := "com.andersen-gott"
 
@@ -15,7 +15,7 @@ libraryDependencies ++=
     "net.databinder" %% "unfiltered-jetty" % "0.8.1",
     "commons-logging" % "commons-logging" % "1.1.1",
     "joda-time" % "joda-time" % "2.1",
-    "org.mindrot" % "jbcrypt" % "0.3m",
+    "org.mindrot" % "jbcrypt" % "0.4",
     "org.joda" % "joda-convert" % "1.2",
     "org.scalatest" %% "scalatest" % "2.2.2" % "test",
     "com.google.guava" % "guava" % "11.0.2",
@@ -24,5 +24,8 @@ libraryDependencies ++=
     "org.scalaz" %% "scalaz-core" % "7.1.0",
     "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
     "org.constretto" %% "constretto-scala" % "1.1",
-    "ch.qos.logback" % "logback-classic" % "1.1.2"
+    "ch.qos.logback" % "logback-classic" % "1.1.2",
+    "io.circe" %% "circe-core" % "0.9.0",
+  "io.circe" %% "circe-parser" % "0.9.0"
+
   )
