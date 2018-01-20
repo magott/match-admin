@@ -173,15 +173,17 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
               |AD2: ${m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}${ass2.map(", "+_.telephone).getOrElse("")}
            """.stripMargin
     }
-    |
+    |${config.email.clubNotificationFooter.getOrElse("")}
+    |God kamp!
      """.stripMargin
   }
   def html : NodeSeq = {
+    <div>
     <h2>Dommeroppsett</h2>
       <p>
         {config.name}
         har satt opp dommer for kamp</p>
-      <table style="text-align: left; float: left;">
+      <table style="text-align: left;">
         <tr>
           <th>Kamp</th>
           <td>
@@ -227,6 +229,16 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
             </td>
           </tr>)}
       </table>
+      <p></p>
+      <div>
+        <p>
+          {config.email.clubNotificationFooter.getOrElse("")}
+        </p>
+        <p>
+          God kamp!
+        </p>
+      </div>
+    </div>
     }
 
     def formatedPhoneNumberOrBlank(u:Option[User]) = u.map(" (Tel: " + _.telephone + ")").getOrElse("")

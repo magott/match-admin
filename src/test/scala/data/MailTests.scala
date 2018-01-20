@@ -15,11 +15,15 @@ class MailTests extends FunSuite{
 
     val refUser = User(None, "","","12345678", "",false, 1, DateTime.now, "")
 
-    val config = Config("", "", "", "", "", "", EmailConfig("", "", List.empty, None), "", "")
+    val config = Config("", "", "", "", "", "", EmailConfig("", "", List.empty, None, Some("Footer text")), "", "")
 
-    val text = ClubRefereeNotification(m, config,Some(refUser), None, None).text
+    val notification = ClubRefereeNotification(m, config, Some(refUser), None, None)
+
+    val text = notification.text
 
     println(text)
+
+    println(notification.html)
   }
 
 
