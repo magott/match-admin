@@ -1,6 +1,8 @@
 package data
 
 import conf.{Config, EmailConfig}
+import org.constretto.Constretto
+import org.constretto.Constretto.json
 import org.joda.time.DateTime
 import org.scalatest.FunSuite
 
@@ -15,7 +17,14 @@ class MailTests extends FunSuite{
 
     val refUser = User(None, "","","12345678", "",false, 1, DateTime.now, "")
 
-    val config = Config("", "", "", "", "", "", EmailConfig("", "", List.empty, None, Some("Footer text")), "", "")
+    System.setProperty("CONSTRETTO_TAGS", "dev")
+    val c = Constretto(
+      List(
+        json("classpath:conf/dev.conf", "config", Some("dev"))
+      )
+    )[Config]("config")
+
+    val config = Config("", "", "", "", "", "", c.email, "", "")
 
     val notification = ClubRefereeNotification(m, config, Some(refUser), None, None)
 

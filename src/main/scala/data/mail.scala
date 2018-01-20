@@ -173,7 +173,7 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
               |AD2: ${m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}${ass2.map(", "+_.telephone).getOrElse("")}
            """.stripMargin
     }
-    |${config.email.clubNotificationFooter.getOrElse("")}
+    |${config.clubNotificationFooter.getOrElse("")}
     |God kamp!
      """.stripMargin
   }
@@ -232,7 +232,7 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
       <p></p>
       <div>
         <p>
-          {config.email.clubNotificationFooter.getOrElse("")}
+          {config.clubNotificationFooter.getOrElse("")}
         </p>
         <p>
           God kamp!
