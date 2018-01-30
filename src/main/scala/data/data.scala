@@ -1,9 +1,12 @@
 package data
 
-import org.joda.time.{LocalDateTime, DateTime}
+import org.joda.time.{DateTime, LocalDateTime}
 import org.bson.types.ObjectId
 import com.mongodb.casbah.query.Imports._
-import java.util.{List => JList, Collections, UUID}
+import java.util.{Collections, UUID, List => JList}
+
+import io.circe.Json
+
 import collection.mutable
 import collection.mutable.ArrayBuffer
 import xml.NodeSeq
@@ -15,6 +18,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee],
                  published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo], payerEmail:String, payingTeam: Option[String]){
 
+  def idString = id.map(_.toString).getOrElse("")
   def kickoffDateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
   def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
@@ -144,6 +148,19 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   }
 
+  def asJson: Json ={
+    import io.circe.literal._
+    import io.circe._, io.circe.syntax._
+    json"""{
+          "kamp":$teams,
+          "bane":$venue,
+          "avspark":$kickoffDateTimeString,
+          "dommer":${appointedRef.map(_.name)},
+          "AD1":${appointedAssistant1.map(_.name)},
+          "AD2":${appointedAssistant2.map(_.name)},
+          }"""
+  }
+
 }
 
 object Match{
@@ -251,6 +268,8 @@ object User{
     User(None, name, email, telephone, level, false, refereeNumber, new DateTime, password)
 
   def toIdNameJson(u:User) = s"""{"id":"${u.id.getOrElse("")}", "label":"${u.name}"}"""
+
+  def system = User(None, "System","code@andersen-gott.com","","",true,0,DateTime.now,"",None)
 }
 
 case class ContactInfo(name:String, address:String, zip:String, telephone:String, email:String){

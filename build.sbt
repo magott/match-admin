@@ -26,6 +26,7 @@ libraryDependencies ++=
     "org.constretto" %% "constretto-scala" % "1.1",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
     "io.circe" %% "circe-core" % "0.9.0",
-  "io.circe" %% "circe-parser" % "0.9.0"
+    "io.circe" %% "circe-parser" % "0.9.0",
+    "io.circe" %% "circe-literal" % "0.9.0"
 
   )

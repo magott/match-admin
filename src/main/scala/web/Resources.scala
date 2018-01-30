@@ -2,9 +2,11 @@ package web
 
 import unfiltered.filter.Plan
 import unfiltered.request._
-import unfiltered.response.{Pass, Ok, Html5}
+import unfiltered.response.{Html5, Ok, Pass}
 import service.{MailgunService, MongoRepository}
 import conf.Config
+
+import scala.util.Properties
 
 class Resources(config: Config) extends Plan{
 
@@ -18,6 +20,7 @@ class Resources(config: Config) extends Plan{
     case r@Path(Seg(List("users", _*))) => new UserHandler(repo).handleUser(r)
     case r@Path(Seg(List("matches", _*))) => new MatchHandler(repo).handleMatches(r)
     case r@Path(Seg(List("clubs", _*))) => new ClubHandler(repo, mailgun).handleClubRequest(r)
+    case r@Path(Seg(List("webhook", _*))) => new WebhookHandler(Properties.envOrNone("MAILGUN_API_KEY").get).handle(r)
     case r@Path("/login") => loginHandler.handleLogin(r)
     case r@Path("/logout") => loginHandler.handleLogout(r)
     case r@Path("/resetpassword") => loginHandler.handlePasswordReset(r)
