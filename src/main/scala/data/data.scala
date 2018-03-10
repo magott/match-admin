@@ -19,6 +19,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo], payerEmail:String, payingTeam: Option[String]){
 
   def idString = id.map(_.toString).getOrElse("")
+  def refString = (appointedRef.map(r=>s"HD ${r.name}") :: appointedAssistant1.map(r => s"AD1 ${r.name}")  :: appointedAssistant2.map(r => s"AD2 ${r.name}") :: Nil).flatten.mkString(",")
   def kickoffDateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
   def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
@@ -151,14 +152,15 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def asJson: Json ={
     import io.circe.literal._
     import io.circe._, io.circe.syntax._
-    json"""{
-          "kamp":$teams,
-          "bane":$venue,
-          "avspark":$kickoffDateTimeString,
-          "dommer":${appointedRef.map(_.name)},
-          "AD1":${appointedAssistant1.map(_.name)},
-          "AD2":${appointedAssistant2.map(_.name)},
-          }"""
+    Json.obj(
+      "kamp":=teams,
+      "bane" := venue,
+      "avspark" := kickoffDateTimeString,
+      "dommer" := appointedRef.map(_.name),
+      "AD1" := appointedAssistant1.map(_.name),
+      "AD2" := appointedAssistant1.map(_.name)
+    )
+
   }
 
 }

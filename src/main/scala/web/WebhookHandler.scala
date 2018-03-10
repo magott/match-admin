@@ -6,57 +6,76 @@ import java.time.{Instant, ZoneId, ZoneOffset, ZonedDateTime}
 import java.util.Base64
 import javax.crypto.spec.SecretKeySpec
 
-import data.MatchEvent
+import data._
 import io.circe.syntax._
 import io.circe.Json
-import unfiltered.request.{HttpRequest, Params, Path, Seg}
-import unfiltered.response.{NotAcceptable, NotFound, Ok, Pass}
+import service.MatchService
+import unfiltered.filter.Plan
+import unfiltered.request._
+import unfiltered.response.{Accepted, BadRequest, NotAcceptable, NotFound, Ok, Pass}
+
+import scala.util.Try
 
 /**
   *
   */
-class WebhookHandler(private val apiKey:String) {
+class WebhookHandler(private val apiKey:String, matchService: MatchService) {
 
-  def validate(req: HttpRequest[_]) = {
-    val foo:Either[String, String] = Left("foo")
-    val p = Params.unapply(req).get
-    println(p)
-
-    val timestamp = p("timestamp").head
-    val zonedDateTime = Instant.ofEpochSecond(timestamp.toLong).atZone(ZoneId.of("Europe/Oslo"))
-    val valid = isValid(p("signature").head, timestamp,p("token").head)
-    if(valid){
-      val matchId = p("X-Mailgun-Variables").asJson.hcursor.downField("matchId").as[String].right.get
-//      MailgunEvent(zonedDateTime, matchId, p())
-      Right("right")
-    }else {
-      Left("left")
-    }
+  def signed(mailgunIntent: Plan.Intent) : Plan.Intent = {
+    case r@Path(Seg("webhook"::"mailgun" :: event :: Nil)) & Params(p) =>
+      println(s"Event: $event : $p")
+      if(isValid(p("signature").head, p("timestamp").head, p("token").head))
+        mailgunIntent(r)
+      else
+        NotAcceptable
 
   }
 
-  def handle(req: HttpRequest[_]) = {
-    req match {
-      case Path(Seg("webhook" :: "mailgun" :: "sent" :: Nil)) => {
-        val either = validate(req)
-        if(either.isLeft) NotAcceptable
-        else {
-          Ok
-        }
+  def handle: Plan.Intent = {
+      case r@Path(Seg("webhook" :: "mailgun" :: "delivered" :: Nil)) & Params(Mailgunparams(mp)) => {
+        val delivered = MailgunEvent.delivered(mp)
+        matchService.saveEvent(delivered)
+        Ok
       }
-      case _ => NotFound
-    }
+      case r@Path(Seg("webhook" :: "mailgun" :: "opened" :: Nil)) & Params(Mailgunparams(mp)) =>
+        val event = MailgunEvent.opened(mp)
+        matchService.saveEvent(event)
+        Ok
+      case r@Path(Seg("webhook" :: "mailgun" :: "failed" :: Nil)) & Params(Mailgunparams(mp)) =>
+        val event = MailgunEvent.failed(mp)
+        matchService.saveEvent(event)
+        Ok
+      case r@Path(Seg("webhook" :: "mailgun" :: "unsubscribed" :: Nil)) & Params(Mailgunparams(mp)) =>
+        val event = MailgunEvent.unsubscribed(mp)
+        matchService.saveEvent(event)
+        Ok
+      case _ =>
+        println("Uhåndtert mailgun event")
+        Ok
   }
 
-  case class MailgunEvent(timestamp:ZonedDateTime, matchId:String, subject:String, to:String, json:Json) {
-    def toMatchEvent = MatchEvent(None, matchId, timestamp.toLocalDateTime, s"Mail $subject mottatt av $to", "")
+  object MailgunEvent{
+    def delivered(mp:Mailgunparams) =
+      MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail ${mp.subject} levert til ${mp.recipient}", Json.obj().noSpaces, MailDelivered, OkLevel)
+    def opened(mp: Mailgunparams) = MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail lest av ${mp.recipient}", "{}", MailOpened, OkLevel )
+    def failed(mp: Mailgunparams) = MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail kunne ikke leveres til ${mp.recipient}${mp.description.map(", fordi: " + _).getOrElse("")}", "{}", MailUnsubscribed, WarnLevel )
+    def unsubscribed(mp: Mailgunparams) = MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"${mp.recipient} har bedt om å ikke få mer mail. Dette er håndtert", "{}", MailBounced, ErrorLevel )
   }
+
+  def toZonedDateTime(timestamp:String) = {
+    Instant.ofEpochSecond(timestamp.toLong).atZone(ZoneId.of("Europe/Oslo"))
+  }
+
 
   def isValid(signature:String, timestamp:String, token:String) = {
     val zonedDateTime = Instant.ofEpochSecond(timestamp.toLong)
     val validDate = zonedDateTime.isBefore(Instant.now().plus(2, ChronoUnit.HOURS))
     val hmac = generateHMAC(apiKey, timestamp + token)
-    validDate && hmac == signature
+    val b = validDate && hmac == signature
+    if(!b){
+      println(s"Ugyldig request $validDate $apiKey")
+    }
+    b
   }
 
   def generateHMAC(sharedSecret: String, preHashString: String): String = {
@@ -68,5 +87,29 @@ class WebhookHandler(private val apiKey:String) {
     hashString.map("%02X" format _).mkString.toLowerCase
   }
 
-
 }
+
+
+object Mailgunparams{
+  def unapply(p:Map[String, Seq[String]]): Option[Mailgunparams] = {
+    def param(name:String) = p(name).headOption
+
+    for {
+      timestamp <- param("timestamp").flatMap(toZonedDateTime)
+      recipient <- param("recipient")
+      matchId <- param("matchId")
+      subject <- param("subject")
+      messageId <- param("Message-Id").map(_.stripPrefix("<").stripSuffix(""))
+
+    }yield(Mailgunparams(timestamp, recipient, matchId, subject, messageId, param("description")))
+
+
+  }
+
+  def toZonedDateTime(timestamp:String) = {
+    Try(Instant.ofEpochSecond(timestamp.toLong).atZone(ZoneId.of("Europe/Oslo"))).toOption
+  }
+}
+
+case class Mailgunparams(timestamp:ZonedDateTime, recipient:String, matchId:String, subject:String, messageId:String, description: Option[String])
+

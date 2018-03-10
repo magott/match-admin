@@ -9,10 +9,13 @@ import unfiltered.response.Html5
 import unfiltered.response.ResponseString
 import data._
 import java.util.Date
-import org.joda.time.{LocalDate, DateMidnight, DateTime}
-import service.{MongoRepository, MailgunService}
+
+import org.joda.time.{DateMidnight, DateTime, LocalDate}
+import service.{MailgunService, MatchService, MongoRepository}
+
 import scala.Left
 import data.MailAccepted
+
 import scala.Right
 import scala.Some
 import unfiltered.response.Html5
@@ -20,8 +23,10 @@ import unfiltered.response.ResponseString
 import org.joda.time
 import unfiltered.request.Params.Extract
 
-class AdminHandler (private val repo:MongoRepository, private val mailgun:MailgunService) (implicit val config:Config){
-  import repo._
+class AdminHandler (private val matchService:MatchService, private val mailgun:MailgunService) (implicit val config:Config){
+
+  val mongo = matchService.repo
+
 
   def handleAdmin(req: HttpRequest[_]) = {
     req match {
@@ -34,15 +39,15 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>{
           if(viewAll(req))
-            Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime)))
+            Html5(Pages(req).adminMatchListView(mongo.listPublishedMatchesNewerThan(new DateMidnight(2000,1,1).toDateTime)))
           else
-            Html5(Pages(req).adminMatchListView(listPublishedMatchesNewerThan(seasonStart)))
+            Html5(Pages(req).adminMatchListView(mongo.listPublishedMatchesNewerThan(seasonStart)))
         }
-        case POST(_) & Params(p)=>{
+        case POST(_) & Params(p) & LoggedOnUser(user)=>{
           matchFromParams(None, p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             case Right(m) => {
-              saveMatch(m)
+              matchService.saveMatch(m, user)
               HerokuRedirect(req, "/admin/matches")
             }
           }
@@ -51,7 +56,7 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
       case Path(Seg("admin" :: "matches" :: matchId :: "sendmail" :: Nil)) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case _ => {
-          fullMatch(new ObjectId(matchId)) match{
+          mongo.fullMatch(new ObjectId(matchId)) match{
             case Some(m) => mailgun.refereesAppointed(m) match{
               case MailAccepted(message) => Ok
               case MailRejected(code, message) =>{
@@ -65,10 +70,10 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
       }
       case Path(Seg("admin" :: "matches" :: matchId :: "admin-status" :: Nil)) & Params(p)=> {
         p.get("from-state").map(from => if (from.head == "open"){
-          markMatchAsDone(new ObjectId(matchId))
+          mongo.markMatchAsDone(new ObjectId(matchId))
           Ok ~> JsonContent ~> ResponseString("""{"newState":"done"}""")
         }else{
-          markMatchAsOpen(new ObjectId(matchId))
+          mongo.markMatchAsOpen(new ObjectId(matchId))
           Ok ~> JsonContent ~> ResponseString("""{"newState":"open"}""")
         }
         ).getOrElse(BadRequest)
@@ -77,7 +82,7 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) => req match{
           case Params(NameParam(name)) => {
-            Ok ~> JsonContent ~> ResponseString(repo.searchUserByName(name).map(User.toIdNameJson).mkString("[",",","]"))
+            Ok ~> JsonContent ~> ResponseString(mongo.searchUserByName(name).map(User.toIdNameJson).mkString("[",",","]"))
           }
           case _ => BadRequest ~> ResponseString("""'name' param is required""")
         }
@@ -86,27 +91,27 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
 
       case Path(Seg("admin" :: "users" :: Nil)) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
-        case GET(_) => Ok ~> Html5(Pages(req).userList(allUsers))
+        case GET(_) => Ok ~> Html5(Pages(req).userList(mongo.allUsers))
       }
       case Path(Seg(List("admin", "users", userId))) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>
-          userById(new ObjectId(userId)) match{
-            case Some(user) => Ok ~> Html5(Pages(req).user(user, repo.matchesWithReferee(user.id.get), "/admin/matches/"))
+          mongo.userById(new ObjectId(userId)) match{
+            case Some(user) => Ok ~> Html5(Pages(req).user(user, mongo.matchesWithReferee(user.id.get), "/admin/matches/"))
             case None => NotFound ~> Html5(Pages(req).notFound(Some("Fant ingen dommer med id %s".format(userId))))
           }
         case _ => MethodNotAllowed
       }
       case Path(Seg("admin" :: "matches" :: "orders" :: Nil)) => req match{
         case GET(_) => {
-          val unpublishedMatches = repo.listUnpublishedMatches
+          val unpublishedMatches = mongo.listUnpublishedMatches
           Ok ~> Html5(Pages(req).unpublishedMatches(unpublishedMatches))
         }
       }
       case Path(Seg(List("admin","matches", matchId))) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)
         case GET(_) =>{
-          fullMatch(new ObjectId(matchId)) match {
+          mongo.fullMatch(new ObjectId(matchId)) match {
             case None => BadRequest ~> Html5(Pages(req).notFound(Some("Ingen kamp med id " + matchId)))
             case Some(m) => Html5(Pages(req).editMatchForm(Some(m)))
           }
@@ -114,25 +119,25 @@ class AdminHandler (private val repo:MongoRepository, private val mailgun:Mailgu
         case POST(_) & Params(p)=> req match {
           case Params(RefTypeParam(reftype)) & Params(UserIdParam(userid)) => req match{
             case Params(RefTypeParam("ref")) => {
-              repo.refInterestedInMatch(new ObjectId(matchId), new ObjectId(userid))
+              mongo.refInterestedInMatch(new ObjectId(matchId), new ObjectId(userid))
               NoContent
             }
             case Params(RefTypeParam("assRef")) => {
-              repo.assistantInterestedInMatch(new ObjectId(matchId), new ObjectId(userid))
+              mongo.assistantInterestedInMatch(new ObjectId(matchId), new ObjectId(userid))
               NoContent
             }
             case _ => BadRequest~> JsonContent ~> ResponseString("""{"error":"Invalid or no reftype specified" }""")
           }
-          case _ => matchFromParams(Some(matchId), p) match{
+          case LoggedOnUser(user) => matchFromParams(Some(matchId), p) match{
             case Left(errors) => Html5(Pages(req).errorPage(errors.map(e => <p>{e}</p>)))
             case Right(m) => {
-              saveMatch(m)
+              matchService.saveMatch(m,user)
               HerokuRedirect(req, "/admin/matches")
             }
           }
         }
         case DELETE(_) => {
-          deleteMatch(new ObjectId(matchId))
+          mongo.deleteMatch(new ObjectId(matchId))
           Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
         }
       }

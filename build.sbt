@@ -8,8 +8,16 @@ scalaVersion:="2.11.12"
 
 organization := "com.andersen-gott"
 
+val doobieVersion = "0.5.0"
+
 libraryDependencies ++=
   Seq(
+    "org.flywaydb"      %  "flyway-core"        % "5.0.7",
+    "org.postgresql"    %  "postgresql"         % "42.2.1",
+    "com.zaxxer"        %  "HikariCP"           % "2.7.7",
+    "org.tpolecat"      %% "doobie-core"        % doobieVersion,
+    "org.tpolecat"      %% "doobie-hikari"      % doobieVersion, // HikariCP transactor.
+    "org.tpolecat"      %% "doobie-postgres"    % doobieVersion,
     "net.databinder" %% "unfiltered" % "0.8.1",
     "net.databinder" %% "unfiltered-filter" % "0.8.1",
     "net.databinder" %% "unfiltered-jetty" % "0.8.1",

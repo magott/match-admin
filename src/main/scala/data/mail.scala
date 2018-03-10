@@ -10,7 +10,8 @@ case class MailMessage(from:String, to:Seq[String], cc:Seq[String], bcc:Seq[Stri
 
   def asMailgunParams : Seq[(String,String)] = Seq("from" -> from, "subject" -> subject, "text"->body) ++ to.map("to"-> _) ++ cc.map("cc" -> _) ++ bcc.map("bcc" -> _) ++
     bodyHtml.map("html" -> _.toString) ++
-    matchId.map(id => Seq("v:matchId" -> id)).getOrElse(Seq.empty)
+    matchId.map(id => Seq("v:matchId" -> id)).getOrElse(Seq.empty) ++
+    Seq("v:subject" -> subject)
 
 }
 
