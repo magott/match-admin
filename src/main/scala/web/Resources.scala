@@ -21,7 +21,7 @@ class Resources(config: Config) extends Plan{
     case r@Path(Seg(List("users", _*))) => new UserHandler(repo).handleUser(r)
     case r@Path(Seg(List("matches", _*))) => new MatchHandler(repo).handleMatches(r)
     case r@Path(Seg(List("clubs", _*))) => new ClubHandler(repo, mailgun).handleClubRequest(r)
-    case r@Path(Seg(List("webhook", _*))) => webhookHandler.signed(webhookHandler.handle)(r)
+    case r@Path(Seg(List("webhook", _*))) => webhookHandler.signed(r)
     case r@Path("/login") => loginHandler.handleLogin(r)
     case r@Path("/logout") => loginHandler.handleLogout(r)
     case r@Path("/resetpassword") => loginHandler.handlePasswordReset(r)
