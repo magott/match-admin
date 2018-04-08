@@ -56,7 +56,7 @@ object Jetty extends App{
   }
 
   def dataSource :HikariDataSource = {
-    val jdbcUrl:String = Properties.envOrNone("DATABASE_URL").get
+    val jdbcUrl:String = Properties.envOrNone("JDBC_DATABASE_URL").get
     val dbconfig = new HikariConfig()
     dbconfig.setJdbcUrl(jdbcUrl)
     new HikariDataSource(dbconfig)
