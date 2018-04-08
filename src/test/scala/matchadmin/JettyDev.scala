@@ -1,4 +1,4 @@
-import java.io.File
+package matchadmin
 
 import org.flywaydb.core.Flyway
 

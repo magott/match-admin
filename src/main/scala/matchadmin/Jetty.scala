@@ -1,18 +1,17 @@
+package matchadmin
+
 import java.util.Locale
 import javax.sql.DataSource
 
 import cats.effect.Async
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import conf.Config
-import doobie.hikari.HikariTransactor
 import doobie._
 import org.constretto.Constretto
 import org.constretto.Constretto._
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
 import unfiltered.jetty
-import unfiltered.jetty.Http
-import unfiltered.util.Server
 import web.{Resources, UserUpdateInterceptor}
 
 import scala.util.Properties

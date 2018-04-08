@@ -2,6 +2,8 @@ import com.typesafe.sbt.SbtStartScript
 
 SbtStartScript.startScriptForClassesSettings
 
+mainClass in Compile := Some("matchadmin.Jetty")
+
 name:="match-admin"
 
 scalaVersion:="2.11.12"
