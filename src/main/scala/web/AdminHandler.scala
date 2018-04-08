@@ -143,7 +143,7 @@ class AdminHandler (private val matchService:MatchService, private val mailgun:M
           }
         }
         case DELETE(_) => {
-          mongo.deleteMatch(new ObjectId(matchId))
+          matchService.deleteMatch(matchId)
           Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
         }
       }

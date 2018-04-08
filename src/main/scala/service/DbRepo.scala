@@ -32,14 +32,10 @@ object DbRepo {
     }
   )
 
-  case class Person(name:String, age:Int)
-
   val selectMatchEvent = fr"select id, usr, matchid, uuid, timestamp, description, details, eventtype, eventlevel, recipient from match_event"
   def whereRecipient(recipient:String) = fr"where recipient = $recipient"
   def whereMatchId(matchid:String) = fr"where matchid = $matchid"
-
-  val name:Query0[Person] = sql"select name, age from x".query[Person]
-  def params(p:Int) = sql"select name from x where p < $p".query[String]
+  def deleteEvents(matchId:String) :Update0 = sql"delete from match_event where matchid = $matchId".update
 
   def insertMatchEvent(e:MatchEvent):Update0 =
     sql"""insert into match_event(usr, matchid, uuid, timestamp, description, details, eventtype, eventlevel, recipient)
@@ -54,7 +50,8 @@ object DbRepo {
 }
 
 case class DbRepo(tx:Transactor[IO]) {
-  def name = DbRepo.name.to[Vector].transact(tx)
+
+  def deleteEvents(matchId: String) = DbRepo.deleteEvents(matchId).run.transact(tx).unsafeRunSync()
 
   def eventsByMatch(matchId:String) = DbRepo.eventsByMatch(matchId).to[List].transact(tx).unsafeRunSync()
 

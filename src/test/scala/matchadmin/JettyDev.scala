@@ -14,7 +14,7 @@ object JettyDev extends App {
   private val database = postgres.getPostgresDatabase
 
   flyway.setDataSource(database)
-  flyway.clean()
+//  flyway.clean()
   flyway.migrate()
 
   Jetty.run(database, () => postgres.close())

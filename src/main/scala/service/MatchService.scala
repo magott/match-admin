@@ -1,11 +1,17 @@
 package service
 
 import data.{Match, MatchEvent, User}
+import org.bson.types.ObjectId
 
 /**
   *
   */
 case class MatchService(repo: MongoRepository, dbRepo: DbRepo) {
+
+  def deleteMatch(matchId:String) = {
+    repo.deleteMatch(new ObjectId(matchId))
+    dbRepo.deleteEvents(matchId)
+  }
 
   def saveMatch(m: Match, user:User) = {
     m.id.flatMap(id => {

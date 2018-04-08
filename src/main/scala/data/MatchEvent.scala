@@ -71,6 +71,6 @@ object MatchEvent{
   }
 
   def kampPublisert(m: Match, user: User): MatchEvent ={
-    MatchEvent(None, user.email, m.idString, UUID.randomUUID().toString, LocalDateTime.now(), "Kamp publisert", Json.obj(), MatchEdit, OkLevel, None)
+    MatchEvent(None, user.email, m.idString, UUID.randomUUID().toString, LocalDateTime.now(), "Kamp publisert", Json.obj(), MatchEdit, OkLevel, Some(user.email))
   }
 }
