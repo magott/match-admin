@@ -8,6 +8,7 @@ import doobie.hikari.HikariTransactor
 import doobie._
 import org.constretto.Constretto
 import org.constretto.Constretto._
+import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
 import unfiltered.jetty
 import unfiltered.jetty.Http
@@ -20,6 +21,9 @@ object Jetty extends App{
 
 
   val ds = dataSource
+  private val flyway = new Flyway()
+  flyway.setDataSource(ds)
+  flyway.migrate()
   run(ds, () => ds.close())
 
   def run(dataSource: DataSource, shutdown: () => Unit = () => Unit) : Unit = {
