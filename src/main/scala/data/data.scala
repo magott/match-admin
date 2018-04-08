@@ -28,7 +28,12 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def showInterestedRefIcon = appointedRef.isEmpty && interstedRefsAvailable(interestedRefs)
   def showAss1RefIcon = appointedAssistant1.isEmpty && interstedRefsAvailable(interestedAssistants)
   def showAss2RefIcon = appointedAssistant2.isEmpty && interstedRefsAvailable(interestedAssistants)
-  private def interstedRefsAvailable(interested:List[Referee]) = !interested.filterNot(Set(appointedAssistant1, appointedAssistant2, appointedRef).flatten.contains(_)).isEmpty
+  private def interstedRefsAvailable(interested:List[Referee]) = {
+    val appointedRefs = Set(appointedAssistant1, appointedAssistant2, appointedRef).flatten
+    ! interested.filterNot{interestedRef =>
+      appointedRefs.contains(interestedRef) || interestedRef.name.contains("Reservert") || interestedRef.name.contains("stengt")
+    }.isEmpty
+  }
 
 //  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
   def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)

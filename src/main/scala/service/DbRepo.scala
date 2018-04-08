@@ -35,6 +35,7 @@ object DbRepo {
   val selectMatchEvent = fr"select id, usr, matchid, uuid, timestamp, description, details, eventtype, eventlevel, recipient from match_event"
   def whereRecipient(recipient:String) = fr"where recipient = $recipient"
   def whereMatchId(matchid:String) = fr"where matchid = $matchid"
+  val orderByDateDecending = fr"order by timestamp desc"
   def deleteEvents(matchId:String) :Update0 = sql"delete from match_event where matchid = $matchId".update
 
   def insertMatchEvent(e:MatchEvent):Update0 =
@@ -46,7 +47,7 @@ object DbRepo {
          values(?,?,?,?,?,?,?,?,?)""")
 
   def eventsByMatch(matchid:String):Query0[MatchEvent] =
-    (selectMatchEvent ++ whereMatchId(matchid)).query[MatchEvent]
+    (selectMatchEvent ++ whereMatchId(matchid) ++ orderByDateDecending).query[MatchEvent]
 }
 
 case class DbRepo(tx:Transactor[IO]) {
