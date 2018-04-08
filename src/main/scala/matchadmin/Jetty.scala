@@ -1,6 +1,7 @@
 package matchadmin
 
-import java.util.Locale
+import java.time.ZoneId
+import java.util.{Locale, TimeZone}
 import javax.sql.DataSource
 
 import cats.effect.Async
@@ -32,6 +33,7 @@ object Jetty extends App{
     val userUpdateLimit = DateTime.parse(Properties.envOrElse("USER_UPDATE_DATE", DateTime.now.toString))
     Locale.setDefault(new Locale("no_NO"))
     System.setProperty("user.timezone", "Europe/Oslo")
+    TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
     println("Starting on port:" + port)
     val http = jetty.Http(port)
     http.resources(getClass().getResource("/static"))
