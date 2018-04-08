@@ -16,11 +16,13 @@ import io.circe.{Encoder, Json}
 case class MatchEvent(id:Option[Long], endretAv: String, matchId:String, uuid:String, timestamp: LocalDateTime, description:String, details:Json, typ:EventType, level: EventLevel, recipient:Option[String])
 
 sealed abstract class EventLevel(private val level:String)
+case object SuccessLevel extends EventLevel("success")
 case object OkLevel extends EventLevel("ok")
 case object WarnLevel extends EventLevel("warn")
 case object ErrorLevel extends EventLevel("error")
 object EventLevel{
   def fromDb(string:String) = string match {
+    case "success" => SuccessLevel
     case "ok" => OkLevel
     case "warn" => WarnLevel
     case "error" => ErrorLevel

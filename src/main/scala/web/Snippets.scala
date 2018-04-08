@@ -157,14 +157,6 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           <div id="match-events">
             <legend>Hendelser</legend>
               <table class="table table-condensed table-bordered table-nonfluid" id="event-table">
-                <thead>
-                  <tr>
-                    <th>Tid</th><th>Hendelse</th><th>Bruker</th><th>Beskrivelse</th><th>Type</th>
-                  </tr>
-                </thead>
-                <tbody id="events">
-
-                </tbody>
               </table>
           </div>
       </p>

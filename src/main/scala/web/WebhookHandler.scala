@@ -52,8 +52,8 @@ class WebhookHandler(private val apiKey:String, matchService: MatchService) {
         None
     }
     def delivered(mp:Mailgunparams) =
-      MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' levert til ${mp.recipient}", Json.obj(), MailDelivered, OkLevel, Some(mp.recipient))
-    def opened(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' lest av ${mp.recipient}", Json.obj(), MailOpened, OkLevel, Some(mp.recipient))
+      MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' levert til ${mp.recipient}", Json.obj(), MailDelivered, SuccessLevel, Some(mp.recipient))
+    def opened(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' lest av ${mp.recipient}", Json.obj(), MailOpened, SuccessLevel, Some(mp.recipient))
     def failed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' kunne ikke leveres til ${mp.recipient}${mp.description.map(", fordi: " + _).getOrElse("")}", Json.obj(), MailUnsubscribed, WarnLevel, Some(mp.recipient) )
     def unsubscribed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"${mp.recipient} har bedt om å ikke få mer mail og vil ikke få det", Json.obj(), MailBounced, ErrorLevel, Some(mp.recipient) )
   }

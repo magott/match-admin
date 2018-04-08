@@ -5,7 +5,8 @@ window.onload = function() {
 var root = document.getElementById("event-table");
 var eventLevel = function(level) {
     switch (level){
-        case "ok": return "label label-success";
+        case "success": return "label label-success";
+        case "ok": return "label label-info";
         case "warn": return "label label-warning";
         case "error": return "label label-important";
     }
@@ -22,14 +23,13 @@ var Event = {
         .then(function(data) {
             Event.list = data;
             m.render(root,[
-                m("thead", m("tr", [m("th","Tid"), m("th","Hendelse"),m("th","Beskrivelse"),m("th","Bruker"),m("th","Type")])),
+                m("thead", m("tr", [m("th","Tid"), m("th","Hendelse"),m("th","Beskrivelse"),m("th","Bruker")])),
                 m("tbody", Event.list.map(function(event){
                 return m("tr", [
                         m("td", moment(event.timestamp).format("DD.MM.YY HH:mm")),
-                        m("td", event.typ),
-                        m("td", event.recipient),
+                        m("td", m("span",{class: eventLevel(event.level)}, event.typ)),
                         m("td", event.description),
-                        m("td", m("span",{class: eventLevel(event.level)}, event.level))
+                        m("td", event.recipient)
                 ]);
             }))]
             )
