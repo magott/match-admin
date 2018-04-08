@@ -153,6 +153,21 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           }
           {modal}
         </form>
+        <p>
+          <div id="match-events">
+            <legend>Hendelser</legend>
+              <table class="table table-condensed table-bordered table-nonfluid" id="event-table">
+                <thead>
+                  <tr>
+                    <th>Tid</th><th>Hendelse</th><th>Bruker</th><th>Beskrivelse</th><th>Type</th>
+                  </tr>
+                </thead>
+                <tbody id="events">
+
+                </tbody>
+              </table>
+          </div>
+      </p>
     , Some(editMatchJS))
   }
 
@@ -809,7 +824,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <div class="control-group">
           <label class="control-label">Kontaktperson</label>
           <div class="controls">
-            <input type="text" id="clubContactName" name="clubContactName" placeholder="Navn" class="input-large" required="required"/>
+            <input type="text" id="clubContactName" name="clubContactName" placeholder="Navn" class="input-large" required="required" autocomplete="name"/>
             <span class="help-inline"></span>
           </div>
         </div>
@@ -1077,7 +1092,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
   val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
   val jQueryValidateAdditionalJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
   val jqueryPlaceholder = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.7/jquery.placeholder.min.js"></script>
-
+  val mithril = <script src="https://unpkg.com/mithril/mithril.js"></script>
+  val matcheventsjs =  <script src="/js/matchevents.js"></script>
 
   def filterTableJS = {
    momentJs ++ underscoreJs ++
@@ -1090,7 +1106,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
   }
 
   def editMatchJS = {
-    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ underscoreJs ++jQueryUiJs ++
+    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ underscoreJs ++jQueryUiJs ++ mithril ++ matcheventsjs ++ momentJs ++
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);

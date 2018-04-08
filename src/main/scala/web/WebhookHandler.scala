@@ -24,62 +24,43 @@ import scala.util.Try
 class WebhookHandler(private val apiKey:String, matchService: MatchService) {
 
   def signed : Plan.Intent = {
-    case r@Path(Seg("webhook"::"mailgun" :: event :: Nil)) & MultiPart(p) =>
-      val params = MultiPartParams.Memory(r).params
-      val signParams = SignatureParams.unapply(params)
-      val mgParams = Mailgunparams.unapply(params)
-      handle(r, mgParams, signParams, handleMailgun)
-
-    case r@Path(Seg("webhook"::"mailgun" :: event :: Nil)) & Params(params) =>
-      val signParams = SignatureParams.unapply(params)
-      val mgParams = Mailgunparams.unapply(params)
-      handle(r, mgParams, signParams, handleMailgun)
-
-  }
-
-  def handle(req: HttpRequest[_], mgparams:Option[Mailgunparams], signparams:Option[SignatureParams], reqHandler: (HttpRequest[_], Mailgunparams) => ResponseFunction[HttpServletResponse]) = {
-    signparams.filter(_.isValid(apiKey))
-      .map(_ => mgparams.map(p => reqHandler(req, p)).getOrElse(Ok))
-    .getOrElse(NotAcceptable)
-  }
-
-  def handleMailgun(req: HttpRequest[_], mp:Mailgunparams) : ResponseFunction[HttpServletResponse] = {
-    req match {
-      case Path(Seg("webhook" :: "mailgun" :: "delivered" :: Nil)) =>
-        val delivered = MailgunEvent.delivered(mp)
-        matchService.saveEvent(delivered)
+    case r@Path(Seg("webhook"::"mailgun" :: event :: Nil)) =>
+      val params = r match {
+        case MultiPart(_) => MultiPartParams.Memory(r).params
+        case Params(p) => p
+      }
+      if(SignatureParams.unapply(params).exists(_.isValid(apiKey))) {
+        for {
+          p <- Mailgunparams.unapply(params)
+          creator <- MailgunEvent.get(event)
+        } matchService.saveEvent(creator(p))
         Ok
-      case Path(Seg("webhook" :: "mailgun" :: "opened" :: Nil))  =>
-        val event = MailgunEvent.opened(mp)
-        matchService.saveEvent(event)
-        Ok
-      case Path(Seg("webhook" :: "mailgun" :: "failed" :: Nil))  =>
-        val event = MailgunEvent.failed(mp)
-        matchService.saveEvent(event)
-        Ok
-      case Path(Seg("webhook" :: "mailgun" :: "unsubscribed" :: Nil)) =>
-        val event = MailgunEvent.unsubscribed(mp)
-        matchService.saveEvent(event)
-        Ok
-      case _ =>
-        println("Uhåndtert mailgun event")
-        Ok
-    }
+      } else
+        NotAcceptable
   }
 
 
   object MailgunEvent{
+    def get(event:String) : Option[Mailgunparams => MatchEvent] =
+      event match {
+      case "delivered" => Some(MailgunEvent.delivered)
+      case "opened" => Some(MailgunEvent.opened)
+      case "failed" => Some(MailgunEvent.failed)
+      case "unsubscribed" => Some(MailgunEvent.unsubscribed)
+      case _ =>
+        println("Uhåndtert mailgun event")
+        None
+    }
     def delivered(mp:Mailgunparams) =
-      MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' levert til ${mp.recipient}", Json.obj().noSpaces, MailDelivered, OkLevel)
-    def opened(mp: Mailgunparams) = MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' lest av ${mp.recipient}", "{}", MailOpened, OkLevel )
-    def failed(mp: Mailgunparams) = MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' kunne ikke leveres til ${mp.recipient}${mp.description.map(", fordi: " + _).getOrElse("")}", "{}", MailUnsubscribed, WarnLevel )
-    def unsubscribed(mp: Mailgunparams) = MatchEvent(None, User.system, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"${mp.recipient} har bedt om å ikke få mer mail og vil ikke få det", "{}", MailBounced, ErrorLevel )
+      MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' levert til ${mp.recipient}", Json.obj(), MailDelivered, OkLevel, Some(mp.recipient))
+    def opened(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' lest av ${mp.recipient}", Json.obj(), MailOpened, OkLevel, Some(mp.recipient))
+    def failed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' kunne ikke leveres til ${mp.recipient}${mp.description.map(", fordi: " + _).getOrElse("")}", Json.obj(), MailUnsubscribed, WarnLevel, Some(mp.recipient) )
+    def unsubscribed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"${mp.recipient} har bedt om å ikke få mer mail og vil ikke få det", Json.obj(), MailBounced, ErrorLevel, Some(mp.recipient) )
   }
 
   def toZonedDateTime(timestamp:String) = {
     Instant.ofEpochSecond(timestamp.toLong).atZone(ZoneId.of("Europe/Oslo"))
   }
-
 }
 
 object Mailgunparams{

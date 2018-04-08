@@ -1,6 +1,8 @@
 package web
 
 import conf.Config
+
+import io.circe._, io.circe.parser._, io.circe.syntax._
 import unfiltered.request._
 import unfiltered.response._
 import service.MongoRepository._
@@ -107,6 +109,10 @@ class AdminHandler (private val matchService:MatchService, private val mailgun:M
           val unpublishedMatches = mongo.listUnpublishedMatches
           Ok ~> Html5(Pages(req).unpublishedMatches(unpublishedMatches))
         }
+      }
+
+      case Path(Seg(List("admin","matches", matchId, "events"))) => req match{
+        case GET(_) => Ok ~> JsonContent ~> ResponseString(matchService.dbRepo.eventsByMatch(matchId).asJson.noSpaces)
       }
       case Path(Seg(List("admin","matches", matchId))) => req match{
         case NotAdmin(_) => Forbidden ~> Html5(Pages(req).forbidden)

@@ -5,7 +5,7 @@ import data.{Match, MatchEvent, User}
 /**
   *
   */
-case class MatchService(repo: MongoRepository) {
+case class MatchService(repo: MongoRepository, dbRepo: DbRepo) {
 
   def saveMatch(m: Match, user:User) = {
     m.id.flatMap(id => {
@@ -20,7 +20,7 @@ case class MatchService(repo: MongoRepository) {
 
   def saveEvent(event: MatchEvent): Unit ={
     println(s"Et event skjedde $event")
-
+    dbRepo.insert(event)
   }
 
 }
