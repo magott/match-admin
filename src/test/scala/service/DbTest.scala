@@ -36,8 +36,14 @@ class DbTest extends FunSuite with BeforeAndAfterAll {
   val matchEvent = MatchEvent(None, "morten@andersen-gott.com", "124", "uuid", LocalDateTime.now(), "desc", Json.fromString("details"), MailDelivered, OkLevel, Some("morten@example.com"))
 
   test("foo"){
-    val id = DbRepo.insertMatchEvent(matchEvent).withUniqueGeneratedKeys[Int]("id").transact(transactor)
-    println(id.unsafeRunSync())
+//    val id = DbRepo.insertMatchEvent(matchEvent).withUniqueGeneratedKeys[Int]("id").transact(transactor)
+//    val id2 = DbRepo.insertMatchEvent(matchEvent).withUniqueGeneratedKeys[Int]("id").transact(transactor)
+    val count = DbRepo(transactor).insert(matchEvent)
+    val count2 = DbRepo(transactor).insert(matchEvent)
+//    println(id.unsafeRunSync())
+//    println(id2.attempt.unsafeRunSync())
+    println(count)
+    println(count2)
   }
 
 }

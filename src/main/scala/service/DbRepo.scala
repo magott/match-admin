@@ -40,7 +40,8 @@ object DbRepo {
 
   def insertMatchEvent(e:MatchEvent):Update0 =
     sql"""insert into match_event(usr, matchid, uuid, timestamp, description, details, eventtype, eventlevel, recipient)
-         values(${e.endretAv}, ${e.matchId}, ${e.uuid}, ${e.timestamp},${e.description},${e.details},${e.typ},${e.level},${e.recipient})""".update
+         values(${e.endretAv}, ${e.matchId}, ${e.uuid}, ${e.timestamp},${e.description},${e.details},${e.typ},${e.level},${e.recipient})
+      on conflict do nothing""".update
 
   def insertMatchEvent2:Update[MatchEvent] =
     Update("""insert into match_event(usr, matchid, uuid, timestamp, description, details, eventtype, eventlevel, recipient)
