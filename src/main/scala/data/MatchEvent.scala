@@ -37,7 +37,7 @@ object EventLevel{
 
 sealed abstract class EventType(val typ:String, val label:String)
 case object MailDelivered extends EventType("delivered", "E-post mottatt")
-case object MailOpened extends EventType("opened", "E-post sendt")
+case object MailOpened extends EventType("opened", "E-post lest")
 case object MailBounced extends EventType("bounced", "E-post feilet")
 case object MailUnsubscribed extends EventType("unsubscribed", "Ønsker ikke e-post")
 case object MatchEdit extends EventType("edit", "Kamp endret")
@@ -45,8 +45,8 @@ object EventType{
   implicit val EventTypeMeta: Meta[EventType] = Meta[String].xmap(
     varchar => varchar match {
       case "delivered" => MailDelivered
-      case "opened" => MailBounced
-      case "bounced" => MailOpened
+      case "opened" => MailOpened
+      case "bounced" => MailBounced
       case "unsubscribed" => MailUnsubscribed
       case "edit" => MatchEdit
     },
