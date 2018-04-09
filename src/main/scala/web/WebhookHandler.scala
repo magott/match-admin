@@ -54,8 +54,8 @@ class WebhookHandler(private val apiKey:String, matchService: MatchService) {
     def delivered(mp:Mailgunparams) =
       MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' levert til ${mp.recipient}", Json.obj(), MailDelivered, SuccessLevel, Some(mp.recipient))
     def opened(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' lest av ${mp.recipient}", Json.obj(), MailOpened, SuccessLevel, Some(mp.recipient))
-    def failed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' kunne ikke leveres til ${mp.recipient}${mp.description.map(", fordi: " + _).getOrElse("")}", Json.obj(), MailUnsubscribed, WarnLevel, Some(mp.recipient) )
-    def unsubscribed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"${mp.recipient} har bedt om å ikke få mer mail og vil ikke få det", Json.obj(), MailBounced, ErrorLevel, Some(mp.recipient) )
+    def failed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"Mail '${mp.subject}' kunne ikke leveres til ${mp.recipient}${mp.description.map(", fordi: " + _).getOrElse("")}", Json.obj(), MailUnsubscribed, ErrorLevel, Some(mp.recipient) )
+    def unsubscribed(mp: Mailgunparams) = MatchEvent(None, User.system.email, mp.matchId, mp.messageId, mp.timestamp.toLocalDateTime, s"${mp.recipient} har bedt om å ikke få mer mail og vil ikke få det", Json.obj(), MailBounced, WarnLevel, Some(mp.recipient) )
   }
 
   def toZonedDateTime(timestamp:String) = {
@@ -72,7 +72,7 @@ object Mailgunparams{
       recipient <- param("recipient")
       matchId <- param("matchId")
       subject <- param("subject")
-      messageId <- param("Message-Id").map(_.stripPrefix("<").stripSuffix(""))
+      messageId <- param("Message-Id").orElse(param("message-id")).map(_.stripPrefix("<").stripSuffix(""))
 
     }yield(Mailgunparams(timestamp, recipient, matchId, subject, messageId, param("description")))
   }
