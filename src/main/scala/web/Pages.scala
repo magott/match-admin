@@ -2,7 +2,9 @@ package web
 
 import conf.Config
 import unfiltered.request.HttpRequest
-import data.{RefereeType, MatchTemplate, User, Match}
+import data.{Match, MatchTemplate, RefereeType, User}
+import stats.Stats
+
 import xml.NodeSeq
 
 case class Pages(req:HttpRequest[_]) (implicit val config:Config){
@@ -92,5 +94,7 @@ case class Pages(req:HttpRequest[_]) (implicit val config:Config){
   def refereeOrderReceipt(matchTemplate:MatchTemplate) = bootstrap("Takk for bestillingen",
     refereeOrderReceiptSnippet(matchTemplate),
     None)
+
+  def statsPage = bootstrap("Statistikk", stats, Some(statsJs))
 
 }

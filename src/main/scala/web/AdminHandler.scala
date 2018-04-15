@@ -147,6 +147,9 @@ class AdminHandler (private val matchService:MatchService, private val mailgun:M
           Ok ~> JsonContent ~> ResponseString("""{"href": "/admin/matches"}""")
         }
       }
+      case r@Path(Seg("admin" :: "stats" :: Nil)) & IsAdmin(_) =>
+        r.parameterValues("season").headOption.map(_.toInt).map(season => Ok ~> JsonContent ~> ResponseString(stats.Stats(mongo, season).statsJson.noSpaces))
+          .getOrElse(Ok ~> Html5(Pages(r).statsPage))
       case _ => NotFound ~> Html5(Pages(req).notFound(Some("Ukjent adminside")))
     }
   }
@@ -170,6 +173,10 @@ class AdminHandler (private val matchService:MatchService, private val mailgun:M
   private def viewAll(req: HttpRequest[_]): Boolean = req.parameterNames.contains("all")
 
   object NameParam extends Params.Extract("term", Params.first)
+  object YearParam extends Params.Extract(
+    "season",
+    Params.first ~> Params.nonempty ~> Params.int
+  )
   object UserIdParam extends Params.Extract("userid", Params.first)
   object RefTypeParam extends Params.Extract("reftype", Params.first)
 

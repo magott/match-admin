@@ -1,11 +1,14 @@
 package web
 
+import java.time.Year
+
 import conf.Config
 
 import xml.NodeSeq
-import unfiltered.request.{Params, Host, RequestHeader, HttpRequest}
+import unfiltered.request.{Host, HttpRequest, Params, RequestHeader}
 import data._
 import data.KeyAndValue
+
 import scala.Some
 import data.RefereeType.{Dommer, Trio}
 import org.joda.time.DateTime
@@ -664,6 +667,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                   <a href="/admin/matches/new">Legg til kamp</a>
                   <a href="/admin/matches/orders">Bestillinger</a>
                   <a href="/admin/users">Brukere</a>
+                  <a href="/admin/stats">Statistikk</a>
                 </ul>
               </li>
             }
@@ -1077,6 +1081,18 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </div>
     </form>
   }
+  def stats = {
+    <div id="stats-app">
+      <legend>Statistikk</legend>
+      <label>Sesong</label>
+      <div id="stats-select">
+
+      </div>
+      <div id="stats-data">
+
+      </div>
+    </div>
+  }
   val jQuery = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   val jQueryUiJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
   val momentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
@@ -1084,8 +1100,9 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
   val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
   val jQueryValidateAdditionalJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
   val jqueryPlaceholder = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.7/jquery.placeholder.min.js"></script>
-  val mithril = <script src="https://unpkg.com/mithril/mithril.js"></script>
+  val mithril = <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/1.1.6/mithril.min.js"></script>
   val matcheventsjs =  <script src="/js/matchevents.js"></script>
+  val lodashJs = <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js"></script>
 
   def filterTableJS = {
    momentJs ++ underscoreJs ++
@@ -1095,6 +1112,10 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
         """}
     </script>
+  }
+
+  def statsJs = {
+    mithril ++ lodashJs ++ momentJs ++ <script src ="/js/stats.js"/>
   }
 
   def editMatchJS = {

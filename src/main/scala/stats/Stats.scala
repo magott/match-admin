@@ -1,77 +1,34 @@
 package stats
 
+
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import common.MongoSetting
 import data.Level.{Men1Div, MenPrem}
-import data.{Level, RefereeType, Referee}
-import org.joda.time.DateTime
+import data.{Level, Match, Referee, RefereeType}
+import io.circe.Json
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import service.MongoRepository
+import stats.Stats.{Assistant, RefStat}
 
 import scala.util.Properties
 
 /**
- *
- */
-object Stats extends App{
+  *
+  */
+object Stats{
 
-  RegisterJodaTimeConversionHelpers()
-
-  private val mongolab = Properties.envOrNone("MONGOLAB_URI")
-
-  private val MongoSetting(db) = mongolab
-
-  private val startOfSeason = DateTime.now().withTimeAtStartOfDay().withDayOfMonth(1).withMonthOfYear(11).minusYears(1)
-
-  private val matchesThisYear = new MongoRepository(db).listPublishedMatchesNewerThan(startOfSeason)
-
-  val refstats: Map[Referee, List[RefStat]] = matchesThisYear.foldLeft(Map.empty[Referee, List[RefStat]].withDefaultValue(List.empty[RefStat]))(assignmentsPerReferee)
-
-  val numberOfAssignments = refstats.mapValues(_.size).values.sum
-  val numberOfAd = refstats.values.flatten.filter(_.role == Assistant).size
-  val numberOfRefsWithMultipleMatches = refstats.filter(_._2.size > 1).keySet.size
-  val numberOfRefsWithAssignment = refstats.keySet.size
-  val interestedRefs = matchesThisYear.flatMap(m => m.interestedRefs ++ m.interestedAssistants).map(_.id.toString)
-  val mostInterestFromReferees = matchesThisYear.maxBy(_.interestedRefs.size)
-  val mostInterestFromAd = matchesThisYear.maxBy(_.interestedAssistants.size)
-  val differentLevels = matchesThisYear.map(_.level).toSet.size
-  val refsAtLevelOrHigher = refstats.filter{ tup =>
-    val refAssignments = tup._2.filter(_.role == Referee)
-    refAssignments.exists(a => ratedAs(a.level) > ratedAs(tup._1.level))
+  def main(array: Array[String]) {
+    Stats(MongoRepository.singleton, 2017).print
   }
-  val matchesWithRefAtLevelOrHigher = matchesThisYear.filter(m => m.appointedRef.exists(r => ratedAs(r.level) <= ratedAs(m.level))).size
-  println(s"Siden $startOfSeason")
-  println(s"${matchesThisYear.size} kamper fordelt på $differentLevels forskjellige nivåer")
-  println(s"$numberOfAssignments oppdrag totalt")
-  println(s"$numberOfAd AD-oppdrag")
-  println(s"${interestedRefs.size} ganger har medlemmer meldt interesse for oppdrag")
-  println(s"${interestedRefs.toSet.size} forskjellige dommere har meldt interesse for kamp ila sesongen")
-  println(s"${numberOfRefsWithAssignment} dommere har fått tildelt kamp ila sesongen")
-  println(s"$numberOfRefsWithMultipleMatches dommere har fått mer enn ett oppdrag")
-  println(s"${Level.asMap(mostInterestFromAd.level)}-kampen ${mostInterestFromAd.teams} skapte mest interesse blandt AD-er (${mostInterestFromAd.interestedAssistants.size} meldte interesse)")
-  println(s"${Level.asMap(mostInterestFromReferees.level)}-kampen ${mostInterestFromReferees.teams} skapte mest interesse blandt dommere (${mostInterestFromReferees.interestedRefs.size} meldte interesse)")
-  println(s"${refsAtLevelOrHigher.size} dommere har fått minst ett hoveddommeroppdrag på samme nivå eller høyere enn det de har oppgitt å ha dømt foregående sesong")
-  println(s"$matchesWithRefAtLevelOrHigher kamper har hatt hoveddommer som dømmer på samme nivå eller lavere foregående sesong")
 
-  private def assignmentsPerReferee(assignments: Map[Referee, List[RefStat]], m:data.Match) : Map[Referee, List[RefStat]] = {
-    val withReferee = if(m.appointedRef.isDefined) {
-      val referee = m.appointedRef.get
-      val oldRefStats: List[RefStat] = assignments(referee)
-      val newRefStat = RefStat(Referee, m.level) :: oldRefStats
-      assignments + (referee -> newRefStat)
-    } else assignments
-    val withAd1 = if(m.appointedAssistant1.isDefined){
-      val referee = m.appointedAssistant1.get
-      val oldRefStats:List[RefStat] = withReferee(referee)
-      val newRefStat = RefStat(Assistant, m.level) :: oldRefStats
-      withReferee + (referee -> newRefStat)
-    } else withReferee
-    val withAd2 = if(m.appointedAssistant2.isDefined){
-      val referee = m.appointedAssistant2.get
-      val oldRefStats:List[RefStat] = withAd1(referee)
-      val newRefStat = RefStat(Assistant, m.level) :: oldRefStats
-      withAd1 + (referee -> newRefStat)
-    } else withAd1
-    withAd2
+  def apply(repo: MongoRepository, year:Int): Stats ={
+    val from = new LocalDate(year, 11, 11).toDateTimeAtStartOfDay(DateTimeZone.forID("Europe/Oslo"))
+    val to = from.plusYears(1)
+    val matchesOfYear = repo.listPublishedMatchesBetween(from, to)
+    val refstats = matchesOfYear.flatMap(m =>
+      m.appointedRef.map(_ -> RefStat(Referee, m.level)).toList ++ m.appointedAssistant1.map(_ -> RefStat(Assistant, m.level)) ++ m.appointedAssistant2.map(_ -> RefStat(Assistant, m.level)))
+      .groupBy(_._1).mapValues(_.map(_._2))
+    Stats(from, to, matchesOfYear, refstats)
   }
 
   case class RefStat(role:Role, level:String)
@@ -112,6 +69,56 @@ object Stats extends App{
   def ratedAs(level: String) = {
     val index = ranking.indexOf(Level.asMap(level))
     index
+  }
+
+}
+
+case class Stats(from:DateTime, to:DateTime, matchesOfYear:Seq[Match], refstats:Map[Referee, Seq[RefStat]]){
+  val numberOfAssignments = refstats.mapValues(_.size).values.sum
+  val numberOfAd = refstats.values.flatten.filter(_.role == Assistant).size
+  val numberOfRefsWithMultipleMatches = refstats.filter(_._2.size > 1).keySet.size
+  val numberOfRefsWithAssignment = refstats.keySet.size
+  val interestedRefs = matchesOfYear.flatMap(m => m.interestedRefs ++ m.interestedAssistants).map(_.id.toString)
+  val mostInterestFromReferees = matchesOfYear.maxBy(_.interestedRefs.size)
+  val mostInterestFromAd = matchesOfYear.maxBy(_.interestedAssistants.size)
+  val differentLevels = matchesOfYear.map(_.level).toSet.size
+  val refsAtLevelOrHigher = refstats.filter { tup =>
+    val refAssignments = tup._2.filter(_.role == Referee)
+    refAssignments.exists(a => Stats.ratedAs(a.level) > Stats.ratedAs(tup._1.level))
+  }
+  val matchesWithRefAtLevelOrHigher = matchesOfYear.filter(m => m.appointedRef.exists(r => Stats.ratedAs(r.level) <= Stats.ratedAs(m.level))).size
+
+  def statsJson : Json = {
+    Json.arr(
+      Json.fromString(s"Mellom ${from.toString("yyyy-MM-dd")} og ${to.toString("yyyy-MM-dd")}"),
+      Json.fromString(s"${matchesOfYear.size} kamper fordelt på $differentLevels forskjellige nivåer"),
+      Json.fromString(s"$numberOfAssignments oppdrag totalt"),
+      Json.fromString(s"$numberOfAd AD-oppdrag"),
+      Json.fromString(s"${interestedRefs.size} ganger har medlemmer meldt interesse for oppdrag"),
+      Json.fromString(s"${interestedRefs.toSet.size} forskjellige dommere har meldt interesse for kamp ila sesongen"),
+      Json.fromString(s"${numberOfRefsWithAssignment} dommere har fått tildelt kamp ila sesongen"),
+      Json.fromString(s"$numberOfRefsWithMultipleMatches dommere har fått mer enn ett oppdrag"),
+      Json.fromString(s"${Level.asMap(mostInterestFromAd.level)}-kampen ${mostInterestFromAd.teams} skapte mest interesse blandt AD-er (${mostInterestFromAd.interestedAssistants.size} meldte interesse)"),
+      Json.fromString(s"${Level.asMap(mostInterestFromReferees.level)}-kampen ${mostInterestFromReferees.teams} skapte mest interesse blandt dommere (${mostInterestFromReferees.interestedRefs.size} meldte interesse)"),
+      Json.fromString(s"${refsAtLevelOrHigher.size} dommere har fått minst ett hoveddommeroppdrag på samme nivå eller høyere enn det de har oppgitt å ha dømt foregående sesong"),
+      Json.fromString(s"$matchesWithRefAtLevelOrHigher kamper har hatt hoveddommer som dømmer på samme nivå eller lavere foregående sesong")
+    )
+  }
+
+  def print = {
+    println(s"Mellom $from og $to")
+    println(s"${matchesOfYear.size} kamper fordelt på $differentLevels forskjellige nivåer")
+    println(s"$numberOfAssignments oppdrag totalt")
+    println(s"$numberOfAd AD-oppdrag")
+    println(s"${interestedRefs.size} ganger har medlemmer meldt interesse for oppdrag")
+    println(s"${interestedRefs.toSet.size} forskjellige dommere har meldt interesse for kamp ila sesongen")
+    println(s"${numberOfRefsWithAssignment} dommere har fått tildelt kamp ila sesongen")
+    println(s"$numberOfRefsWithMultipleMatches dommere har fått mer enn ett oppdrag")
+    println(s"${Level.asMap(mostInterestFromAd.level)}-kampen ${mostInterestFromAd.teams} skapte mest interesse blandt AD-er (${mostInterestFromAd.interestedAssistants.size} meldte interesse)")
+    println(s"${Level.asMap(mostInterestFromReferees.level)}-kampen ${mostInterestFromReferees.teams} skapte mest interesse blandt dommere (${mostInterestFromReferees.interestedRefs.size} meldte interesse)")
+    println(s"${refsAtLevelOrHigher.size} dommere har fått minst ett hoveddommeroppdrag på samme nivå eller høyere enn det de har oppgitt å ha dømt foregående sesong")
+    println(s"$matchesWithRefAtLevelOrHigher kamper har hatt hoveddommer som dømmer på samme nivå eller lavere foregående sesong")
+
   }
 
 }

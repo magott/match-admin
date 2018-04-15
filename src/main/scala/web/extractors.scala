@@ -15,6 +15,12 @@ object NotAdmin{
   }
 }
 
+object IsAdmin{
+  def unapply(req:HttpRequest[_]) = {
+    LoggedOnUser.unapply(req).filter(_.admin)
+  }
+}
+
 object AdminSession {
   val repo = MongoRepository.singletonWithSessionCaching
   def unapply(req: HttpRequest[_]) = {

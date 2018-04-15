@@ -46,6 +46,13 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
     mongoObject.as[ObjectId]("_id")
   }
 
+  def listPublishedMatchesBetween(from:DateTime, to:DateTime) : Seq[Match]= {
+    val afterDate = ("kickoff" $gt from)
+    val before = ("kickoff" $lt to)
+    val notUnpublished = ("published" $ne false)
+    db("matches").find( afterDate ++ before ++ notUnpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
+  }
+
   def listPublishedMatchesNewerThan(date:DateTime) : Seq[Match]= {
     val afterDate = ("kickoff" $gt date)
     val notUnpublished = ("published" $ne false)
@@ -133,6 +140,6 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
 object MongoRepository{
   RegisterJodaTimeConversionHelpers()
   private val MongoSetting(db) = Properties.envOrNone("MONGOLAB_URI")
-  private val singleton = new MongoRepository(db) with CachingSessionRepository
+  val singleton = new MongoRepository(db) with CachingSessionRepository
   def singletonWithSessionCaching:MongoRepository = singleton
 }
