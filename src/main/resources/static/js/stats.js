@@ -25,7 +25,6 @@ var Stats = {
         })
     },
     change: function(data){
-        console.debug("foo "+data.value);
         Stats.loadList(data.value);
     },
     init: function(){
