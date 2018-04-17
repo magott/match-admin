@@ -4,10 +4,10 @@ window.onload = function() {
 };
 var select = document.getElementById("stats-select");
 var dataelement = document.getElementById("stats-data");
-var currentSeason = moment().quarter >= 3 ? moment().year() : moment().year()-1;
+var currentSeason = moment().quarter >= 3 ? moment().year()-1 : moment().year();
 var Stats = {
     seasons: function() {
-        return _.range(currentSeason, 2011).map(function(y){
+        return _.rangeRight(2011, currentSeason).map(function(y){
             return {key: y, value: y + "/" +(y+1)}
         });
     },
