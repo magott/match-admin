@@ -47,10 +47,9 @@ class MongoRepository(db:MongoDB) extends SessionRepository{
   }
 
   def listPublishedMatchesBetween(from:DateTime, to:DateTime) : Seq[Match]= {
-    val afterDate = ("kickoff" $gt from)
-    val before = ("kickoff" $lt to)
+    val daterange = $and("kickoff" $lt to $gt from)
     val notUnpublished = ("published" $ne false)
-    db("matches").find( afterDate ++ before ++ notUnpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
+    db("matches").find( daterange ++ notUnpublished ).sort(by("kickoff" -> 1)).map(Match.fromMongo(_)).toSeq
   }
 
   def listPublishedMatchesNewerThan(date:DateTime) : Seq[Match]= {
