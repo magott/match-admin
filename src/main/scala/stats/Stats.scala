@@ -83,8 +83,8 @@ case class Stats(from:DateTime, to:DateTime, matchesOfYear:Seq[Match], refstats:
   val mostInterestFromAd = matchesOfYear.maxBy(_.interestedAssistants.size)
   val differentLevels = matchesOfYear.map(_.level).toSet.size
   val refsAtLevelOrHigher = refstats.filter { tup =>
-    val refAssignments = tup._2.filter(_.role == Referee)
-    refAssignments.exists(a => Stats.ratedAs(a.level) > Stats.ratedAs(tup._1.level))
+    val refAssignments: Seq[RefStat] = tup._2.filter(_.role == Stats.Referee)
+    refAssignments.exists(a => Stats.ratedAs(a.level) >= Stats.ratedAs(tup._1.level))
   }
   val matchesWithRefAtLevelOrHigher = matchesOfYear.filter(m => m.appointedRef.exists(r => Stats.ratedAs(r.level) <= Stats.ratedAs(m.level))).size
 
