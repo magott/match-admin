@@ -7,7 +7,7 @@ var dataelement = document.getElementById("stats-data");
 var currentSeason = moment().quarter >= 3 ? moment().year() : moment().year()-1;
 var Stats = {
     seasons: function() {
-        return _.range(currentSeason, 2012).map(function(y){
+        return _.range(currentSeason, 2011).map(function(y){
             return {key: y, value: y + "/" +(y+1)}
         });
     },
