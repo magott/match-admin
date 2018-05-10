@@ -1,0 +1,250 @@
+[
+  {
+    "documentId": 7176352,
+    "credit": false,
+    "number": 3,
+    "printedEmail": "morten@andersen-gott.com",
+    "orderNumber": "10",
+    "invoiceDate": "2018-06-14",
+    "dueDate": "2018-06-28",
+    "orderDate": "2018-06-14",
+    "reminderDate": null,
+    "ourReference": null,
+    "yourReference": null,
+    "kid": null,
+    "tax": 0,
+    "total": 200,
+    "invoiceText": "Dommer til treningskamp",
+    "accountNumber": "97101839595",
+    "dunningType": null,
+    "balance": null,
+    "balanceDate": "",
+    "currency": "NOK",
+    "deliveryDate": null,
+    "deliveryAddress": null,
+    "originator": {
+      "id": 47178,
+      "name": "Morten Andersen-Gott",
+      "fax": null,
+      "phone": null,
+      "mobile": null,
+      "web": null,
+      "organisationNumber": null,
+      "address": {
+        "address1": "Vollsveien 80A",
+        "address2": "",
+        "zip": "1358",
+        "city": "JAR",
+        "country": "NORGE"
+      }
+    },
+    "recipient": {
+      "number": 6,
+      "customerNumber": null,
+      "name": "Morten Andersen-Gott",
+      "email": "morten.andersengott@gmail.com",
+      "mobile": null,
+      "address": {
+        "address1": "",
+        "address2": "",
+        "zip": "1358",
+        "city": "Ukjent",
+        "country": "NORGE"
+      },
+      "organisationNumber": null
+    },
+    "items": [
+      {
+        "number": 1,
+        "quantity": 1,
+        "productCode": "4",
+        "description": "Adm. gebyr enkeltdommer til En - to 25.01.18 - sen bestilling",
+        "unitPrice": 200,
+        "discount": null,
+        "taxRate": 0,
+        "total": 200,
+        "totalWithoutTax": 200
+      }
+    ],
+    "international": null,
+    "currentBalance": 200,
+    "_links": {
+      "pdf": {
+        "uri": "/download/i/5975346/AnaAP7AegW6lAPjAXjWcjW5eDglAeeAXjTcdWgaAfcDgnAej?pcwm=0&dt=&viewer=originator"
+      },
+      "self": {
+        "uri": "/invoices/3"
+      }
+    },
+    "publicPdfUrl": "https://www.sendregning.no/download/i/5975346/AnaAP7AegW6lAPjAXjWcjW5eDglAeeAXjTcdWgaAfcDgnAej"
+  },
+  {
+    "documentId": 7173793,
+    "credit": false,
+    "number": 2,
+    "printedEmail": "morten@andersen-gott.com",
+    "orderNumber": null,
+    "invoiceDate": "2018-06-13",
+    "dueDate": "2018-06-27",
+    "orderDate": null,
+    "reminderDate": null,
+    "ourReference": null,
+    "yourReference": null,
+    "kid": null,
+    "tax": 0,
+    "total": 200,
+    "invoiceText": "Dommer til treningskamp",
+    "accountNumber": "97101839595",
+    "dunningType": null,
+    "balance": null,
+    "balanceDate": "",
+    "currency": "NOK",
+    "deliveryDate": null,
+    "deliveryAddress": null,
+    "originator": {
+      "id": 47178,
+      "name": "Morten Andersen-Gott",
+      "fax": null,
+      "phone": null,
+      "mobile": null,
+      "web": null,
+      "organisationNumber": null,
+      "address": {
+        "address1": "Vollsveien 80A",
+        "address2": "",
+        "zip": "1358",
+        "city": "JAR",
+        "country": "NORGE"
+      }
+    },
+    "recipient": {
+      "number": 6,
+      "customerNumber": null,
+      "name": "Morten Andersen-Gott",
+      "email": "morten.andersengott@gmail.com",
+      "mobile": null,
+      "address": {
+        "address1": "",
+        "address2": "",
+        "zip": "1358",
+        "city": "Ukjent",
+        "country": "NORGE"
+      },
+      "organisationNumber": null
+    },
+    "items": [
+      {
+        "number": 1,
+        "quantity": 1,
+        "productCode": "4",
+        "description": "Adm. gebyr enkeltdommer til En - to 25.01.18 - sen bestilling",
+        "unitPrice": 200,
+        "discount": null,
+        "taxRate": 0,
+        "total": 200,
+        "totalWithoutTax": 200
+      }
+    ],
+    "international": null,
+    "currentBalance": 0,
+    "_links": {
+      "pdf": {
+        "uri": "/download/i/5973723/AlfAegA8lAjdAfXWbXAjbAbPEggAelAaeTc7WbbAf6AnnWg5?pcwm=0&dt=&viewer=originator"
+      },
+      "self": {
+        "uri": "/invoices/2"
+      }
+    },
+    "publicPdfUrl": "https://www.sendregning.no/download/i/5973723/AlfAegA8lAjdAfXWbXAjbAbPEggAelAaeTc7WbbAf6AnnWg5"
+  },
+  {
+    "documentId": 7057799,
+    "credit": false,
+    "number": 1,
+    "printedEmail": "morten@andersen-gott.com",
+    "orderNumber": null,
+    "invoiceDate": "2018-05-04",
+    "dueDate": "2018-05-18",
+    "orderDate": "2018-04-30",
+    "reminderDate": "2018-05-23",
+    "ourReference": null,
+    "yourReference": null,
+    "kid": null,
+    "tax": 0,
+    "total": 200,
+    "invoiceText": "",
+    "accountNumber": "97101839595",
+    "dunningType": null,
+    "balance": null,
+    "balanceDate": "",
+    "currency": "NOK",
+    "deliveryDate": null,
+    "deliveryAddress": null,
+    "originator": {
+      "id": 47178,
+      "name": "Morten Andersen-Gott",
+      "fax": null,
+      "phone": null,
+      "mobile": null,
+      "web": null,
+      "organisationNumber": null,
+      "address": {
+        "address1": "Vollsveien 80A",
+        "address2": "",
+        "zip": "1358",
+        "city": "JAR",
+        "country": "NORGE"
+      }
+    },
+    "recipient": {
+      "number": 1,
+      "customerNumber": "1",
+      "name": "Test Olavsen",
+      "email": "code@andersen-gott.com",
+      "mobile": null,
+      "address": {
+        "address1": "Vollsveien 80A",
+        "address2": "",
+        "zip": "1358",
+        "city": "JAR",
+        "country": "NORGE"
+      },
+      "organisationNumber": null
+    },
+    "items": [
+      {
+        "number": 1,
+        "quantity": 1,
+        "productCode": "",
+        "description": "Treningskamp",
+        "unitPrice": 100,
+        "discount": null,
+        "taxRate": 0,
+        "total": 100,
+        "totalWithoutTax": 100
+      },
+      {
+        "number": 2,
+        "quantity": 1,
+        "productCode": "1",
+        "description": "Dommer til treningskamp2222222222222222222222222222222222222222222222",
+        "unitPrice": 100,
+        "discount": null,
+        "taxRate": 0,
+        "total": 100,
+        "totalWithoutTax": 100
+      }
+    ],
+    "international": null,
+    "currentBalance": 200,
+    "_links": {
+      "pdf": {
+        "uri": "/download/i/5906691/TXXAlnAfnAbgAllAnaA88Ad5APnWjaW6jAnbWgfAl7WgaWcl?pcwm=0&dt=&viewer=originator"
+      },
+      "self": {
+        "uri": "/invoices/1"
+      }
+    },
+    "publicPdfUrl": "https://www.sendregning.no/download/i/5906691/TXXAlnAfnAbgAllAnaA88Ad5APnWjaW6jAnbWgfAl7WgaWcl"
+  }
+]

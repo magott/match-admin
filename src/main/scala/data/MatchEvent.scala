@@ -41,6 +41,7 @@ case object MailOpened extends EventType("opened", "E-post lest")
 case object MailBounced extends EventType("bounced", "E-post feilet")
 case object MailUnsubscribed extends EventType("unsubscribed", "Ønsker ikke e-post")
 case object MatchEdit extends EventType("edit", "Kamp endret")
+case object MatchInvoiced extends EventType("invoiced", "Regning opprettet")
 object EventType{
   implicit val EventTypeMeta: Meta[EventType] = Meta[String].xmap(
     varchar => varchar match {
@@ -49,6 +50,7 @@ object EventType{
       case "bounced" => MailBounced
       case "unsubscribed" => MailUnsubscribed
       case "edit" => MatchEdit
+      case "invoiced" => MatchInvoiced
     },
     eventtype => eventtype.typ
   )
@@ -69,6 +71,9 @@ object MatchEvent{
 //    MatchEvent(None, )
     ???
   }
+
+  def opprettetRegning(m:Match, user:User, regningsnr:Int): MatchEvent = MatchEvent(None, user.email, m.idString, UUID.randomUUID().toString, LocalDateTime.now(), s"Opprettet regning #$regningsnr", Json.obj(), MatchInvoiced, OkLevel, Some(user.email))
+
 
   def kampPublisert(m: Match, user: User): MatchEvent ={
     MatchEvent(None, user.email, m.idString, UUID.randomUUID().toString, LocalDateTime.now(), "Kamp publisert", Json.obj(), MatchEdit, OkLevel, Some(user.email))

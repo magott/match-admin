@@ -1,0 +1,51 @@
+[
+  {
+    "credit": false,
+    "number": 3,
+    "orderNumber": null,
+    "invoiceDate": "2018-05-05",
+    "dueDate": "2018-05-19",
+    "orderDate": "2018-05-05",
+    "ourReference": null,
+    "yourReference": null,
+    "tax": 0,
+    "total": 100,
+    "invoiceText": null,
+    "currency": "NOK",
+    "deliveryDate": null,
+    "deliveryAddress": {
+      "address": null,
+      "zip": null,
+      "city": null,
+      "country": null
+    },
+    "recipient": {
+      "number": 1,
+      "customerNumber": "1",
+      "name": "Test Olavsen",
+      "email": "code@andersen-gott.com",
+      "mobile": null,
+      "address": {
+        "address1": "Vollsveien 80A",
+        "address2": "",
+        "zip": "1358",
+        "city": "JAR",
+        "country": "NORGE"
+      },
+      "organisationNumber": null
+    },
+    "originDocument": null,
+    "items": [
+      {
+        "number": 1,
+        "quantity": 1,
+        "productCode": "1",
+        "description": "Dommer til treningskamp",
+        "unitPrice": 100,
+        "discount": null,
+        "taxRate": 0
+      }
+    ],
+    "international": null
+  }
+]

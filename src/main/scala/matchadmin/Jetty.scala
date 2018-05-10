@@ -12,6 +12,7 @@ import org.constretto.Constretto
 import org.constretto.Constretto._
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
+import service.{SendRegning}
 import unfiltered.jetty
 import web.{Resources, UserUpdateInterceptor}
 
@@ -31,14 +32,15 @@ object Jetty extends App{
     val config = getConfig
     val checkUserLevelSet = Properties.envOrElse("CHECK_USERS", "false").toBoolean
     val userUpdateLimit = DateTime.parse(Properties.envOrElse("USER_UPDATE_DATE", DateTime.now.toString))
+
     Locale.setDefault(new Locale("no_NO"))
     System.setProperty("user.timezone", "Europe/Oslo")
     TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
     println("Starting on port:" + port)
-    val http = jetty.Http(port)
+    val http = jetty.Server.http(port)
     http.resources(getClass().getResource("/static"))
       .plan(new UserUpdateInterceptor(userUpdateLimit, checkUserLevelSet))
-      .plan(new Resources(config, tx(dataSource)))
+      .plan(new Resources(config, tx(dataSource), SendRegning.create))
       .run(_ => Unit, _ => shutdown.apply())
   }
 

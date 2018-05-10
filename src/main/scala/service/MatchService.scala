@@ -6,7 +6,7 @@ import org.bson.types.ObjectId
 /**
   *
   */
-case class MatchService(repo: MongoRepository, dbRepo: DbRepo) {
+case class MatchService(repo: MongoRepository, dbRepo: DbRepo, sendRegning: Option[SendRegning]) {
 
   def deleteMatch(matchId:String) = {
     repo.deleteMatch(new ObjectId(matchId))
@@ -27,6 +27,14 @@ case class MatchService(repo: MongoRepository, dbRepo: DbRepo) {
   def saveEvent(event: MatchEvent): Unit ={
     println(s"Et event skjedde $event")
     dbRepo.insert(event)
+  }
+
+  def opprettRegning(m: Match, user:User) = {
+    val resultat = sendRegning.get.opprettRegningPaKamp(m)
+    resultat.map(regningsnr => MatchEvent.opprettetRegning(m, user, regningsnr))
+      .foreach(dbRepo.insert)
+    resultat.map(regningsnr => repo.saveMatch(m.copy(invoice = Some(regningsnr))))
+    resultat
   }
 
 }

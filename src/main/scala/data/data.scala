@@ -16,7 +16,8 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  description:Option[String], kickoff:DateTime, refereeType:String, refFee:Option[Int],
                  assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                  appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee],
-                 published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo], payerEmail:String, payingTeam: Option[String]){
+                 published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo], payerEmail:String, payingTeam: Option[String],
+                 invoice:Option[Int]){
 
   def idString = id.map(_.toString).getOrElse("")
   def refString = (appointedRef.map(r=>s"HD ${r.name}") :: appointedAssistant1.map(r => s"AD1 ${r.name}")  :: appointedAssistant2.map(r => s"AD2 ${r.name}") :: Nil).flatten.mkString(",")
@@ -42,6 +43,9 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   def assigned = if(refereeType == RefereeType.Trio.key) (List(appointedRef,appointedAssistant1,appointedAssistant2).forall(_.isDefined)) else appointedRef.isDefined
 
+  def regningsMottaker  = if(payerEmail.nonEmpty) clubContact.map(_.copy(email = payerEmail)) else clubContact
+
+
   private def setsAndUnsets = {
     val unsets = mutable.MutableList.empty[String]
 
@@ -64,6 +68,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     appointedAssistant1.foreach(x => sets += "assRef1" -> x.toMongo)
     appointedAssistant2.foreach(x => sets += "assRef2" -> x.toMongo)
     clubContact.foreach(x => sets += "clubContact" -> x.toMongo)
+    invoice.foreach(x => sets += "invoice" -> x)
 
     if(description.isEmpty) unsets += "desc"
     if(refFee.isEmpty) unsets += "refFee"
@@ -72,6 +77,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
     if(appointedAssistant1.isEmpty) unsets += "assRef1"
     if(appointedAssistant2.isEmpty) unsets += "assRef2"
     if(clubContact.isEmpty) unsets += "clubContact" //TODO: Does it work?
+    if(invoice.isEmpty) unsets += "invoice"
     (sets, unsets)
   }
   
@@ -194,9 +200,9 @@ object Match{
     val clubContact = m.getAs[DBObject]("clubContact").map(ContactInfo.fromMongo)
     val payerEmail = m.getAsOrElse[String]("payerEmail","")
     val payingTeam = m.getAs[String]("payingTeam")
+    val invoice = m.getAs[Int]("invoice")
 
-
-    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, adminOk,clubContact, payerEmail, payingTeam)
+    Match(Some(id), created, home, away, venue, level, desc, kickoff, refereeType, refFee, assFee, intRefs, intAss, referee, assRef1, assRef2, published, adminOk,clubContact, payerEmail, payingTeam, invoice)
   }
 
   def newInstance(homeTeam:String, awayTeam:String, venue:String, level:String,
@@ -204,7 +210,7 @@ object Match{
                   assistantFee:Option[Int], interestedRefs:List[Referee], interestedAssistants:List[Referee],
                   appointedRef:Option[Referee], appointedAssistant1:Option[Referee], appointedAssistant2: Option[Referee]
                   ) =
-    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, false, None, "", None)
+    Match(None, DateTime.now, homeTeam, awayTeam, venue, level, description, kickoff, refereeType, refFee, assistantFee, Nil, Nil, appointedRef, appointedAssistant1, appointedAssistant2, true, false, None, "", None, None)
 
 
 }

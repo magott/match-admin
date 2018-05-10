@@ -1,6 +1,7 @@
 package service
 
-import conf.Config
+import java.nio.charset.StandardCharsets
+
 import data._
 
 import scala.concurrent.{Await, ExecutionContext}
@@ -8,6 +9,7 @@ import scala.util.Properties
 import dispatch._
 import data.MailMessage
 import common._
+import conf.Config
 import org.joda.time.{LocalDate, LocalDateTime}
 
 import scala.util.Properties
@@ -17,6 +19,7 @@ class MailgunService (private val config:Config){
   val mailgunApiKey = Properties.envOrNone("MAILGUN_API_KEY").get
   val mailgunAppName = config.email.mailgunAppName orElse
     Properties.envOrNone("MAILGUN_SMTP_LOGIN").map(_.split("@")(1).trim) getOrElse "app15913574.mailgun.org"
+  val http = Http.default.closeAndConfigure(config => config.setAcceptAnyCertificate(true))
 
 
   def sendAll(messages: List[MailMessage]) : List[MailReceipt]= {
@@ -33,7 +36,7 @@ class MailgunService (private val config:Config){
     import ExecutionContext.Implicits.global
     val req = mailgunUrl << mailMessage.asMailgunParams
     for {
-      resp <- Http(req)
+      resp <-  http(req)
       receipt = if(resp.getStatusCode == 200) MailAccepted(resp.getResponseBody) else MailRejected(resp.getResponseBody, resp.getStatusCode)
     } yield receipt
   }
@@ -55,6 +58,7 @@ class MailgunService (private val config:Config){
     val ass1 = m.appointedAssistant1.flatMap(x => repo.userById(x.id))
     val ass2 = m.appointedAssistant2.flatMap(x => repo.userById(x.id))
     val appointmentMail = AppointmentMail(m, config, "", ref, ass1, ass2).toMailMessage
+    println(appointmentMail.asMailgunParams)
     val clubNotificationMail = ClubRefereeNotification(m, config, ref, ass1, ass2).toMailMessage
     sendAll(appointmentMail :: clubNotificationMail :: Nil)
       .head
@@ -99,7 +103,7 @@ class MailgunService (private val config:Config){
   }
 
     def mailgunUrl = {
-      url("https://api.mailgun.net/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).
+      url("https://api.mailgun.net/v2/%s/messages".format(mailgunAppName)).as_!("api",mailgunApiKey).setBodyEncoding(StandardCharsets.UTF_8).
         POST <:< (Map("Content-Type" -> "application/x-www-form-urlencoded"))
   }
 

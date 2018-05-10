@@ -136,7 +136,7 @@ object MatchValidation {
       (kickoff, home, away, venue, refType, refFee, assFee, appointedRef, appointedAss1, appointedAss2, lvl, payerEmail) =>
         Match(id.map(new ObjectId(_)), DateTime.now, home, away, venue, lvl, nonEmpty(description), kickoff, refereeType, refFee, assFee,
         Nil, Nil, appointedRef, appointedAss1, appointedAss2, true, false,
-          createContact, payerEmail, Some(payingTeam))
+          createContact, payerEmail, Some(payingTeam), None)
     }.toEither.left.map(_.list)
   }
 

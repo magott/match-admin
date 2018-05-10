@@ -3,25 +3,25 @@ package web
 import unfiltered.filter.Plan
 import unfiltered.request._
 import unfiltered.response.{Html5, Ok, Pass}
-import service.{DbRepo, MailgunService, MatchService, MongoRepository}
+import service._
 import conf.Config
 import doobie.Transactor
 import cats.effect.IO
 
-
 import scala.util.Properties
 
-class Resources(config: Config, tx: Transactor[IO]) extends Plan{
+class Resources(config: Config, tx: Transactor[IO], sendRegning: Option[SendRegning]) extends Plan{
 
   private val repo = MongoRepository.singletonWithSessionCaching
   implicit val c = config
   val mailgun = new MailgunService(c)
   val loginHandler = new LoginHandler(repo, mailgun)
-  val matchService = new MatchService(repo, DbRepo(tx))
+  val matchService = new MatchService(repo, DbRepo(tx), sendRegning)
   val webhookHandler = new WebhookHandler(Properties.envOrNone("MAILGUN_API_KEY").get, matchService)
   def intent = {
     case r@GET(_) & XForwardProto("http") => HerokuRedirect(r,r.uri)
-    case r@Path(Seg(List("admin", _*))) => new AdminHandler(matchService, mailgun).handleAdmin(r)
+    case r@Path(Seg(List("admin", "invoice", _*))) & IsAdmin(_) => new InvoiceHandler(matchService).handle(r)
+    case r@Path(Seg(List("admin", _*))) & IsAdmin(_) => new AdminHandler(matchService, mailgun).handleAdmin(r)
     case r@Path(Seg(List("users", _*))) => new UserHandler(repo).handleUser(r)
     case r@Path(Seg(List("matches", _*))) => new MatchHandler(repo).handleMatches(r)
     case r@Path(Seg(List("clubs", _*))) => new ClubHandler(repo, mailgun).handleClubRequest(r)

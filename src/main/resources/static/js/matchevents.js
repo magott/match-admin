@@ -1,7 +1,3 @@
-window.onload = function() {
-    console.debug("Laster matchevents");
-    bootstrap();
-};
 var root = document.getElementById("event-table");
 var eventLevel = function(level) {
     switch (level){
@@ -37,7 +33,9 @@ var Event = {
     },
 };
 
-var bootstrap = function(){
+var bootstrapEvents = function(){
     Event.loadList();
 };
+console.debug("Laster matchevents");
+bootstrapEvents();
 

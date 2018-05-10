@@ -1,0 +1,93 @@
+{
+  "recipient": [
+    {
+      "number": 1,
+      "comment": null,
+      "customerNumber": "1",
+      "name": "Test Olavsen",
+      "vipps": null,
+      "contact": {
+        "address": {
+          "address1": "Vollsveien 80A",
+          "address2": "",
+          "city": "JAR",
+          "country": "NORGE",
+          "zip": "1358"
+        },
+        "email": "code@andersen-gott.com",
+        "phone": null,
+        "mobile": null,
+        "fax": null,
+        "web": null
+      },
+      "organisation": {
+        "form": "prv",
+        "icd": null,
+        "number": null
+      },
+      "settings": {
+        "discount": 0.0,
+        "creditDays": null,
+        "attachPdf": true,
+        "defaultShipment": null,
+        "currency": null,
+        "lost": false
+      },
+      "avtaleGiro": null,
+      "eFaktura": false,
+      "yourReference": null,
+      "customFields": null,
+      "deleted": false,
+      "_links": {
+        "self": {
+          "uri": "/recipients/1"
+        }
+      }
+    },
+    {
+      "number": 2,
+      "comment": null,
+      "customerNumber": "2",
+      "name": "Tast Tastesen",
+      "vipps": null,
+      "contact": {
+        "address": {
+          "address1": "",
+          "address2": "",
+          "city": "JAR",
+          "country": "NORGE",
+          "zip": "1358"
+        },
+        "email": "code@andersen-gott.com",
+        "phone": null,
+        "mobile": null,
+        "fax": null,
+        "web": null
+      },
+      "organisation": {
+        "form": "prv",
+        "icd": null,
+        "number": null
+      },
+      "settings": {
+        "discount": 0.0,
+        "creditDays": null,
+        "attachPdf": true,
+        "defaultShipment": null,
+        "currency": null,
+        "lost": false
+      },
+      "avtaleGiro": null,
+      "eFaktura": false,
+      "yourReference": "",
+      "customFields": null,
+      "deleted": false,
+      "_links": {
+        "self": {
+          "uri": "/recipients/2"
+        }
+      }
+    }
+  ],
+  "total": 2
+}

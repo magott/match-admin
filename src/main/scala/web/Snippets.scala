@@ -139,11 +139,10 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
               }}
             </div>
           </div>
-          <div class="control-group">
-            <div class="controls">
-              {m.map(_.adminButton).getOrElse(<div></div>)}
+            {if(m.exists(_.kickoff.isBeforeNow)){
+            <div class="control-group" id="regning">
             </div>
-          </div>
+            }}
           {
             if(m.isDefined){
               val matchUrl = "%s/matches/%s".format(baseUrl,m.get.id.get.toString)
@@ -1006,11 +1005,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
             <div class="control-group">
               <div class="controls">
                 <label class="checkbox">
-                  {if(c.isDefined)
                     <input type="checkbox" name="saveContact" id="saveContact" checked="checked" > </input>
-                  else
-                      <input type="checkbox" name="saveContact" id="saveContact" > </input>
-                  }
                   Lagre kontaktinfo
                 </label>
               </div>
@@ -1102,6 +1097,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
   val jqueryPlaceholder = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.7/jquery.placeholder.min.js"></script>
   val mithril = <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/1.1.6/mithril.min.js"></script>
   val matcheventsjs =  <script src="/js/matchevents.js"></script>
+  val invoicejs =  <script src="/js/invoice.js"></script>
   val lodashJs = <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js"></script>
 
   def filterTableJS = {
@@ -1119,7 +1115,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
   }
 
   def editMatchJS = {
-    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ underscoreJs ++jQueryUiJs ++ mithril ++ matcheventsjs ++ momentJs ++
+    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ lodashJs ++jQueryUiJs ++ mithril ++ matcheventsjs ++ momentJs ++ invoicejs ++
     <script type="text/javascript">
       { """
             $(document).ready(editMatchFunctions);
