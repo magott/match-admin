@@ -1,5 +1,6 @@
 var regning = document.getElementById("regning");
-console.debug("Laster regning");
+var createClicked = false;
+console.debug("Laster regning..");
 
 var Invoice = {
     status: {},
@@ -17,7 +18,7 @@ var Invoice = {
             } else {
                 m.render(regning, [
                     m("label", {class: "control-label"}, "Regningstatus"),
-                    m("div", {class: "controls"}, [m("button", {class: "btn", type: "button", onclick:(Invoice.createInvoice)}, "Opprett regning")])
+                    m("div", {class: "controls"}, [m("button", {id: "createButton", class: "btn", type: "button", onclick:(Invoice.createInvoice)}, "Opprett regning")])
                 ])
             }
         })
@@ -37,17 +38,19 @@ var Invoice = {
         }).catch(function() {
             m.render(regning, [
                 m("label", {class: "control-label"}, "Regningstatus"),
-                m("div", {class: "controls"}, [m("button", {class: "btn", type: "button", onclick:(Invoice.createInvoice)}, "Opprett regning")])
+                m("div", {class: "controls"}, [m("button", {id: "createButton", class: "btn", type: "button", onclick:(Invoice.createInvoice)}, "Opprett regning")])
             ])
         })
     },
     createInvoice: function() {
+        document.getElementById("createButton").setAttribute("disabled","disabled")
         m.request({
             method: "POST",
             url: window.location.origin + "/admin/invoice/match/"+Invoice.matchId,
             withCredentials: true,
         }).then(function(response){
             Invoice.loadStatus2(response);
+            document.getElementById("createButton").removeAttribute("disabled");
         })
     }
 };
