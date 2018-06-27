@@ -21,6 +21,7 @@ class InvoiceHandler (matchService: MatchService) {
           sendRegning.finnSendRegningWebUrl(nr.toInt).map(x => Json.obj("status" := x._1, "url" := x._2))
             .map(json => Ok ~> ResponseString(json.noSpaces)).getOrElse(NotFound)
         }
+        case r@Path(Seg("admin" :: "invoice" :: "match" :: "new" :: Nil)) => NotFound
         case r@Path(Seg("admin" :: "invoice" :: "match" :: matchId :: Nil)) => r match {
           case GET(_) =>
             matchService.repo.fullMatch(new ObjectId(matchId))
