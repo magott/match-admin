@@ -16,7 +16,8 @@ import com.google.common.cache.CacheBuilder
 import data.{ContactInfo, Match}
 import org.joda.time.{DateTime, Days}
 
-import scala.util.Properties
+import scala.io.Source
+import scala.util.{Properties, Try}
 
 //import cats.implicits._
 import cats.syntax.traverse._
@@ -45,6 +46,12 @@ object SendRegning {
 
   def main(args: Array[String]): Unit = {
 
+    val f = Try(Source.fromInputStream(getClass.getResourceAsStream("/Postnummerregister-ansi.txt"), "UTF-8").getLines()
+      .map{ s =>
+        val splitted = s.split("\t")
+        splitted(0) -> splitted(1)
+      }.toMap).toOption
+
     val sendRegning = SendRegning.create.get
     val resp = sendRegning.hentAlleMottakereResp
     resp.right.get.foreach(println)
@@ -63,11 +70,16 @@ object SendRegning {
     for {
       username <- Properties.envOrNone("SENDREGNING_USERNAME")
       password <- Properties.envOrNone("SENDREGNING_PASSWORD")
-    } yield (SendRegning(username, password, Properties.envOrNone("SENDREGNING_ORIGINATOR")))
+      postnrMap <- Try(Source.fromInputStream(getClass.getResourceAsStream("/Postnummerregister-ansi.txt"), "UTF-8").getLines()
+        .map{ s =>
+          val splitted = s.split("\t")
+          splitted(0) -> splitted(1)
+        }.toMap).toOption
+    } yield (SendRegning(username, password, Properties.envOrNone("SENDREGNING_ORIGINATOR"), postnrMap))
   }
 }
 
-case class SendRegning(username:String, password:String, originator:Option[String]) {
+case class SendRegning(username:String, password:String, originator:Option[String], postnrMap:Map[String, String]) {
 
   import SendRegning._
   val baseUrl = "https://www.sendregning.no"
@@ -94,7 +106,7 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
       opprettRegningPaa(recipient.right.get.head, m).asRight
     } else {
       //Hvis ikke mottaker, lag ny regning med ny mottaker
-      val maybeInt = mottaker.map(Recipient.newFromContact).map(nyMottaker => opprettRegningPaa(nyMottaker, m))
+      val maybeInt = mottaker.map(x => Recipient.newFromContact(x, postnrMap)).map(nyMottaker => opprettRegningPaa(nyMottaker, m))
       Either.fromOption(maybeInt, "Trenger navn, epost og postnummer på mottaker av regning")
 
     }
@@ -203,8 +215,8 @@ object Recipient{
     either.right.map(_.filter(_.isRight).map(_.right.get))
   }
 
-  def newFromContact(contactInfo: ContactInfo) = {
-    Recipient(None, contactInfo.name, contactInfo.email, Address(contactInfo.zip, "Ukjent"))
+  def newFromContact(contactInfo: ContactInfo, postnrMap:Map[String, String]) = {
+    Recipient(None, contactInfo.name, contactInfo.email, Address(contactInfo.zip, postnrMap.get(contactInfo.zip).getOrElse("Ukjent")))
   }
 
 }
@@ -228,7 +240,8 @@ case class Invoice(number:Int, orderNo: Option[String], recipient: Recipient){}
 
 object PrisKalkulator{
   def varelinje(m:Match) : Item = {
-    val dagerIForveienBestilt = Days.daysBetween(m.created, m.kickoff).getDays
+    import data.ObjectIdPimp
+    val dagerIForveienBestilt = Days.daysBetween(m.id.get.dateTime, m.kickoff).getDays
     val senBestilling = dagerIForveienBestilt < 7
     (m.refereeType, senBestilling) match {
       case ("trio", true) =>  Item(1, "3", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 250,0)
