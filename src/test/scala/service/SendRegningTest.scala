@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import org.scalatest.FunSuite
 import io.circe.syntax._
 import io.circe.parser._
+import org.bson.types.ObjectId
 
 import scala.io.Source
 
