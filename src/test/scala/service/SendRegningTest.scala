@@ -40,8 +40,10 @@ class SendRegningTest extends FunSuite{
   }
 
   test("Lager korrekte regningslinjer"){
-    val senTrio = Match(None, DateTime.now, "hjemme", "borte", "der","men4div", None, DateTime.now.plusDays(6),
+
+    val senTrio = Match(Some(new ObjectId(DateTime.now().toDate)), DateTime.now, "hjemme", "borte", "der","men4div", None, DateTime.now.plusDays(6),
       "trio", Some(100), Some(50), Nil, Nil, None, None, None, true, true, None, "payer@example.com", Some("home"), None)
+
     val tidligTrio = senTrio.copy(kickoff = DateTime.now.plusWeeks(1))
 
     val senDommer = senTrio.copy(refereeType = "dommer")
