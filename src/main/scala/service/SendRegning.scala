@@ -165,6 +165,7 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
     .header("Content-Type","application/json")
     .header("Originator-Id", originator.getOrElse(""))
     .header("Authorization", authHeader)
+    .timeout(10000, 20000)
 
   def authHeader = s"Basic ${Base64.getEncoder.encodeToString(s"$username:$password".getBytes(StandardCharsets.UTF_8))}"
 
