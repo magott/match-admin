@@ -61,9 +61,10 @@ object SendRegning {
     val senTrio = Match(None, DateTime.now, "Ørn-Horten", "Stålkameratene", "der","men4div", None, DateTime.now.plusDays(6),
       "trio", Some(100), Some(50), Nil, Nil, None, None, None, true, true, Some(ContactInfo("Payer","","1358","", "foo@bar.com")), "payer@example.com", Some("home"), None)
 
-    val int = sendRegning.opprettRegningPaKamp(senTrio)
+//    val int = sendRegning.opprettRegningPaKamp(senTrio)
+//    println(int)
+    sendRegning.finnRegningPaged(10).foreach(println)
 
-    println(int)
   }
 
   def create : Option[SendRegning] = {
@@ -173,7 +174,7 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
     val draft = sendRegningUrl(s"/invoices/drafts/$draftNumber").asString.option
       .map(_ => s"Opprettet #$draftNumber" -> s"https://www.sendregning.no/side/#/regning/kladd/$draftNumber")
 
-    draft.orElse(finnRegning(draftNumber).map(invoiceNumber => s"Sendt #$invoiceNumber" -> s"https://www.sendregning.no/side/#/regning/$invoiceNumber"))
+    draft.orElse(finnRegningPaged(draftNumber).map(invoiceNumber => s"Sendt #$invoiceNumber" -> s"https://www.sendregning.no/side/#/regning/$invoiceNumber"))
   }
 
   def finnRegning(draftNr: Int) : Option[Int] = {
@@ -183,6 +184,15 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
     val regninger = io.circe.parser.decode[List[Invoice]](regningerJsonString)
 
     regninger.toOption.flatMap(_.find(_.orderNo.exists(_ == draftNr.toString))).map(_.number)
+  }
+
+  def finnRegningPaged(draftNr: Int) : Option[Int] = {
+   Stream.from(1).map(page => sendRegningUrl(s"/invoices/?page=$page&perPage=30").asString.body.trim)
+     .takeWhile(_.nonEmpty)
+     .flatMap(pageString => io.circe.parser.decode[List[Invoice]](pageString).right.get)
+     .dropWhile(_.orderNo.forall(_.toInt != draftNr))
+     .headOption
+     .map(_.number)
   }
 
 }
