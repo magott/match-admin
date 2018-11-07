@@ -66,7 +66,7 @@ class SendRegningTest extends FunSuite{
   }
 
   test("Kan encode/decode Draft"){
-    val asJson = Draft(None, None, Recipient(None, "Morten", "morten@example.com", Address("1358", "jar")), Item(1,"2", "Desc", 100, 0) :: Nil).asJson
+    val asJson = Draft(None, None, Recipient.withEmail(None, "Morten", "morten@example.com", Address("1358", "jar")), Item(1,"2", "Desc", 100, 0) :: Nil).asJson
     println(asJson.noSpaces)
     val draft = decode[Draft](asJson.noSpaces)
     assert(draft.isRight)

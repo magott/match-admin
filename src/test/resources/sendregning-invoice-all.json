@@ -200,7 +200,7 @@
       "number": 1,
       "customerNumber": "1",
       "name": "Test Olavsen",
-      "email": "code@andersen-gott.com",
+      "email": null,
       "mobile": null,
       "address": {
         "address1": "Vollsveien 80A",

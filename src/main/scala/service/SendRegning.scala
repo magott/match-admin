@@ -53,17 +53,17 @@ object SendRegning {
       }.toMap).toOption
 
     val sendRegning = SendRegning.create.get
-    val resp = sendRegning.hentAlleMottakereResp
-    resp.right.get.foreach(println)
-    val utkast = sendRegning.hentAlleRegningsutkast
-    utkast.foreach(println)
-    val regning = utkast.right.get.head
+//    val resp = sendRegning.hentAlleMottakereResp
+//    resp.right.get.foreach(println)
+//    val utkast = sendRegning.hentAlleRegningsutkast
+//    utkast.foreach(println)
+//    val regning = utkast.right.get.head
     val senTrio = Match(None, DateTime.now, "Ørn-Horten", "Stålkameratene", "der","men4div", None, DateTime.now.plusDays(6),
       "trio", Some(100), Some(50), Nil, Nil, None, None, None, true, true, Some(ContactInfo("Payer","","1358","", "foo@bar.com")), "payer@example.com", Some("home"), None)
 
 //    val int = sendRegning.opprettRegningPaKamp(senTrio)
 //    println(int)
-    sendRegning.finnRegningPaged(10).foreach(println)
+    sendRegning.finnRegningPaged(334).foreach(println)
 
   }
 
@@ -187,13 +187,20 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
   }
 
   def finnRegningPaged(draftNr: Int) : Option[Int] = {
-   Stream.from(1).map(page => sendRegningUrl(s"/invoices/?page=$page&perPage=30").asString.body.trim)
+   Stream.from(1)
+     .map(page => sendRegningUrl(s"/invoices/?page=$page&perPage=30").asString.body.trim)
      .takeWhile(_.nonEmpty)
-     .flatMap(pageString => io.circe.parser.decode[List[Invoice]](pageString).right.get)
-     .dropWhile(_.orderNo.forall(_.toInt != draftNr))
+     .flatMap{
+       pageString =>
+       val parsed = io.circe.parser.decode[List[Invoice]](pageString)
+       parsed.right.get
+     }
+     .dropWhile(_.orderNo.forall(orderNumber => notNumber(orderNumber)  || orderNumber.toInt != draftNr))
      .headOption
      .map(_.number)
   }
+
+  def notNumber(i:String) : Boolean = !i.matches("""\d+""")
 
 }
 
@@ -203,8 +210,11 @@ object Address{
   implicit val addressEncoder : Encoder[Address] = Encoder.forProduct2("zip", "city")(a => (a.zip, a.city))
 }
 
-case class Recipient(number:Option[Int], name:String, email:String, address: Address)
+case class Recipient(number:Option[Int], name:String, emailOpt:Option[String], address: Address){
+  val email:String = emailOpt.getOrElse("")
+}
 object Recipient{
+  def withEmail(number:Option[Int], name:String, email:String, address: Address) : Recipient = Recipient(number, name, Some(name), address)
   implicit val recipientDecoder:Decoder[Recipient] = Decoder.instance{
     c =>
       for{
@@ -212,7 +222,7 @@ object Recipient{
         name <- c.downField("name").as[String]
         contact <- c.downField("contact").as[Json]
         address <- contact.hcursor.downField("address").as[Address]
-        email <- contact.hcursor.downField("email").as[String]
+        email <- contact.hcursor.downField("email").as[Option[String]]
       } yield {
         Recipient(Some(number), name, email, address)
       }
@@ -227,7 +237,7 @@ object Recipient{
   }
 
   def newFromContact(contactInfo: ContactInfo, postnrMap:Map[String, String]) = {
-    Recipient(None, contactInfo.name, contactInfo.email, Address(contactInfo.zip, postnrMap.get(contactInfo.zip).getOrElse("Ukjent")))
+    Recipient(None, contactInfo.name, Some(contactInfo.email), Address(contactInfo.zip, postnrMap.getOrElse(contactInfo.zip, "Ukjent")))
   }
 
 }
