@@ -19,9 +19,9 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
                  published:Boolean, adminOk:Boolean ,clubContact:Option[ContactInfo], payerEmail:String, payingTeam: Option[String],
                  invoice:Option[Int]){
 
-  def idString = id.map(_.toString).getOrElse("")
-  def refString = (appointedRef.map(r=>s"HD ${r.name}") :: appointedAssistant1.map(r => s"AD1 ${r.name}")  :: appointedAssistant2.map(r => s"AD2 ${r.name}") :: Nil).flatten.mkString(",")
-  def kickoffDateTimeString = kickoff.toString("dd.MM.yyyy HH:mm")
+  def idString: String = id.map(_.toString).getOrElse("")
+  def refString: String = (appointedRef.map(r=>s"HD ${r.name}") :: appointedAssistant1.map(r => s"AD1 ${r.name}")  :: appointedAssistant2.map(r => s"AD2 ${r.name}") :: Nil).flatten.mkString(",")
+  def kickoffDateTimeString :String = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
   def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
   def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
@@ -35,6 +35,9 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
       appointedRefs.contains(interestedRef) || interestedRef.name.contains("Reservert") || interestedRef.name.contains("stengt")
     }.isEmpty
   }
+
+  //Season starts 11.11
+  def season: Int = if(kickoff.getMonthOfYear > 10 && kickoff.getDayOfMonth > 10) kickoff.getYear + 1 else kickoff.getYear
 
 //  def updateClause : MongoDBObject = id.map(_id => MongoDBObject("_id" -> _id)).getOrElse(MongoDBObject.empty)
   def updateClause : MongoDBObject =  MongoDBObject("_id" -> id.get)

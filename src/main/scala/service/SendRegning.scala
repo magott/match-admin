@@ -9,12 +9,11 @@ import java.util.concurrent.atomic.AtomicReference
 
 import io.circe.{Decoder, Encoder, Error, Json, Printer}
 import io.circe.syntax._
-
 import scalaj.http.{Http, HttpResponse}
 import cats.syntax.either._
 import com.google.common.cache.CacheBuilder
-import data.{ContactInfo, Match}
-import org.joda.time.{DateTime, Days}
+import data.{ContactInfo, Match, RefereeType}
+import org.joda.time.{DateTime, Days, Hours}
 
 import scala.io.Source
 import scala.util.{Properties, Try}
@@ -262,15 +261,62 @@ case class Invoice(number:Int, orderNo: Option[String], recipient: Recipient){}
 object PrisKalkulator{
   def varelinje(m:Match) : Item = {
     import data.ObjectIdPimp
-    val dagerIForveienBestilt = Days.daysBetween(m.id.get.dateTime, m.kickoff).getDays
-    val senBestilling = dagerIForveienBestilt < 7
-    (m.refereeType, senBestilling) match {
-      case ("trio", true) =>  Item(1, "3", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 250,0)
-      case ("trio", false) => Item(1, "1", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")}", 150,0)
-      case ("dommer", true) => Item(1, "4", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 200,0)
-      case ("dommer", false) => Item(1, "2", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")}",100,0)
+    val timerIForveien = Hours.hoursBetween(m.id.get.dateTime, m.kickoff).getHours
+    if(m.season >= 2019){
+      from2019(m, timerIForveien)
+    }else{
+      pre2019(m, timerIForveien)
     }
   }
+
+  def pre2019(m: Match, timerIForveien:Int) : Item  = {
+    Prisgruppe.from(m.refereeType, timerIForveien) match {
+      case HastTrio | SenTrio => Item(1, "3", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 250, 0)
+      case RegulerTrio => Item(1, "1", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")}", 150, 0)
+      case HastKunDommer | SenKunDommer => Item(1, "4", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 200, 0)
+      case RegulerKunDommer => Item(1, "2", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")}", 100, 0)
+    }
+  }
+
+  private def from2019(m: Match, timerIForveien: Int) : Item = {
+    Prisgruppe.from(m.refereeType, timerIForveien) match {
+      case HastTrio => Item(1, "8", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - 48t bestilling", 350, 0)
+      case SenTrio => Item(1, "3", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 250, 0)
+      case RegulerTrio => Item(1, "1", s"Adm. gebyr trio til ${m.teams} ${m.kickoff.toString("dd.MM.yy")}", 150, 0)
+      case HastKunDommer => Item(1, "9", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - 48t bestilling", 300, 0)
+      case SenKunDommer => Item(1, "4", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")} - sen bestilling", 200, 0)
+      case RegulerKunDommer => Item(1, "2", s"Adm. gebyr enkeltdommer til ${m.teams} ${m.kickoff.toString("dd.MM.yy")}", 100, 0)
+    }
+  }
+
+  sealed class Prisgruppe
+
+  object Prisgruppe{
+    def from(refereeType: String, timerIForveien: Int): Prisgruppe = {
+      val dagerIForveien = Hours.hours(timerIForveien).toStandardDays.getDays
+      if (refereeType == RefereeType.Dommer.key) {
+        if (timerIForveien <= 48) HastKunDommer
+        else if (dagerIForveien <= 6) SenKunDommer
+        else RegulerKunDommer
+      }
+      else if (refereeType == RefereeType.Trio.key) {
+        if (timerIForveien <= 48) HastTrio
+        else if (dagerIForveien <= 6) SenTrio
+        else RegulerTrio
+      }
+      else RegulerKunDommer
+    }
+  }
+    case object HastKunDommer extends Prisgruppe
+    case object SenKunDommer extends Prisgruppe
+    case object RegulerKunDommer extends Prisgruppe
+
+    case object HastTrio extends Prisgruppe
+    case object SenTrio extends Prisgruppe
+    case object RegulerTrio extends Prisgruppe
+
+
+
 }
 
 
