@@ -1,1 +1,1 @@
-web: target/start Jetty
+web: target/universal/stage/bin/match-admin
