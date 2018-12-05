@@ -34,26 +34,26 @@ class MongoRepositoryInterationTest extends FunSuite{
 //    val m2 = m1.copy(id = Some(id), interestedAssistants = int, description = None)
   }
 
-  test("Add to set"){
+  ignore("Add to set"){
 
     val bObject = $addToSet("numberLiterals") $each(List("one", "two"))
     val data = MongoDBObject("test" -> "test") ++ bObject
     db("test").update(MongoDBObject.empty, bObject, true, false)
   }
 
-  test("Toggle off") {
+  ignore("Toggle off") {
     val MongoSetting(db) = None
     val id = new ObjectId("50773262b8c9ae1683d02e4a")
     db("foo").update(q= where("_id" -> id), o= $pull(where("number" -> MongoDBObject("num" -> 2))))
   }
 
-  test("Toggle on") {
+  ignore("Toggle on") {
     val MongoSetting(db) = None
     val id = new ObjectId("50773262b8c9ae1683d02e4a")
     db("foo").update(q= where("_id" -> id), o= $addToSet("number" -> MongoDBObject("num" ->10, "lit" -> "ti")))
   }
 
-  test("Exists"){
+  ignore("Exists"){
     val MongoSetting(db) = None
 //    val exists = db("foo").exists(_.getAs[List[Int]]("number.num").exists(_ == 1))
     val exists = db("foo").findOne(MongoDBObject("name" -> "Morten", "number.lit" -> "en"))
