@@ -1,0 +1,6 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/samplescala
+    docker:
+    - image: openjdk:8
