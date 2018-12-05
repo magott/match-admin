@@ -29,8 +29,8 @@ libraryDependencies ++=
     "org.mindrot"                % "jbcrypt"                    % "0.4",
     "org.joda"                   % "joda-convert"               % "1.2",
     "com.google.guava"           % "guava"                      % "11.0.2",
-    "org.mongodb"                %% "casbah"                    % "3.1.1"   excludeAll(ExclusionRule(organization = "org.slf4j")),
-//    "org.mongodb" % "mongo-java-driver" % "2.13.2",           
+    "org.mongodb"                %% "casbah"                    % "3.1.1"   excludeAll ExclusionRule(organization = "org.slf4j"),
+//    "org.mongodb" % "mongo-java-driver" % "2.13.2",
     "org.scalaz"                 %% "scalaz-core"               % "7.1.15",
     "net.databinder.dispatch"    %% "dispatch-core"             % "0.13.3",
     "org.constretto"             %% "constretto-scala"          % "1.2",
@@ -41,5 +41,5 @@ libraryDependencies ++=
     "io.circe"                   %% "circe-literal"             % "0.9.0",
     "org.scalatest"              %% "scalatest"                 % "3.0.5"       % "test",
     "com.opentable.components"   % "otj-pg-embedded"            % "0.11.4"      % "test"
-        
+
   )

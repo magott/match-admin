@@ -312,9 +312,9 @@ object Session{
 object Level{
 
   object MenPrem extends KeyAndValue("menPrem", "Tippeligaen")
-  object Men1Div extends KeyAndValue("men1div", "1. div menn")
-  object Men2Div extends KeyAndValue("men2div", "2. div menn")
-  object Men3Div extends KeyAndValue("men3div", "3. div menn")
+  object Men1Div extends KeyAndValue("men1div", "Obosligaen")
+  object Men2Div extends KeyAndValue("men2div", "PostNord-ligaen")
+  object Men3Div extends KeyAndValue("men3div", "Norsk Tipping-ligaen")
   object Men4Div extends KeyAndValue("men4div", "4. div menn")
   object Men5Div extends KeyAndValue("men5div", "5. div menn")
   object Men6Div extends KeyAndValue("men6div", "6. div menn")
