@@ -32,7 +32,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   private def interstedRefsAvailable(interested:List[Referee]) = {
     val appointedRefs = Set(appointedAssistant1, appointedAssistant2, appointedRef).flatten
     ! interested.filterNot{interestedRef =>
-      appointedRefs.contains(interestedRef) || interestedRef.name.contains("Reservert") || interestedRef.name.contains("stengt")
+      appointedRefs.contains(interestedRef) || interestedRef.name.contains("Reservert") || interestedRef.name.contains("stengt") || interestedRef.name.contains("utilgjengelig")
     }.isEmpty
   }
 
