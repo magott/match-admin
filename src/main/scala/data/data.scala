@@ -23,17 +23,19 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
   def refString: String = (appointedRef.map(r=>s"HD ${r.name}") :: appointedAssistant1.map(r => s"AD1 ${r.name}")  :: appointedAssistant2.map(r => s"AD2 ${r.name}") :: Nil).flatten.mkString(",")
   def kickoffDateTimeString :String = kickoff.toString("dd.MM.yyyy HH:mm")
   def teams:String = "%s - %s".format(homeTeam, awayTeam)
-  def isInterestedRef(userId: String) : Boolean = interestedRefs.find(_.id.toString == userId).isDefined
-  def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.find(_.id.toString == userId).isDefined
+  def isInterestedRef(userId: String) : Boolean = interestedRefs.exists(_.id.toString == userId)
+  def isInterestedAssistant(userId: String) : Boolean = interestedAssistants.exists(_.id.toString == userId)
   def areAssistantsAppointed = appointedAssistant1.isDefined && appointedAssistant2.isDefined
   def showInterestedRefIcon = appointedRef.isEmpty && interstedRefsAvailable(interestedRefs)
   def showAss1RefIcon = appointedAssistant1.isEmpty && interstedRefsAvailable(interestedAssistants)
   def showAss2RefIcon = appointedAssistant2.isEmpty && interstedRefsAvailable(interestedAssistants)
+
+  private def appointedRefs:Set[Referee] = Set(appointedAssistant1, appointedAssistant2, appointedRef).flatten
+
   private def interstedRefsAvailable(interested:List[Referee]) = {
-    val appointedRefs = Set(appointedAssistant1, appointedAssistant2, appointedRef).flatten
-    ! interested.filterNot{interestedRef =>
+    !interested.filterNot(appointedRefs.contains).forall { interestedRef =>
       appointedRefs.contains(interestedRef) || interestedRef.name.contains("Reservert") || interestedRef.name.contains("stengt") || interestedRef.name.contains("utilgjengelig")
-    }.isEmpty
+    }
   }
 
   //Season starts 11.11
@@ -44,7 +46,7 @@ case class Match(id:Option[ObjectId], created:DateTime, homeTeam:String, awayTea
 
   def isAppointed(userId:String) = appointedRef.exists(_.id.toString == userId)
 
-  def assigned = if(refereeType == RefereeType.Trio.key) (List(appointedRef,appointedAssistant1,appointedAssistant2).forall(_.isDefined)) else appointedRef.isDefined
+  def assigned = if(refereeType == RefereeType.Trio.key) List(appointedRef,appointedAssistant1,appointedAssistant2).forall(_.isDefined) else appointedRef.isDefined
 
   def regningsMottaker  = if(payerEmail.nonEmpty) clubContact.map(_.copy(email = payerEmail)) else clubContact
 
