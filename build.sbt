@@ -38,7 +38,8 @@ libraryDependencies ++=
     "io.circe"                   %% "circe-core"                % "0.9.0",
     "io.circe"                   %% "circe-generic"             % "0.9.0",
     "io.circe"                   %% "circe-parser"              % "0.9.0",
-    "io.circe"                   %% "circe-literal"             % "0.9.0",
+    "io.circe"                   %% "circe-literal"             % "0.9.0", 
+    "org.jsoup"                  % "jsoup"                      % "1.12.1",
     "org.scalatest"              %% "scalatest"                 % "3.0.5"       % "test",
     "com.opentable.components"   % "otj-pg-embedded"            % "0.11.4"      % "test"
 

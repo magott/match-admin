@@ -9,6 +9,8 @@ import unfiltered.response.Html5
 import data.{MatchTemplate, MatchValidation}
 import unfiltered.request.UserAgent
 import common._
+import org.jsoup.Jsoup
+import org.jsoup.safety.Whitelist
 
 class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val config:Config){
 
@@ -51,10 +53,10 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
   def handleNewMatchFromClub(params: Map[String, Seq[String]]) : Either[List[String], MatchTemplate] = {
     val p = params.withDefaultValue(List(""))
     println("New match posted with params "+params.mkString)
-    MatchValidation.unpublished(p("home").head, p("away").head, p("venue").head, p("level").head, p("date").head,
-                                p("time").head, p("refType").head, p("clubContactName").head, p("clubContactTelephone").head,
-                                p("clubContactAddress").head, p("clubContactZip").head, p("clubContactEmail").head,
-                                p("payingTeam").head, p("payerEmail").head
+    MatchValidation.unpublished(p("home").cleanHead, p("away").cleanHead, p("venue").cleanHead, p("level").cleanHead, p("date").cleanHead,
+                                p("time").cleanHead, p("refType").cleanHead, p("clubContactName").cleanHead, p("clubContactTelephone").cleanHead,
+                                p("clubContactAddress").cleanHead, p("clubContactZip").cleanHead, p("clubContactEmail").cleanHead,
+                                p("payingTeam").cleanHead, p("payerEmail").cleanHead
     )
   }
 
@@ -62,6 +64,12 @@ class ClubHandler(repo:MongoRepository, mailgun:MailgunService) (implicit val co
     req match {
       case XForwardProto(_) & Host(host) => "https://%s".format(host)
       case Host(host) => "http://%s".format(host)
+    }
+  }
+
+  implicit class RequestParamsHtmlWashing(params:Seq[String]){
+    def cleanHead :String = {
+      Jsoup.clean(params.head, Whitelist.none())
     }
   }
 
