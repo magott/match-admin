@@ -29,7 +29,7 @@ case class MatchService(repo: MongoRepository, dbRepo: DbRepo, sendRegning: Opti
     dbRepo.insert(event)
   }
 
-  def opprettRegning(m: Match, user:User) = {
+  def opprettRegning(m: Match, user:User): Either[String, Int] = {
     val resultat = sendRegning.get.opprettRegningPaKamp(m)
     resultat.map(regningsnr => MatchEvent.opprettetRegning(m, user, regningsnr))
       .foreach(dbRepo.insert)

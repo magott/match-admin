@@ -28,29 +28,35 @@ var Invoice = {
         m.request({
             method: "GET",
             url: window.location.origin +"/admin/invoice/" + data.invoiceNumber,
-            withCredentials: true,
+            withCredentials: true
         }).then(function (response) {
             Invoice.status = response;
             m.render(regning, [
                 m("label", {class: "control-label"}, "Regningstatus"),
                 m("div",{class: "controls"}, [m("button", {class: "btn", type: "button", onclick: function () {window.open(Invoice.status.url)}}, Invoice.status.status)])
-            ])
+            ]);
         }).catch(function() {
             m.render(regning, [
                 m("label", {class: "control-label"}, "Regningstatus"),
                 m("div", {class: "controls"}, [m("button", {id: "createButton", class: "btn", type: "button", onclick:(Invoice.createInvoice)}, "Opprett regning")])
-            ])
+            ]);
         })
     },
     createInvoice: function() {
-        document.getElementById("createButton").setAttribute("disabled","disabled")
+        document.getElementById("createButton").setAttribute("disabled","disabled");
         m.request({
             method: "POST",
             url: window.location.origin + "/admin/invoice/match/"+Invoice.matchId,
-            withCredentials: true,
+            withCredentials: true
         }).then(function(response){
             Invoice.loadStatus2(response);
             document.getElementById("createButton").removeAttribute("disabled");
+        }).catch(function(e){
+            m.render(regning, [
+                m("label", {class: "control-label"}, "Regningstatus"),
+                m("div", {class: "controls"}, [m("button", {id: "createButton", class: "btn", type: "button", onclick:(Invoice.createInvoice)}, "Opprett regning")]),
+                m("div", {class:"alert alert-error alert-dismissible"}, e.message)
+            ]);
         })
     }
 };

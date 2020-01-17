@@ -14,6 +14,7 @@ import cats.syntax.either._
 import com.google.common.cache.CacheBuilder
 import data.{ContactInfo, Match, RefereeType}
 import org.joda.time.{DateTime, Days, Hours}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.io.Source
 import scala.util.{Properties, Try}
@@ -29,6 +30,8 @@ import cats.instances.either._
 
 object SendRegning {
 
+  val log = LoggerFactory.getLogger(SendRegning.getClass)
+
   implicit class ScalaJPimp[R](response: HttpResponse[R]){
     def either : Either[String, R] = if (response.is2xx) {
       Right(response.body)
@@ -40,6 +43,7 @@ object SendRegning {
 
     def eitherResp : Either[String, HttpResponse[R]] =
       if(response.is2xx) Right(response)
+      else if (response.code == 401) Left("Fikk ikke tilgang til SendRegning. Om passordet er endret, gi beskjed til Morten")
       else Left(s"${response.code} : ${response.body}")
   }
 
@@ -75,7 +79,10 @@ object SendRegning {
           val splitted = s.split("\t")
           splitted(0) -> splitted(1)
         }.toMap).toOption
-    } yield (SendRegning(username, password, Properties.envOrNone("SENDREGNING_ORIGINATOR"), postnrMap))
+    } yield {
+      log.info("Applikasjon konfigurert med SendRegning")
+      SendRegning(username, password, Properties.envOrNone("SENDREGNING_ORIGINATOR"), postnrMap)
+    }
   }
 }
 
@@ -100,15 +107,16 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
 
     //Hvis mottaker og draft, legg til
     if(drafts.exists(_.nonEmpty)) {
-      leggTiRegning(drafts.right.get.head, m).asRight
+      leggTiRegning(drafts.right.get.head, m)
     } else if(recipient.exists(_.nonEmpty)) {
       //Hvis mottaker og ikke draft lag nytt draft
-      opprettRegningPaa(recipient.right.get.head, m).asRight
+      opprettRegningPaa(recipient.right.get.head, m)
     } else {
       //Hvis ikke mottaker, lag ny regning med ny mottaker
-      val maybeInt = mottaker.map(x => Recipient.newFromContact(x, postnrMap)).map(nyMottaker => opprettRegningPaa(nyMottaker, m))
-      Either.fromOption(maybeInt, "Trenger navn, epost og postnummer på mottaker av regning")
+      val maybeInt:Option[Either[String, Int]] = mottaker.map(x => Recipient.newFromContact(x, postnrMap))
+        .map(nyMottaker => opprettRegningPaa(nyMottaker, m))
 
+      maybeInt.getOrElse(Left("Trenger navn, epost og postnummer på mottaker av regning"))
     }
 
   }
@@ -131,16 +139,24 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
     sendRegningUrl("/invoices/drafts").asString.either.right.flatMap(s => io.circe.parser.decode[List[Draft]](s).leftMap(_.getMessage))
   }
 
-  def opprettRegningPaa(recipient: Recipient, m:Match) : Int = {
+  def opprettRegningPaa(recipient: Recipient, m:Match) : Either[String, Int] = {
     val regning = Draft(None, None, recipient, PrisKalkulator.varelinje(m) :: Nil)
+
     val resp : Either[String, HttpResponse[String]] = sendRegningUrl("/invoices/drafts").postData(printer.pretty(regning.asJson)).asString.eitherResp
     println(s"Regningsresponse $resp")
-    val draftNo = resp.right.get.location.map(_.split('/').last.toInt).get
-    hentUtkast(draftNo)
-      .map(_.copy(orderNo = Some(draftNo.toString)))
-      .foreach(oppdaterRegning)
-    draftNo
+    //Teigen
+    val createdId = for {
+      r <- resp
+      location <- r.location.toRight("Regningopprettelse feilet")
+      draftId = location.split('/').last.toInt
+      draft <- hentUtkast(draftId).toRight("mangler draft")
+    } yield {
+      val newDraft = draft.copy(orderNo = Some(draftId.toString))
+      oppdaterRegning(newDraft)
+      draftId
+    }
 
+    createdId
   }
 
   def hentUtkast(draftNo:Int) : Option[Draft] = {
@@ -150,8 +166,7 @@ case class SendRegning(username:String, password:String, originator:Option[Strin
   def leggTiRegning(draft: Draft, m:Match) = {
     val varelinje = PrisKalkulator.varelinje(m)
     val oppdatert = draft.copy(items = varelinje :: draft.items, orderNo = draft.number.map(_.toString))
-    oppdaterRegning(oppdatert)
-    draft.number.get
+    oppdaterRegning(oppdatert).eitherResp.right.map(_ => draft.number.get)
   }
 
   def oppdaterRegning(draft: Draft) = {

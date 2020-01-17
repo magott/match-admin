@@ -8,6 +8,7 @@
     </appender>
 
     <logger name="com.ning.http.client" level="WARN"/>
+    <logger name="service" level="INFO"/>
 
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
