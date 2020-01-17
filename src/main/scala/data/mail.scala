@@ -168,10 +168,10 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
        |${m.teams}
        |${m.venue}
        |${m.kickoffDateTimeString}
-       |Dommer: ${m.appointedRef.map(_.name).getOrElse("")}${ref.map(", " + _.telephone).getOrElse("")}
+       |Dommer: ${m.appointedRef.map(_.name).getOrElse("")}${ref.map(", " + _.telephone).getOrElse("")}${ref.flatMap(_ => m.refFee.map(h => s", $h kroner")).getOrElse("")}
        |${if(m.refereeType == RefereeType.Trio.key)
-          s"""|AD1: ${m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt")}${ass1.map(", "+_.telephone).getOrElse("")}
-              |AD2: ${m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}${ass2.map(", "+_.telephone).getOrElse("")}
+          s"""|AD1: ${m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt")}${ass1.map(", "+_.telephone).getOrElse("")}${ass1.flatMap(_ => m.assistantFee.map(h => s", $h kroner")).getOrElse("")}
+              |AD2: ${m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt")}${ass2.map(", "+_.telephone).getOrElse("")}${ass2.flatMap(_ => m.assistantFee.map(h => s", $h kroner")).getOrElse("")}
            """.stripMargin
     }
     |${config.clubNotificationFooter.getOrElse("")}
@@ -214,19 +214,19 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
         <tr>
           <th>Dommer</th>
           <td>
-            {m.appointedRef.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ref)}
+            {m.appointedRef.map(r => s"${r.name} (Tel: ${ref.get.telephone}) (Honorar: ${m.refFee.get} kroner)").getOrElse("Ikke oppnevnt")}
           </td>
         </tr>{if (m.refereeType == RefereeType.Trio.key) (
         <tr>
           <th>Assistentdommer 1</th>
           <td>
-            {m.appointedAssistant1.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ass1)}
+            {m.appointedAssistant1.map(r => s"${r.name} (Tel: ${ass1.get.telephone}) (Honorar: ${m.assistantFee.get} kroner)").getOrElse("Ikke oppnevnt")}
           </td>
         </tr>
           <tr>
             <th>Assistentdommer 2</th>
             <td>
-              {m.appointedAssistant2.map(_.name).getOrElse("Ikke oppnevnt") + formatedPhoneNumberOrBlank(ass2)}
+            {m.appointedAssistant2.map(r => s"${r.name} (Tel: ${ass2.get.telephone}) (Honorar: ${m.assistantFee.get} kroner)").getOrElse("Ikke oppnevnt")}
             </td>
           </tr>)}
       </table>
@@ -241,8 +241,6 @@ case class ClubRefereeNotification(m:Match, config: Config, ref:Option[User], as
       </div>
     </div>
     }
-
-    def formatedPhoneNumberOrBlank(u:Option[User]) = u.map(" (Tel: " + _.telephone + ")").getOrElse("")
 
     def toMailMessage: MailMessage = {
       MailMessage(config.email.fromFdl,
