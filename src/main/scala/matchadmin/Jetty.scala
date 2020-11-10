@@ -18,37 +18,38 @@ import web.{Resources, UserUpdateInterceptor}
 
 import scala.util.Properties
 
-object Jetty extends App{
+object Jetty extends App {
 
-
-  val ds = dataSource
+  val ds             = dataSource
   private val flyway = new Flyway()
   flyway.setDataSource(ds)
   flyway.migrate()
   run(ds, () => ds.close())
 
-  def run(dataSource: DataSource, shutdown: () => Unit = () => Unit) : Unit = {
-    val port = Properties.envOrElse("PORT", "1234").toInt
-    val config = getConfig
+  def run(dataSource: DataSource, shutdown: () => Unit = () => Unit): Unit = {
+    val port              = Properties.envOrElse("PORT", "1234").toInt
+    val config            = getConfig
     val checkUserLevelSet = Properties.envOrElse("CHECK_USERS", "false").toBoolean
-    val userUpdateLimit = DateTime.parse(Properties.envOrElse("USER_UPDATE_DATE", DateTime.now.toString))
+    val userUpdateLimit   = DateTime.parse(Properties.envOrElse("USER_UPDATE_DATE", DateTime.now.toString))
 
     Locale.setDefault(new Locale("no_NO"))
     System.setProperty("user.timezone", "Europe/Oslo")
     TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
+    CleanUpSessions.cleanup()
     println("Starting on port:" + port)
     val http = jetty.Server.http(port)
-    http.resources(getClass().getResource("/static"))
+    http
+      .resources(getClass.getResource("/static"))
       .plan(new UserUpdateInterceptor(userUpdateLimit, checkUserLevelSet))
       .plan(new Resources(config, tx(dataSource), SendRegning.create))
       .run(_ => Unit, _ => shutdown.apply())
   }
 
-
-  private def getConfig:Config = {
-    if (Properties.envOrNone("CONSTRETTO_TAGS").isEmpty && Properties.envOrNone("DATABASE_URL").isDefined) sys.error("Running on Heroku with no CONSTRETTO_TAGS set. Aborting")
-    if (Properties.envOrNone("CONSTRETTO_TAGS").isEmpty) Properties.setProp("CONSTRETTO_TAGS","dev")
-    val c = Constretto(
+  private def getConfig: Config                                            = {
+    if (Properties.envOrNone("CONSTRETTO_TAGS").isEmpty && Properties.envOrNone("DATABASE_URL").isDefined)
+      sys.error("Running on Heroku with no CONSTRETTO_TAGS set. Aborting")
+    if (Properties.envOrNone("CONSTRETTO_TAGS").isEmpty) Properties.setProp("CONSTRETTO_TAGS", "dev")
+    val c      = Constretto(
       List(
         json("classpath:conf/ofdl.conf", "config", Some("ofdl")),
         json("classpath:conf/tfdl.conf", "config", Some("tfdl")),
@@ -59,14 +60,14 @@ object Jetty extends App{
     config
   }
 
-  def dataSource :HikariDataSource = {
-    val jdbcUrl:String = Properties.envOrNone("JDBC_DATABASE_URL").get
-    val dbconfig = new HikariConfig()
+  def dataSource: HikariDataSource                                         = {
+    val jdbcUrl: String = Properties.envOrNone("JDBC_DATABASE_URL").get
+    val dbconfig        = new HikariConfig()
     dbconfig.setJdbcUrl(jdbcUrl)
     new HikariDataSource(dbconfig)
   }
 
-  def tx[F[_] : Async](dataSource: DataSource):Transactor[F] = {
+  def tx[F[_]: Async](dataSource: DataSource): Transactor[F]               = {
     Transactor.fromDataSource[F](dataSource)
   }
 

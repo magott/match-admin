@@ -2,7 +2,6 @@ package matchadmin
 
 import org.flywaydb.core.Flyway
 
-
 /**
   *
   */

@@ -1,5 +1,6 @@
+package matchadmin
+
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
-import com.mongodb.casbah.Imports._
 import common.MongoSetting
 import org.joda.time.DateTime
 
