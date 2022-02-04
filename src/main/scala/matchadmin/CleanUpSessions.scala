@@ -3,7 +3,7 @@ package matchadmin
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import common.MongoSetting
 import org.joda.time.DateTime
-
+import com.mongodb.casbah.query.Imports._
 import scala.util.Properties
 
 object CleanUpSessions {
