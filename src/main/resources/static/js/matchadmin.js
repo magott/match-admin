@@ -288,6 +288,9 @@ function validateMatchForm() {
                 clubContactEmail:{
                     required: isSaveContactChecked,
                     email: true
+                },
+                terms:{
+                    required: true
                 }
             },
             messages:{
@@ -318,7 +321,8 @@ function validateMatchForm() {
                 level:"Nivå for kampen må fylles ut",
                 refFee:"Dommerhonorar må fylles ut",
                 assFee:"AD-honorar må fylles ut for trio",
-                refType:"Velg mellom dommer og trio"
+                refType:"Velg mellom dommer og trio",
+                terms:"Vilkårene må aksepteres"
             },
             highlight:function (label) {
                 $(label).closest('.control-group').addClass('error');

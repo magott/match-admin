@@ -13,20 +13,21 @@ import scala.Some
 import data.RefereeType.{Dommer, Trio}
 import org.joda.time.DateTime
 
-case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
+case class Snippets(req: HttpRequest[_])(implicit val config: Config) {
 
   val Host(host) = req
-  val protocol = XForwardProto.unapply(req).getOrElse("http")
-  val baseUrl = "%s://%s".format(protocol, host)
-  val iframeView =  Params.unapply(req).get.contains("embedded")
+  val protocol   = XForwardProto.unapply(req).getOrElse("http")
+  val baseUrl    = "%s://%s".format(protocol, host)
+  val iframeView = Params.unapply(req).get.contains("embedded")
 
   def editMatch(m: Option[Match]) = {
-    val isTrio = m.isDefined && m.get.refereeType==Trio.key
-    bootstrap("Kamp",
+    val isTrio = m.isDefined && m.get.refereeType == Trio.key
+    bootstrap(
+      "Kamp",
       <legend>
         {if (m.isEmpty) "Ny" else "Endre"}
         kamp</legend>
-        <form class="form-horizontal" action={"/admin/matches/"+m.flatMap(_.id.map(_.toString)).getOrElse("")} method="POST" id="match-form">
+        <form class="form-horizontal" action={"/admin/matches/" + m.flatMap(_.id.map(_.toString)).getOrElse("")} method="POST" id="match-form">
           <div class="control-group">
              {contactInfoFormElements(m)}
           </div>
@@ -51,8 +52,12 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           <div class="control-group">
           <label class="control-label">Kampstart</label>
             <div class="controls controls-row">
-              <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required" value={m.map(_.kickoff.toString("yyyy-MM-dd")).getOrElse("")}/>
-              <input type="time" id="time" name="time" placeholder="TT:MM" class="input-medium" required="required" value={m.map(_.kickoff.toString("HH:mm")).getOrElse("")}/>
+              <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required" value={
+        m.map(_.kickoff.toString("yyyy-MM-dd")).getOrElse("")
+      }/>
+              <input type="time" id="time" name="time" placeholder="TT:MM" class="input-medium" required="required" value={
+        m.map(_.kickoff.toString("HH:mm")).getOrElse("")
+      }/>
               <span class="help-inline"></span>
               </div>
             </div>
@@ -60,15 +65,19 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
             <label class="control-label" for="level">Nivå</label>
             <div class="controls">
               <select id="level" name="level" placeholder="Velg">
-                {if (m.isEmpty || m.get.level.isEmpty)
-                <option disabled="disabled" selected="selected" value="">Velg</option>
-                }
-                {Level.all.map(
-                (l: KeyAndValue) => m.map(
-                  `match` =>
-                  if (`match`.level == l.key) <option selected="selected" value={l.key}> {l.display} </option>
-                  else <option value={l.key}> {l.display}</option>
-                ).getOrElse(<option value={l.key}> {l.display}</option>))}
+                {
+        if (m.isEmpty || m.get.level.isEmpty)
+          <option disabled="disabled" selected="selected" value="">Velg</option>
+      }
+                {
+        Level.all.map((l: KeyAndValue) =>
+          m.map(`match` =>
+              if (`match`.level == l.key) <option selected="selected" value={l.key}> {l.display} </option>
+              else <option value={l.key}> {l.display}</option>
+            )
+            .getOrElse(<option value={l.key}> {l.display}</option>)
+        )
+      }
               </select>
               <span class="help-inline"></span>
             </div>
@@ -77,19 +86,21 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
             <label class="control-label">Behov</label>
             <div class="controls">
               <label class="radio">
-                {if (isTrio)
-                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
-              else
-                  <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
-                }
+                {
+        if (isTrio)
+          <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} required="required"/>
+        else
+          <input type="radio" name="refType" id="refTypeDommer" value={Dommer.key} checked="checked" required="required"/>
+      }
                 <div>{Dommer.display}</div>
                 </label>
                 <label class="radio">
-                {if (!isTrio)
-                  <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
-              else
-                  <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
-                }
+                {
+        if (!isTrio)
+          <input type="radio" name="refType" id="refTypeTrio" value={Trio.key}/>
+        else
+          <input type="radio" name="refType" id="refTypeTrio"  checked="checked" value={Trio.key}/>
+      }
                 <div>{Trio.display}</div>
                 </label>
                 <span class="help-inline"></span>
@@ -98,8 +109,12 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           <div class="control-group">
             <label class="control-label" for="refFee">Honorar</label>
             <div class="controls controls-row">
-              <input type="number" id="refFee" name="refFee" class="input-small" placeholder="Dommer" required="required" value={m.flatMap(_.refFee.map(_.toString)).getOrElse("")}/>
-              <input type="number" id="assFee" name="assFee" class="input-small" placeholder="AD" required="required" value={m.flatMap(_.assistantFee.map(_.toString)).getOrElse("")}/>
+              <input type="number" id="refFee" name="refFee" class="input-small" placeholder="Dommer" required="required" value={
+        m.flatMap(_.refFee.map(_.toString)).getOrElse("")
+      }/>
+              <input type="number" id="assFee" name="assFee" class="input-small" placeholder="AD" required="required" value={
+        m.flatMap(_.assistantFee.map(_.toString)).getOrElse("")
+      }/>
               <span class="help-inline"></span>
             </div>
           </div>
@@ -115,13 +130,27 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                 <button type="button" class="btn" disabled="disabled" id="addRefBtn" value=""><i class="icon-plus"></i></button>
               </div>
               <div class="ass-controls">
-              {select("appointedAssistant1", "AD1", m.flatMap(_.appointedAssistant1.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
+              {
+        select(
+          "appointedAssistant1",
+          "AD1",
+          m.flatMap(_.appointedAssistant1.map(_.id.toString)),
+          m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil)
+        )
+      }
                 <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
                 <input type="text" id="assRefAutoComplete" class="input-large" placeholder="Legg til AD i liste" value=""></input>
                 <button type="button" class="btn" disabled="disabled" id="addAssRefBtn" value=""><i class="icon-plus"></i></button>
               </div>
               <div class="ass-controls">
-                {select("appointedAssistant2", "AD2", m.flatMap(_.appointedAssistant2.map(_.id.toString)), m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil))}
+                {
+        select(
+          "appointedAssistant2",
+          "AD2",
+          m.flatMap(_.appointedAssistant2.map(_.id.toString)),
+          m.map(_.interestedAssistants.map(_.toSelectOption)).getOrElse(Nil)
+        )
+      }
                 <a class="user-profile btn btn-small" href=""><i class="icon-user"></i></a>
               </div>
             </div>
@@ -129,30 +158,34 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
           <div class="control-group">
             <div class="controls">
-              <button type="submit" class="btn btn-primary">{if(m.map(_.published).getOrElse(true)) "Lagre" else "Publiser"} </button>
+              <button type="submit" class="btn btn-primary">{if (m.map(_.published).getOrElse(true)) "Lagre" else "Publiser"} </button>
               <button type="button" data-toggle="modal" class="btn btn-danger" data-target="#confirmDelete">Slett</button>
-              {if(m.exists(_.assigned)){
-                <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
+              {
+        if (m.exists(_.assigned)) {
+          <button type="button" class="btn btn-inverse" id="send-mail">Send mail</button>
                 <span class="mail-status mail-processing fade in hide"><i class="icon-time"> </i> Sender..</span>
                 <span class="mail-status mail-success fade in hide"><i class="icon-ok icon-green"> </i> Mail sendt!</span>
                 <span class="mail-status mail-failure fade in hide"><i class="icon-remove icon-red"></i> Feil ved sending av mail</span>
-              }}
+        }
+      }
             </div>
           </div>
-            {if(m.exists(_.kickoff.isBeforeNow)){
-            <div class="control-group" id="regning">
+            {
+        if (m.exists(_.kickoff.isBeforeNow)) {
+          <div class="control-group" id="regning">
             </div>
-            }}
+        }
+      }
           {
-            if(m.isDefined){
-              val matchUrl = "%s/matches/%s".format(baseUrl,m.get.id.get.toString)
-              <div class="row">
+        if (m.isDefined) {
+          val matchUrl = "%s/matches/%s".format(baseUrl, m.get.id.get.toString)
+          <div class="row">
                 <div class="span4 offset3">
                 <a href={"http://www.facebook.com/sharer.php?u=%s".format(matchUrl)}>Legg ut på Facebook</a>
                   </div>
               </div>
-            }
-          }
+        }
+      }
           {modal}
         </form>
         <p>
@@ -161,11 +194,12 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
               <table class="table table-condensed table-bordered table-nonfluid" id="event-table">
               </table>
           </div>
-      </p>
-    , Some(editMatchJS))
+      </p>,
+      Some(editMatchJS)
+    )
   }
 
-  def modal = {
+  def modal                       = {
     <div id="confirmDelete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -181,36 +215,37 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
     </div>
   }
 
-  def select(selectId:String, defaultDisplay:String, selected:Option[String], options:List[KeyAndValue]) = {
+  def select(selectId: String, defaultDisplay: String, selected: Option[String], options: List[KeyAndValue]) = {
     <select id={selectId} name={selectId}>
-      {if(selected.isEmpty)
+      {
+      if (selected.isEmpty)
         <option selected="selected" value="">{defaultDisplay}</option>
-       else
+      else
         <option value="">{defaultDisplay}</option>
-      }
+    }
       {selectOption(selectId, selected, options)}
     </select>
   }
 
-  def selectOption(selectId:String, selected:Option[String], options:List[KeyAndValue]):NodeSeq = {
-    options.map(
-      o => selected.map(
-        s=> if(s == o.key) <option value={o.key} selected="selected">{o.display}</option> else <option value={o.key}>{o.display}</option>)
-    .getOrElse(<option value={o.key}>{o.display}</option>))
+  def selectOption(selectId: String, selected: Option[String], options: List[KeyAndValue]): NodeSeq = {
+    options.map(o =>
+      selected
+        .map(s => if (s == o.key) <option value={o.key} selected="selected">{o.display}</option> else <option value={o.key}>{o.display}</option>)
+        .getOrElse(<option value={o.key}>{o.display}</option>)
+    )
   }
-
 
   def matchContactsTable(m: Match, appointees: Tuple3[Option[User], Option[User], Option[User]]) = {
     val contactRows = appointees._1.map(u => contactRow("Dommer", u.name, u.telephone, u.email)).toList ::
-    appointees._2.map(u => contactRow("AD1", u.name, u.telephone, u.email)).toList ::
-    appointees._3.map(u => contactRow("AD2", u.name, u.telephone, u.email)).toList ::
-    m.clubContact.map(cc => contactRow("Kontaktperson dommerbestilling", cc.name, cc.telephone, cc.email)).toList
+      appointees._2.map(u => contactRow("AD1", u.name, u.telephone, u.email)).toList ::
+      appointees._3.map(u => contactRow("AD2", u.name, u.telephone, u.email)).toList ::
+      m.clubContact.map(cc => contactRow("Kontaktperson dommerbestilling", cc.name, cc.telephone, cc.email)).toList
     <table class="table table-condensed table-bordered table-nonfluid">
       {contactRows}
     </table>
   }
 
-  def contactRow(role:String, name:String, tel:String, email:String) = {
+  def contactRow(role: String, name: String, tel: String, email: String)                         = {
     <tr>
       <th>Rolle</th>
       <th>{role}</th>
@@ -229,7 +264,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
     </tr>
   }
 
-  def viewMatchTable(m: Match, userId:Option[String]) = {
+  def viewMatchTable(m: Match, userId: Option[String]) = {
     <table class="table table-condensed table-bordered table-nonfluid">
       <tr>
         <th>Kamp</th>
@@ -259,8 +294,9 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <th>Dommer</th>
         <td>{m.interestedRefButton(userId)}</td>
       </tr>
-      {if(m.refereeType==Trio.key)
-      <tr>
+      {
+      if (m.refereeType == Trio.key)
+        <tr>
         <th>Assistentdommer</th>
         <td>{m.interestedAssistant1Button(userId)}</td>
       </tr>
@@ -268,22 +304,25 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           <th>&nbsp;</th>
           <td>{m.interestedAssistant2Button(userId)}</td>
         </tr>
-      }
+    }
     </table>
   }
 
-  def viewMatch(m:Match, userId:Option[String]) = {
-    bootstrap(m.teams, viewMatchTable(m, userId)
-      , Some(viewMatchJS),
-        (<meta property="og:title" content={"%s: %s".format(RefereeType.asMap(m.refereeType), m.teams)} />
-          <meta property="og:description" content={"%s trengs til kamp %s den %s klokken %s".format(RefereeType.asMap(m.refereeType), m.teams, m.kickoff.toString("dd.MM"), m.kickoff.toString("HH.mm"))}/>
-          )
+  def viewMatch(m: Match, userId: Option[String]) = {
+    bootstrap(
+      m.teams,
+      viewMatchTable(m, userId),
+      Some(viewMatchJS),
+      (<meta property="og:title" content={"%s: %s".format(RefereeType.asMap(m.refereeType), m.teams)} />
+          <meta property="og:description" content={
+        "%s trengs til kamp %s den %s klokken %s".format(RefereeType.asMap(m.refereeType), m.teams, m.kickoff.toString("dd.MM"), m.kickoff.toString("HH.mm"))
+      }/>)
     )
   }
 
   def editUserForm(user: Option[User]) = {
-    bootstrap("Bruker",
-
+    bootstrap(
+      "Bruker",
       <form class="form-horizontal" id="user-form" method="POST">
         <legend>
           {if (user.isEmpty) "Ny" else "Endre"}
@@ -335,20 +374,27 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           <label class="control-label" for="level">Høyeste nivå som hoveddommer siste sesong</label>
           <div class="controls">
             <select id="level" name="level">
-              {if (user.isEmpty || user.get.level.isEmpty)
-                <option selected="selected" value="">Velg</option>}
-              {Level.all.map(
-                (l: KeyAndValue) => user.map(
-                  u => if (u.level == l.key) <option selected="selected" value={l.key}>
+              {
+        if (user.isEmpty || user.get.level.isEmpty)
+          <option selected="selected" value="">Velg</option>
+      }
+              {
+        Level.all.map((l: KeyAndValue) =>
+          user
+            .map(u =>
+              if (u.level == l.key) <option selected="selected" value={l.key}>
                   {l.display}
                 </option>
-                else
+              else
                 <option value={l.key}>
                   {l.display}
                 </option>
-              ).getOrElse(<option value={l.key}>
+            )
+            .getOrElse(<option value={l.key}>
                 {l.display}
-              </option>))}
+              </option>)
+        )
+      }
             </select>
           <span class="help-inline"></span>
           </div>
@@ -359,13 +405,14 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
             <button type="submit" class="btn">Lagre</button>
           </div>
         </div>
-      </form>, Some(userFormJS)
+      </form>,
+      Some(userFormJS)
     )
   }
 
-  def loginMessages(mp:Map[String, Seq[String]]):NodeSeq = {
-    if(mp.contains("failed")) <div class="alert alert-block">Feil brukernavn/passord, prøve igjen</div>
-    else if(mp.contains("reset")) <div class="alert alert-success">Passordet er endret, logg inn med ditt nye passord </div>
+  def loginMessages(mp: Map[String, Seq[String]]): NodeSeq = {
+    if (mp.contains("failed")) <div class="alert alert-block">Feil brukernavn/passord, prøve igjen</div>
+    else if (mp.contains("reset")) <div class="alert alert-success">Passordet er endret, logg inn med ditt nye passord </div>
     else Nil
   }
 
@@ -414,8 +461,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
     </form>
   }
 
-  def userView(user:User) = {
-      <table class="table table-condensed table-bordered table-nonfluid">
+  def userView(user: User) = {
+    <table class="table table-condensed table-bordered table-nonfluid">
         <tr>
           <th>Dommernummer</th>
           <td>{config.refNoPrefix}-{user.refereeNumber}</td>
@@ -440,16 +487,17 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <th>Sist oppdatert</th>
         <td>{user.lastUpdate.getOrElse(user.created).toString("dd.MM.yyyy HH:mm")}</td>
       </tr>
-        {if(user.admin)
+        {
+      if (user.admin)
         <tr>
         <th></th>
           <td>Admin</td>
         </tr>
-        }
+    }
     </table>
   }
 
-  def bootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None, meta:NodeSeq = Nil) = {
+  def bootstrap(title: String, body: NodeSeq, bottom: Option[NodeSeq] = None, meta: NodeSeq = Nil) = {
 
     <html lang="no">
       <head>
@@ -470,7 +518,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <!-- Le styles -->
         <link href="/css/bootstrap.css" rel="stylesheet"/>
         <style type="text/css">
-          {"""
+          {
+      """
           body{
             padding-top: 60px;
             padding-bottom: 40px;
@@ -481,7 +530,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
          .ui-autocomplete-loading {
              background: white url('/img/spinner_16x16.gif') right center no-repeat;
            }
-           """}
+           """
+    }
         </style>
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
         <link href="/css/matchadmin.css" rel="stylesheet"/>
@@ -499,7 +549,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
       <body>
 
-        {if(!iframeView) header}
+        {if (!iframeView) header}
 
         <div class="container-fluid">
 
@@ -516,11 +566,13 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <script src="/js/bootstrap.min.js"></script>
         <script src={config.javascript}></script>
         <script src="/js/matchadmin.js"></script>
-        {if(bottom.isDefined)
-          bottom.get
-        }
+        {
+      if (bottom.isDefined)
+        bottom.get
+    }
         <script type="text/javascript">
-          {"""
+          {
+      """
           var _gaq = _gaq || [];
           _gaq.push(['_setAccount', 'UA-29904717-2']);
           _gaq.push(['_trackPageview']);
@@ -530,13 +582,14 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                 ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
                 })();
-          """}
+          """
+    }
         </script>
 
       </body>
     </html>
   }
-  def noMenuBootstrap(title: String, body: NodeSeq, bottom:Option[NodeSeq] = None, meta:NodeSeq = Nil) = {
+  def noMenuBootstrap(title: String, body: NodeSeq, bottom: Option[NodeSeq] = None, meta: NodeSeq = Nil) = {
 
     <html lang="no">
       <head>
@@ -554,7 +607,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <!-- Le styles -->
         <link href="/css/bootstrap.css" rel="stylesheet"/>
         <style type="text/css">
-          {"""
+          {
+      """
           body{
             padding-top: 60px;
             padding-bottom: 40px;
@@ -562,7 +616,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           .sidebar-nav{
           padding: 9 px 0;
           }
-           """}
+           """
+    }
         </style>
 
         <link href="/css/bootstrap-responsive.css" rel="stylesheet"/>
@@ -591,11 +646,13 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <script src="/js/bootstrap.min.js"></script>
         <script src={config.javascript}></script>
         <script src="/js/matchadmin.js"></script>
-        {if(bottom.isDefined)
-          bottom.get
-        }
+        {
+      if (bottom.isDefined)
+        bottom.get
+    }
         <script type="text/javascript">
-          {"""
+          {
+      """
           var _gaq = _gaq || [];
           _gaq.push(['_setAccount', 'UA-29904717-2']);
           _gaq.push(['_trackPageview']);
@@ -605,15 +662,16 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                 ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
                 })();
-          """}
+          """
+    }
         </script>
 
       </body>
     </html>
   }
 
-  def header = {
-   val sessOpt = UserSession.unapply(req)
+  def header                              = {
+    val sessOpt = UserSession.unapply(req)
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
@@ -625,38 +683,40 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
           <a class="brand" href="/">{config.heading}</a>
           <div class="nav-collapse collapse">
             {
-            if(sessOpt.isDefined){
-            val session = sessOpt.get
-            <p class="navbar-text pull-right">
+      if (sessOpt.isDefined) {
+        val session = sessOpt.get
+        <p class="navbar-text pull-right">
               {session.name}
             </p>
-            }
-            }
+      }
+    }
             <ul class="nav">
               <li>
                 <a href="/matches">Kamper</a>
               </li>
-              {if(sessOpt.isDefined){
-              <li class="dropdown">
+              {
+      if (sessOpt.isDefined) {
+        <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                   Bruker
                   <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
                   <a href="/logout">Logg ut</a>
-                  <a href={"/users/"+sessOpt.get.userId.toString+"/matches/"}>Mine kamper</a>
-                  <a href={"/users/"+sessOpt.get.userId.toString+"/level"}>Endre nivå</a>
-                  <a href={"/users/"+sessOpt.get.userId.toString}>Endre brukerinfo</a>
+                  <a href={"/users/" + sessOpt.get.userId.toString + "/matches/"}>Mine kamper</a>
+                  <a href={"/users/" + sessOpt.get.userId.toString + "/level"}>Endre nivå</a>
+                  <a href={"/users/" + sessOpt.get.userId.toString}>Endre brukerinfo</a>
                 </ul>
               </li>
-            }else{
-              <li class="active">
+      } else {
+        <li class="active">
                 <a href="/login">Logg inn</a>
               </li>
-            }
-            }
-              {if(sessOpt.isDefined && sessOpt.get.admin){
-              <li class="dropdown">
+      }
+    }
+              {
+      if (sessOpt.isDefined && sessOpt.get.admin) {
+        <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                   Admin
                   <b class="caret"></b>
@@ -669,8 +729,8 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
                   <a href="/admin/stats">Statistikk</a>
                 </ul>
               </li>
-            }
-              }
+      }
+    }
             </ul>
           </div> <!--/.nav-collapse -->
         </div>
@@ -679,12 +739,10 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
 
   }
 
-
-
-  def adminMatchList(matches:Seq[Match]) = {
+  def adminMatchList(matches: Seq[Match]) = {
 
     matchFilterButtons ++
-      <div id="count"> {s"Viser ${matches.size} kamper"}</div>++
+      <div id="count"> {s"Viser ${matches.size} kamper"}</div> ++
       <table class="table table-striped table-bordered table-condensed" id="matches">
         <thead>
           <tr>
@@ -699,24 +757,22 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         </thead>
         <tbody>
           {
-          matches.map( m =>
-            <tr class={if(m.adminOk)"success" else ""}>
+        matches.map(m => <tr class={if (m.adminOk) "success" else ""}>
               <td class="date">{m.kickoffDateTimeString}</td>
               <td><a href={"/admin/matches/" + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
               <td>{m.venue}</td>
-              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}{if(m.showInterestedRefIcon) <i class="icon-user"></i>}</td>
-              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{if(m.showAss1RefIcon) <i class="icon-user"></i>}</td>
-              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{if(m.showAss2RefIcon) <i class="icon-user"></i>}</td>
-            </tr>
-          )
-          }
+              <td>{m.appointedRef.map(_.name).getOrElse(m.refFee.map(_.toString).getOrElse(""))}{if (m.showInterestedRefIcon) <i class="icon-user"></i>}</td>
+              <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{if (m.showAss1RefIcon) <i class="icon-user"></i>}</td>
+              <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{if (m.showAss2RefIcon) <i class="icon-user"></i>}</td>
+            </tr>)
+      }
         </tbody>
       </table>
 
   }
 
-  def matchList(matches:Seq[Match], matchLinkPath:String, userId:Option[String]) = {
+  def matchList(matches: Seq[Match], matchLinkPath: String, userId: Option[String]) = {
     def interestIndicator(interested: String => Boolean) = {
       userId.map(u => if (interested(u)) <span>&nbsp;<i class="icon-ok icon-green"/></span>).getOrElse("")
     }
@@ -735,8 +791,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </thead>
       <tbody>
         {
-          matches.map( m =>
-            <tr>
+      matches.map(m => <tr>
               <td class="date">{m.kickoffDateTimeString}</td>
               <td><a href={matchLinkPath + m.id.get.toString} > {m.homeTeam} - {m.awayTeam} </a></td>
               <td>{Level.asMap(m.level)}</td>
@@ -745,15 +800,14 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
               <td>{m.appointedAssistant1.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{interestIndicator(m.isInterestedAssistant)}</td>
               <td>{m.appointedAssistant2.map(_.name).getOrElse(m.assistantFee.map(_.toString).getOrElse(""))}{interestIndicator(m.isInterestedAssistant)}</td>
 
-            </tr>
-          )
-        }
+            </tr>)
+    }
       </tbody>
     </table>
 
   }
 
-  def matchFilterButtons = {
+  def matchFilterButtons                                                            = {
     <p>
     <div class="btn-group">
       <button id="future" name="all" class="btn">Fremtidige</button>
@@ -785,9 +839,9 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </div>
     </form>
 
-  def listUserTable(users:List[User]) =
+  def listUserTable(users: List[User]) =
     <div>{users.size} registrerte brukere</div> ++
-    <table class="table table-striped table-bordered table-condensed">
+      <table class="table table-striped table-bordered table-condensed">
       <thead>
         <tr>
           <th>Dnr</th>
@@ -800,22 +854,20 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </thead>
       <tbody>
         {
-        users.map(u =>
-        <tr>
+        users.map(u => <tr>
           <td>{u.refereeNumber}</td>
-          <td><a href={"/admin/users/"+u.id.get.toString}>{u.name}</a></td>
+          <td><a href={"/admin/users/" + u.id.get.toString}>{u.name}</a></td>
           <td>{u.telephone}</td>
           <td>{Level.asMap(u.level)}</td>
           <td>{u.email}</td>
           <td>{u.lastUpdate.getOrElse(u.created).toString("dd.MM.yyyy HH:mm")}</td>
-        </tr>
-        )
-        }
+        </tr>)
+      }
       </tbody>
     </table>
 
   def newMatchForm = {
-      <form class="form-horizontal" method="POST" id="ref-order-form">
+    <form class="form-horizontal" method="POST" id="ref-order-form">
         <div class="control-group">
           <label class="control-label">Kontaktperson</label>
           <div class="controls">
@@ -889,7 +941,9 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         <div class="control-group">
           <label class="control-label">Kampstart</label>
           <div class="controls controls-row">
-            <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required"  min={DateTime.now().toString("yyyy-MM-dd")}/>
+            <input type="date" id="date" name="date" placeholder="ÅÅÅÅ-MM-DD" class="input-medium" required="required"  min={
+      DateTime.now().toString("yyyy-MM-dd")
+    }/>
             <input type="time" id="time" name="time" placeholder="TT:MM" class="input-medium" required="required"  />
             <span class="help-inline"></span>
           </div>
@@ -920,6 +974,16 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
         </div>
 
         <div class="control-group">
+          <label class="control-label" for="terms">Vilkår</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="terms" required="required"/>
+              Bestiller er inneforstått med at oppsatt dommer dømmer kampen etter det til enhver tid gjeldende spillerregler og retningslinjer vedtatt av NFF og <a href="theifab.com" >IFAB</a>.
+              </label>
+            </div>
+          </div>
+
+        <div class="control-group">
           <div class="controls">
             <button type="submit" class="btn btn-primary">Send inn</button>
           </div>
@@ -927,10 +991,10 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </form>
   }
 
-  def contactInfoFormElements(m: Option[Match]) = {
-    val c = m.flatMap(_.clubContact)
-    val whoPays:Option[Paying] = m.flatMap(_.payingTeam.flatMap(Paying.fromString))
-    val payerEmail = m.map(_.payerEmail).getOrElse("")
+  def contactInfoFormElements(m: Option[Match])    = {
+    val c                       = m.flatMap(_.clubContact)
+    val whoPays: Option[Paying] = m.flatMap(_.payingTeam.flatMap(Paying.fromString))
+    val payerEmail              = m.map(_.payerEmail).getOrElse("")
     <div class="well well-small">
       <a href="#" data-toggle="collapse" data-target="#clubContact">
         <div>
@@ -978,19 +1042,21 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
             <label class="control-label">Hvem betaler dommer</label>
             <div class="controls">
               <label class="radio">
-                {if (whoPays.exists(_ == Home))
-                  <input type="radio" name="payingTeam" id="whoPaysHome" value="home" checked="checked"/>
-                else
-                  <input type="radio" name="payingTeam" id="whoPaysHome" value="home"/>
-                }
+                {
+      if (whoPays.exists(_ == Home))
+        <input type="radio" name="payingTeam" id="whoPaysHome" value="home" checked="checked"/>
+      else
+        <input type="radio" name="payingTeam" id="whoPaysHome" value="home"/>
+    }
                 Hjemmelag
               </label>
               <label class="radio">
-                {if (whoPays.exists(_ == Away))
-                  <input type="radio" name="payingTeam" id="whoPaysAway" value="away" checked="checked"/>
-                else
-                  <input type="radio" name="payingTeam" id="whoPaysAway" value="away"/>
-                }
+                {
+      if (whoPays.exists(_ == Away))
+        <input type="radio" name="payingTeam" id="whoPaysAway" value="away" checked="checked"/>
+      else
+        <input type="radio" name="payingTeam" id="whoPaysAway" value="away"/>
+    }
                 Bortelag
               </label>
             </div>
@@ -1014,9 +1080,10 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </div>
   }
 
-  def unpublishedMatchesTable(matches:Seq[Match]) = {
-    bootstrap("Bestillinger",
-    <table class="table table-striped table-bordered table-condensed" id="matches">
+  def unpublishedMatchesTable(matches: Seq[Match]) = {
+    bootstrap(
+      "Bestillinger",
+      <table class="table table-striped table-bordered table-condensed" id="matches">
       <thead>
         <tr>
           <th>Tidspunkt</th>
@@ -1027,22 +1094,21 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </thead>
       <tbody>
         {
-        matches.map(m =>
-          <tr>
+        matches.map(m => <tr>
             <td>{m.kickoffDateTimeString}</td>
-            <td><a href={"/admin/matches/"+m.id.get.toString} >{m.teams}</a></td>
+            <td><a href={"/admin/matches/" + m.id.get.toString} >{m.teams}</a></td>
             <td>{m.venue}</td>
             <td>{Level.asMap(m.level)}</td>
-          </tr>
-        )
-        }
+          </tr>)
+      }
 
       </tbody>
-    </table>, None
+    </table>,
+      None
     )
   }
 
-  def refereeOrderReceiptSnippet(matchTemplate:MatchTemplate) = {
+  def refereeOrderReceiptSnippet(matchTemplate: MatchTemplate) = {
     <legend>
       Kampen er registrert
     </legend>
@@ -1057,17 +1123,17 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </p>
   }
 
-  def confirmLevelForm = {
+  def confirmLevelForm           = {
     <form class="form-horizontal" id="level-form" method="POST">
 
       <div class="control-group">
           <select id="level" name="level" required="required">
             <option selected="selected" value="">Hoveddommer i:</option>
-            {Level.all.map( l =>
-              <option value={l.key}>
+            {
+      Level.all.map(l => <option value={l.key}>
                 {l.display}
               </option>)
-            }
+    }
           </select>
         <span class="help-inline"></span>
       </div>
@@ -1076,7 +1142,7 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </div>
     </form>
   }
-  def stats = {
+  def stats                      = {
     <div id="stats-app">
       <legend>Statistikk</legend>
       <label>Sesong</label>
@@ -1088,25 +1154,27 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
       </div>
     </div>
   }
-  val jQuery = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  val jQueryUiJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-  val momentJs = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
-  val underscoreJs = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
-  val jqueryValidateJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
+  val jQuery                     = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  val jQueryUiJs                 = <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  val momentJs                   = <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+  val underscoreJs               = <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+  val jqueryValidateJs           = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/jquery.validate.min.js"></script>
   val jQueryValidateAdditionalJs = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.0/additional-methods.min.js"></script>
-  val jqueryPlaceholder = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.7/jquery.placeholder.min.js"></script>
-  val mithril = <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/1.1.6/mithril.min.js"></script>
-  val matcheventsjs =  <script src="/js/matchevents.js"></script>
-  val invoicejs =  <script src="/js/invoice.js"></script>
-  val lodashJs = <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js"></script>
+  val jqueryPlaceholder          = <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/2.0.7/jquery.placeholder.min.js"></script>
+  val mithril                    = <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/1.1.6/mithril.min.js"></script>
+  val matcheventsjs              = <script src="/js/matchevents.js"></script>
+  val invoicejs                  = <script src="/js/invoice.js"></script>
+  val lodashJs                   = <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js"></script>
 
   def filterTableJS = {
-   momentJs ++ underscoreJs ++
-    <script type="text/javascript">
-      { """
+    momentJs ++ underscoreJs ++
+      <script type="text/javascript">
+      {
+        """
             $(document).ready(filterTableFunctions);
 
-        """}
+        """
+      }
     </script>
   }
 
@@ -1115,74 +1183,83 @@ case class Snippets(req: HttpRequest[_]) (implicit val config:Config){
   }
 
   def editMatchJS = {
-    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ lodashJs ++jQueryUiJs ++ mithril ++ matcheventsjs ++ momentJs ++ invoicejs ++
-    <script type="text/javascript">
-      { """
+    jqueryValidateJs ++ jQueryValidateAdditionalJs ++ lodashJs ++ jQueryUiJs ++ mithril ++ matcheventsjs ++ momentJs ++ invoicejs ++
+      <script type="text/javascript">
+      {
+        """
             $(document).ready(editMatchFunctions);
             $(document).ready(adminUserSearchSetup);
 
-        """}
+        """
+      }
     </script>
   }
-  def newMatchJS = {
+  def newMatchJS  = {
     underscoreJs ++ jqueryValidateJs ++ jQueryValidateAdditionalJs ++ momentJs ++ jqueryPlaceholder ++
       <script type="text/javascript">
-      { """
+      {
+        """
             $('input, textarea').placeholder();
             $(document).ready(validateNewMatchForm);
 
-        """}
+        """
+      }
     </script>
   }
 
-  def loginJs = {
-      jqueryValidateJs ++ (
-      <script type="text/javascript">
-        { """
+  def loginJs     = {
+    jqueryValidateJs ++ (<script type="text/javascript">
+        {
+      """
             $(document).ready(validateLogin());
             $(document).ready(warningOnLoginIfCookiesNotAccepted());
 
 
-          """}
+          """
+    }
       </script>)
   }
-  def userFormJS = {
-      jqueryValidateJs ++(
-      <script type="text/javascript">
-      { """
+  def userFormJS  = {
+    jqueryValidateJs ++ (<script type="text/javascript">
+      {
+      """
           $(document).ready(validateUserForm());
 
-        """}
+        """
+    }
       </script>)
   }
   def levelFormJS = {
-      jqueryValidateJs ++ (
-      <script type="text/javascript">
-        { """
+    jqueryValidateJs ++ (<script type="text/javascript">
+        {
+      """
             $(document).ready(validateLevelForm());
 
-          """}
+          """
+    }
       </script>)
   }
 
   def viewMatchJS = {
-      <script type="text/javascript">
-        { """
+    <script type="text/javascript">
+        {
+      """
             $(document).ready(interestButtonFunctions());
 
-          """}
+          """
+    }
       </script>
   }
 
   def resetPasswordFormJs = {
-    jqueryValidateJs ++ (
-    <script type="text/javascript">
-      { """
+    jqueryValidateJs ++ (<script type="text/javascript">
+      {
+      """
             $(document).ready(validatePasswordResetForm());
 
-        """}
+        """
+    }
     </script>)
   }
-
 
 }
