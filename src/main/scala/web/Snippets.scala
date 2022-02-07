@@ -978,7 +978,7 @@ case class Snippets(req: HttpRequest[_])(implicit val config: Config) {
           <div class="controls">
             <label class="checkbox">
               <input type="checkbox" name="terms" required="required"/>
-              Bestiller er inneforstått med at oppsatt dommer dømmer kampen etter det til enhver tid gjeldende spillerregler og retningslinjer vedtatt av NFF og <a href="https://www.theifab.com/">IFAB</a>.
+              Bestiller er inneforstått med at oppsatt dommer dømmer kampen etter de til enhver tid gjeldende spillerregler og retningslinjer vedtatt av NFF og <a href="https://www.theifab.com/" target="_blank">IFAB</a>.
               </label>
             </div>
           </div>
