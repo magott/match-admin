@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/match-admin
+web: node server.js
